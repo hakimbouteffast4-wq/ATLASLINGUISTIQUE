@@ -8,6 +8,8 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 import folium
 from streamlit_folium import st_folium
+import os
+import json
 
 # --- 1. دالة حساب مسافة التحرير (Levenshtein Distance) ---
 def edit_dist(s1, s2):
@@ -55,13 +57,13 @@ if input_method == "✍️ استمارة إدخال مباشرة":
 
     # بيانات افتراضية أولية للاستمارة
     initial_data = {
-        "Village": ["Skoura_MDaz", "Guigou", "Boulemane", "El_Mers", "Serghina"],
-        "Lat": [33.3214, 33.1502, 33.3611, 33.4188, 33.2045],
-        "Lon": [-4.5612, -5.0281, -4.7299, -4.4285, -4.4981],
-        "Word_1 (أنا)": ["nek", "nek", "nekki", "nech", "nekki"],
-        "Word_2 (الماء)": ["aman", "aman", "aman", "aman", "aman"],
-        "Word_3 (البيت)": ["taddart", "tiddert", "tigemmi", "taddart", "taddart"],
-        "Word_4 (الخيمة/الدار)": ["axxam", "axxam", "tigemmi", "axxam", "axxam"]
+        "Village": ["Skoura_MDaz", "Guigou", "Boulemane", "El_Mers", "Serghina", "Imouzzer_Marmoucha", "Timahdite"],
+        "Lat": [33.3214, 33.1502, 33.3611, 33.4188, 33.2045, 33.4756, 33.2382],
+        "Lon": [-4.5612, -5.0281, -4.7299, -4.4285, -4.4981, -4.2831, -5.0594],
+        "Word_1 (أنا)": ["nek", "nek", "nekki", "nech", "nekki", "nech", "nek"],
+        "Word_2 (الماء)": ["aman", "aman", "aman", "aman", "aman", "aman", "aman"],
+        "Word_3 (البيت)": ["taddart", "tiddert", "tigemmi", "taddart", "taddart", "taddart", "tiddert"],
+        "Word_4 (الخيمة/الدار)": ["axxam", "axxam", "tigemmi", "axxam", "axxam", "axxam", "axxam"]
     }
     
     df = st.data_editor(pd.DataFrame(initial_data), num_rows="dynamic", use_container_width=True)
@@ -77,7 +79,12 @@ else:
         st.subheader("📊 معاينة البيانات المرفوعة")
         st.dataframe(df)
 
-# --- 5. المعالجة والتحليل الفوري ---
+# --- 5. خيارات طبقة الحدود الجغرافية (GeoJSON) ---
+st.sidebar.markdown("---")
+st.sidebar.header("🗺️ حدود الجماعات والإقليم")
+geojson_file = st.sidebar.file_uploader("رفع ملف حدود الجماعات (GeoJSON)", type=["geojson", "json"])
+
+# --- 6. المعالجة والتحليل الفوري ---
 if df is not None and not df.empty:
     columns = df.columns.tolist()
 
@@ -114,15 +121,15 @@ if df is not None and not df.empty:
 
         st.markdown("---")
         
-        # عرض العدادات فوق التبويبات (مثل تطبيق الأندرويد)
+        # عرض العدادات فوق التبويبات (مثل الشاشة التراكمية للتطبيق)
         col_stat1, col_stat2 = st.columns(2)
         with col_stat1:
             st.metric(label="عدد القبائل/المواقع المدروسة", value=f"{num_locs}")
         with col_stat2:
-            st.metric(label="عدد المفردات والكلمات المائة", value=f"{len(feature_cols)}")
+            st.metric(label="عدد المفردات والكلمات المدروسة", value=f"{len(feature_cols)}")
 
         st.markdown("---")
-        tab1, tab2, tab3 = st.tabs(["📏 مصفوفة المسافات", "🌳 الشجرة اللهجية (Dendrogram)", "🗺️ خريطة أطلس الفضائية"])
+        tab1, tab2, tab3 = st.tabs(["📏 مصفوفة المسافات", "🌳 الشجرة اللهجية (Dendrogram)", "🗺️ خريطة أطلس الفضائية والحدود"])
 
         with tab1:
             st.subheader("📏 مصفوفة البعد اللساني بين المواقع")
@@ -140,7 +147,7 @@ if df is not None and not df.empty:
             st.pyplot(fig)
 
         with tab3:
-            st.subheader("🗺️ خريطة أطلس الخرائط الفضائية التفاعلية")
+            st.subheader("🗺️ خريطة أطلس الفضائية مع حدود الجماعات والإقليم")
             if lat_col != "لا يوجد" and lon_col != "لا يوجد":
                 valid_coords = df.dropna(subset=[lat_col, lon_col])
                 if not valid_coords.empty:
@@ -167,7 +174,35 @@ if df is not None and not df.empty:
                         control=True
                     ).add_to(m)
 
-                    # 4️⃣ إضافة النقاط والمفردات في نافذة منبثقة
+                    # 4️⃣ إضافة طبقة حدود الجماعات والإقليم (GeoJSON)
+                    geojson_data = None
+                    
+                    # خيار أ: إذا تم رفع الملف من الشريط الجانبي
+                    if geojson_file is not None:
+                        geojson_data = json.load(geojson_file)
+                    # خيار ب: إذا كان ملف GeoJSON موجوداً في مجلد المشروع باسم boundaries.geojson
+                    elif os.path.exists("boundaries.geojson"):
+                        with open("boundaries.geojson", "r", encoding="utf-8") as f:
+                            geojson_data = json.load(f)
+
+                    if geojson_data is not None:
+                        folium.GeoJson(
+                            geojson_data,
+                            name="🟩 حدود الجماعات المحلية والإقليم",
+                            style_function=lambda x: {
+                                'fillColor': '#00ffaa',
+                                'color': '#ffcc00',      # لون الحدود (أصفر زاهي مثل تطبيقك)
+                                'weight': 2.5,          # سمك الخط
+                                'fillOpacity': 0.12     # الشفافية
+                            },
+                            tooltip=folium.GeoJsonTooltip(
+                                fields=list(geojson_data['features'][0]['properties'].keys())[:2],
+                                aliases=['اسم المنطقة/الجماعة:', 'الرمز/البيانات:'],
+                                localize=True
+                            )
+                        ).add_to(m)
+
+                    # 5️⃣ إضافة دبابيس المواقع والنقاط التفاعلية
                     for idx, row in valid_coords.iterrows():
                         try:
                             info_html = f"<div style='font-family: Arial; direction: rtl; text-align: right; min-width: 160px;'>"
@@ -185,8 +220,8 @@ if df is not None and not df.empty:
                         except Exception as e:
                             pass
 
-                    # 5️⃣ إضافة التحكم في الطبقات
+                    # 6️⃣ إضافة التحكم بالطبقات (Layer Control)
                     folium.LayerControl(position='topright').add_to(m)
                     
                     # عرض الخريطة
-                    st_folium(m, width="100%", height=550)
+                    st_folium(m, width="100%", height=580)
