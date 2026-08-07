@@ -35,12 +35,12 @@ def fix_text(text):
 
 # --- 3. إعدادات الصفحة ---
 st.set_page_config(
-    page_title="منصة التحليل القياسي للهجات",
+    page_title="منصة أطلس التحليل القياسي للهجات",
     page_icon="🗺️",
     layout="wide"
 )
 
-st.title("🗺️ منصة التحليل القياسي للهجات واللسانيات")
+st.title("🗺️ منصة أطلس التحليل القياسي للهجات واللسانيات")
 st.markdown("---")
 
 # --- 4. اختيار طريقة إدخال البيانات ---
@@ -81,7 +81,7 @@ else:
 if df is not None and not df.empty:
     columns = df.columns.tolist()
 
-    default_loc = next((c for c in columns if c.lower() in ['village', 'site', 'location', 'dialect', 'اللهجة', 'الموقع']), columns[0])
+    default_loc = next((c for c in columns if c.lower() in ['village', 'site', 'location', 'dialect', 'اللهجة', 'الموقع', 'القبيلة']), columns[0])
     default_lat = next((c for c in columns if c.lower() in ['lat', 'latitude', 'خط العرض']), None)
     default_lon = next((c for c in columns if c.lower() in ['lon', 'lng', 'longitude', 'خط الطول']), None)
     
@@ -90,7 +90,7 @@ if df is not None and not df.empty:
 
     st.sidebar.markdown("---")
     st.sidebar.header("🎯 أعمدة التحليل")
-    loc_col = st.sidebar.selectbox("عمود المواقع:", columns, index=columns.index(default_loc))
+    loc_col = st.sidebar.selectbox("عمود المواقع/القبائل:", columns, index=columns.index(default_loc))
     feature_cols = st.sidebar.multiselect("أعمدة المتغيرات اللغوية:", [c for c in columns if c != loc_col], default=default_features)
 
     lat_col = st.sidebar.selectbox("خط العرض:", ["لا يوجد"] + columns, index=(columns.index(default_lat) + 1) if default_lat else 0)
@@ -113,7 +113,16 @@ if df is not None and not df.empty:
                     dist_matrix[i, j] = total_dist / len(feature_cols)
 
         st.markdown("---")
-        tab1, tab2, tab3 = st.tabs(["📏 مصفوفة المسافات", "🌳 الشجرة اللهجية (Dendrogram)", "🗺️ الخريطة التفاعلية"])
+        
+        # عرض العدادات فوق التبويبات (مثل تطبيق الأندرويد)
+        col_stat1, col_stat2 = st.columns(2)
+        with col_stat1:
+            st.metric(label="عدد القبائل/المواقع المدروسة", value=f"{num_locs}")
+        with col_stat2:
+            st.metric(label="عدد المفردات والكلمات المائة", value=f"{len(feature_cols)}")
+
+        st.markdown("---")
+        tab1, tab2, tab3 = st.tabs(["📏 مصفوفة المسافات", "🌳 الشجرة اللهجية (Dendrogram)", "🗺️ خريطة أطلس الفضائية"])
 
         with tab1:
             st.subheader("📏 مصفوفة البعد اللساني بين المواقع")
@@ -131,7 +140,7 @@ if df is not None and not df.empty:
             st.pyplot(fig)
 
         with tab3:
-            st.subheader("🗺️ خريطة أطلس اللهجات التفاعلية")
+            st.subheader("🗺️ خريطة أطلس الخرائط الفضائية التفاعلية")
             if lat_col != "لا يوجد" and lon_col != "لا يوجد":
                 valid_coords = df.dropna(subset=[lat_col, lon_col])
                 if not valid_coords.empty:
@@ -158,11 +167,11 @@ if df is not None and not df.empty:
                         control=True
                     ).add_to(m)
 
-                    # 4️⃣ إضافة العلامات والنوافذ المنبثقة
+                    # 4️⃣ إضافة النقاط والمفردات في نافذة منبثقة
                     for idx, row in valid_coords.iterrows():
                         try:
-                            info_html = f"<div style='font-family: Arial; direction: rtl; text-align: right; min-width: 150px;'>"
-                            info_html += f"<h4 style='margin:0; color:#1a73e8;'>📍 {row[loc_col]}</h4><hr style='margin:5px 0;'>"
+                            info_html = f"<div style='font-family: Arial; direction: rtl; text-align: right; min-width: 160px;'>"
+                            info_html += f"<h3 style='margin:0; color:#1a73e8;'>📍 {row[loc_col]}</h3><hr style='margin:5px 0;'>"
                             for col in feature_cols:
                                 info_html += f"<b>{col}:</b> {row[col]}<br>"
                             info_html += "</div>"
@@ -176,5 +185,8 @@ if df is not None and not df.empty:
                         except Exception as e:
                             pass
 
+                    # 5️⃣ إضافة التحكم في الطبقات
                     folium.LayerControl(position='topright').add_to(m)
+                    
+                    # عرض الخريطة
                     st_folium(m, width="100%", height=550)
