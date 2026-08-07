@@ -1,0 +1,12 @@
+streamlit
+pandas
+numpy
+matplotlib
+scipy
+scikit-learn
+lingpy
+arabic-reshaper
+python-bidi
+folium
+streamlit-folium
+openpyx
