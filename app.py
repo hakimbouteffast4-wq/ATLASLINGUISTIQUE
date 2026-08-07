@@ -1,227 +1,181 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import folium
+from streamlit_folium import st_folium
+import json
 import matplotlib.pyplot as plt
-from scipy.spatial.distance import squareform
+from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import linkage, dendrogram
 import arabic_reshaper
 from bidi.algorithm import get_display
-import folium
-from streamlit_folium import st_folium
-import os
-import json
 
-# --- 1. دالة حساب مسافة التحرير (Levenshtein Distance) ---
-def edit_dist(s1, s2):
-    s1, s2 = str(s1), str(s2)
-    m, n = len(s1), len(s2)
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-    for i in range(m + 1):
-        for j in range(n + 1):
-            if i == 0:
-                dp[i][j] = j
-            elif j == 0:
-                dp[i][j] = i
-            elif s1[i-1] == s2[j-1]:
-                dp[i][j] = dp[i-1][j-1]
-            else:
-                dp[i][j] = 1 + min(dp[i][j-1], dp[i-1][j], dp[i-1][j-1])
-    return dp[m][n]
-
-# --- 2. معالجة النصوص العربية للعرض الصحيح ---
-def fix_text(text):
-    if pd.isna(text):
-        return ""
-    reshaped = arabic_reshaper.reshape(str(text))
-    return get_display(reshaped)
-
-# --- 3. إعدادات الصفحة ---
+# إعداد الصفحة
 st.set_page_config(
-    page_title="منصة أطلس التحليل القياسي للهجات",
+    page_title="منصة أطلس التحليل اللساني",
     page_icon="🗺️",
     layout="wide"
 )
 
-st.title("🗺️ منصة أطلس التحليل القياسي للهجات واللسانيات")
+# دالة معالجة النصوص العربية للعرض الصحيح في Matplotlib
+def fix_text(text):
+    if isinstance(text, str):
+        reshaped_text = arabic_reshaper.reshape(text)
+        return get_display(reshaped_text)
+    return text
+
+st.title("🗺️ منصة أطلس التحليل اللساني والجغرافي")
 st.markdown("---")
 
-# --- 4. اختيار طريقة إدخال البيانات ---
-st.sidebar.header("⚙️ طريقة إدخال البيانات")
-input_method = st.sidebar.radio("اختر مصدر البيانات:", ["✍️ استمارة إدخال مباشرة", "📁 رفع ملف Excel/CSV"])
+# القائمة الجانبية - إدخال البيانات والإعدادات
+st.sidebar.header("⚙️ إعدادات البيانات والتحليل")
+
+input_option = st.sidebar.radio(
+    "طريقة إدخال البيانات:",
+    ["استمارة إدخال مباشرة ✍️", "رفع ملف Excel/CSV 📁"]
+)
 
 df = None
 
-if input_method == "✍️ استمارة إدخال مباشرة":
-    st.subheader("📝 استمارة إدخال البيانات اللهجية")
-    st.info("قم بتعديل البيانات أو إضافة مناطق جديدة في الجدول أدناه، وستتحدث الخريطة والشجرة فوراً!")
-
-    # بيانات افتراضية أولية للاستمارة
-    initial_data = {
-        "Village": ["Skoura_MDaz", "Guigou", "Boulemane", "El_Mers", "Serghina", "Imouzzer_Marmoucha", "Timahdite"],
-        "Lat": [33.3214, 33.1502, 33.3611, 33.4188, 33.2045, 33.4756, 33.2382],
-        "Lon": [-4.5612, -5.0281, -4.7299, -4.4285, -4.4981, -4.2831, -5.0594],
-        "Word_1 (أنا)": ["nek", "nek", "nekki", "nech", "nekki", "nech", "nek"],
-        "Word_2 (الماء)": ["aman", "aman", "aman", "aman", "aman", "aman", "aman"],
-        "Word_3 (البيت)": ["taddart", "tiddert", "tigemmi", "taddart", "taddart", "taddart", "tiddert"],
-        "Word_4 (الخيمة/الدار)": ["axxam", "axxam", "tigemmi", "axxam", "axxam", "axxam", "axxam"]
-    }
-    
-    df = st.data_editor(pd.DataFrame(initial_data), num_rows="dynamic", use_container_width=True)
-
-else:
-    uploaded_file = st.sidebar.file_uploader("قم برفع ملف البيانات (Excel أو CSV)", type=["xlsx", "csv"])
+if input_option == "رفع ملف Excel/CSV 📁":
+    uploaded_file = st.sidebar.file_uploader("قم برفع ملف البيانات (CSV/XLSX):", type=["csv", "xlsx"])
     if uploaded_file is not None:
-        if uploaded_file.name.endswith('.csv'):
-            df = pd.read_csv(uploaded_file)
-        else:
-            df = pd.read_excel(uploaded_file)
-        st.sidebar.success("تم تحميل الملف بنجاح! ✅")
-        st.subheader("📊 معاينة البيانات المرفوعة")
-        st.dataframe(df)
+        try:
+            if uploaded_file.name.endswith('.csv'):
+                df = pd.read_csv(uploaded_file)
+            else:
+                df = pd.read_excel(uploaded_file)
+            st.sidebar.success("تم تحميل الملف بنجاح! ✅")
+        except Exception as e:
+            st.sidebar.error(f"حدث خطأ أثناء قراءة الملف: {e}")
+else:
+    # بيانات افتراضية توضيحية
+    default_data = {
+        'Village': ['Boulemane', 'Guigou', 'Timahdite', 'El_Mers', 'Skoura_MDaz', 'Serghina', 'Outat_El_Haj'],
+        'Latitude': [33.36, 33.43, 33.23, 33.47, 33.64, 33.31, 33.67],
+        'Longitude': [-4.73, -5.03, -5.06, -4.45, -4.56, -4.41, -3.70],
+        'Variable_1': [1, 1, 1, 0, 0, 0, 0],
+        'Variable_2': [1, 1, 0, 1, 1, 0, 0],
+        'Variable_3': [0, 1, 1, 0, 1, 1, 0],
+        'Variable_4': [1, 0, 1, 1, 0, 1, 1]
+    }
+    df = pd.DataFrame(default_data)
+    st.sidebar.info("تتم معالجة النموذج بالبيانات التوضيحية الافتراضية 💡")
 
-# --- 5. خيارات طبقة الحدود الجغرافية (GeoJSON) ---
-st.sidebar.markdown("---")
-st.sidebar.header("🗺️ حدود الجماعات والإقليم")
-geojson_file = st.sidebar.file_uploader("رفع ملف حدود الجماعات (GeoJSON)", type=["geojson", "json"])
+# تحميل ملف الحدود الجغرافية GeoJSON إذا كان موجوداً
+geojson_data = None
+try:
+    with open("boundaries.geojson", "r", encoding="utf-8") as f:
+        geojson_data = json.load(f)
+except Exception:
+    geojson_data = None
 
-# --- 6. المعالجة والتحليل الفوري ---
-if df is not None and not df.empty:
+if df is not None:
+    # اختيار الأعمدة
+    st.sidebar.subheader("🎯 أعمدة التحليل")
     columns = df.columns.tolist()
-
-    default_loc = next((c for c in columns if c.lower() in ['village', 'site', 'location', 'dialect', 'اللهجة', 'الموقع', 'القبيلة']), columns[0])
-    default_lat = next((c for c in columns if c.lower() in ['lat', 'latitude', 'خط العرض']), None)
-    default_lon = next((c for c in columns if c.lower() in ['lon', 'lng', 'longitude', 'خط الطول']), None)
     
-    excluded = [default_loc, default_lat, default_lon]
-    default_features = [c for c in columns if c not in excluded and c is not None]
+    location_col = st.sidebar.selectbox("عمود المواقع/القبائل:", columns, index=0 if 'Village' in columns else 0)
+    lat_col = st.sidebar.selectbox("عمود الخطوط العريضة (Latitude):", columns, index=columns.index('Latitude') if 'Latitude' in columns else 0)
+    lon_col = st.sidebar.selectbox("عمود خطوط الطول (Longitude):", columns, index=columns.index('Longitude') if 'Longitude' in columns else 0)
+    
+    # تحديد المتغيرات اللسانية (الأعمدة الثنائية/الملاحظات)
+    feature_cols = [c for c in columns if c not in [location_col, lat_col, lon_col]]
+    selected_features = st.sidebar.multiselect("اختر المتغيرات اللسانية للتحليل:", feature_cols, default=feature_cols)
 
-    st.sidebar.markdown("---")
-    st.sidebar.header("🎯 أعمدة التحليل")
-    loc_col = st.sidebar.selectbox("عمود المواقع/القبائل:", columns, index=columns.index(default_loc))
-    feature_cols = st.sidebar.multiselect("أعمدة المتغيرات اللغوية:", [c for c in columns if c != loc_col], default=default_features)
+    # التبويبات الرئيسية للمنصة
+    tab1, tab2, tab3 = st.tabs(["🗺️ خريطة أطلس الفضائية والحدود", "🌳 التحليل العنقودي والشجرة اللهجية", "📊 مصفوفة المسافات اللسانية"])
 
-    lat_col = st.sidebar.selectbox("خط العرض:", ["لا يوجد"] + columns, index=(columns.index(default_lat) + 1) if default_lat else 0)
-    lon_col = st.sidebar.selectbox("خط الطول:", ["لا يوجد"] + columns, index=(columns.index(default_lon) + 1) if default_lon else 0)
-
-    if loc_col and feature_cols and len(df) > 1:
-        locations = df[loc_col].astype(str).tolist()
-        num_locs = len(locations)
-
-        # حساب مصفوفة المسافات
-        dist_matrix = np.zeros((num_locs, num_locs))
-        for i in range(num_locs):
-            for j in range(num_locs):
-                if i != j:
-                    total_dist = 0
-                    for col in feature_cols:
-                        val1 = df.iloc[i][col]
-                        val2 = df.iloc[j][col]
-                        total_dist += edit_dist(val1, val2)
-                    dist_matrix[i, j] = total_dist / len(feature_cols)
-
-        st.markdown("---")
+    # 1. التبويب الأول: الخريطة
+    with tab1:
+        st.subheader("🗺️ خريطة أطلس الفضائية مع حدود الجماعات والإقليم")
         
-        # عرض العدادات فوق التبويبات (مثل الشاشة التراكمية للتطبيق)
-        col_stat1, col_stat2 = st.columns(2)
-        with col_stat1:
-            st.metric(label="عدد القبائل/المواقع المدروسة", value=f"{num_locs}")
-        with col_stat2:
-            st.metric(label="عدد المفردات والكلمات المدروسة", value=f"{len(feature_cols)}")
+        # حساب مركز الخريطة
+        avg_lat = df[lat_col].mean()
+        avg_lon = df[lon_col].mean()
+        
+        # إنشاء الخريطة باستخدام Google Satellite
+        m = folium.Map(
+            location=[avg_lat, avg_lon],
+            zoom_start=9,
+            tiles='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+            attr='Google Satellite'
+        )
+        
+        # إضافة ملف الحدود GeoJSON إذا توفر
+        if geojson_data:
+            folium.GeoJson(
+                geojson_data,
+                name="حدود الجماعات والأقاليم",
+                style_function=lambda x: {
+                    'fillColor': '#f1c40f',
+                    'color': '#f39c12',
+                    'weight': 1.2,
+                    'fillOpacity': 0.15
+                }
+            ).add_to(m)
 
-        st.markdown("---")
-        tab1, tab2, tab3 = st.tabs(["📏 مصفوفة المسافات", "🌳 الشجرة اللهجية (Dendrogram)", "🗺️ خريطة أطلس الفضائية والحدود"])
+        # إضافة النقاط/المواقع
+        for _, row in df.iterrows():
+            folium.Marker(
+                location=[row[lat_col], row[lon_col]],
+                popup=f"<b>{row[location_col]}</b>",
+                tooltip=str(row[location_col]),
+                icon=folium.Icon(color="red", icon="info-sign")
+            ).add_to(m)
 
-        with tab1:
-            st.subheader("📏 مصفوفة البعد اللساني بين المواقع")
-            dist_df = pd.DataFrame(dist_matrix, index=locations, columns=locations)
-            st.dataframe(dist_df.style.background_gradient(cmap="Blues"), use_container_width=True)
+        folium.LayerControl().add_to(m)
+        st_folium(m, width=1000, height=600)
 
+    # حساب مصفوفة المسافات اللسانية (Jaccard Distance)
+    if selected_features:
+        data_matrix = df[selected_features].values
+        # حساب المسافة بناءً على مقياس Jaccard
+        dist_matrix = squareform(pdist(data_matrix, metric='jaccard'))
+        locations = df[location_col].tolist()
+
+        # 2. التبويب الثاني: الشجرة اللهجية الأفقية الأكاديمية
         with tab2:
-            st.subheader("🌳 التحليل العنقودي والشجرة اللهجية")
-            fig, ax = plt.subplots(figsize=(10, 4))
+            st.subheader("🌳 التحليل العنقودي والشجرة اللهجية (Dendrogram)")
+            st.markdown("تصنيف المواقع اللهجية بناءً على مصفوفة البعد اللساني:")
+            
+            # 1. إعداد المسافات والربط العنقودي
             condensed_dist = squareform(dist_matrix)
             Z = linkage(condensed_dist, method='ward')
             fixed_labels = [fix_text(loc) for loc in locations]
-            dendrogram(Z, labels=fixed_labels, ax=ax)
-            plt.xticks(rotation=45, ha='right')
+            
+            # 2. تحديد ارتفاع الشكل بحسب عدد المواقع لضمان عدم تداخل الأسماء
+            fig_height = max(5, len(locations) * 0.45)
+            fig, ax = plt.subplots(figsize=(10, fig_height))
+            
+            # 3. رسم الشجرة بصورة أفقية ملونة احترافية
+            ddata = dendrogram(
+                Z, 
+                labels=fixed_labels, 
+                orientation='left',            # اتجاه أفقي كما في الأبحاث والمجلات العلميّة
+                color_threshold=0.7 * max(Z[:, 2]), # تلوين الفروع المتميزة تلقائياً
+                above_threshold_color='#2c3e50',
+                ax=ax,
+                leaf_font_size=11
+            )
+            
+            # 4. تحسين مظهر المحاور والخطوط
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            ax.spines['bottom'].set_color('#7f8c8d')
+            
+            ax.xaxis.grid(True, linestyle='--', alpha=0.5, color='#cccccc')
+            ax.set_xlabel("مسافة التباعد اللساني (Linguistic Distance)", fontsize=11, fontweight='bold', labelpad=10)
+            
+            plt.tight_layout()
             st.pyplot(fig)
 
+        # 3. التبويب الثالث: مصفوفة المسافات
         with tab3:
-            st.subheader("🗺️ خريطة أطلس الفضائية مع حدود الجماعات والإقليم")
-            if lat_col != "لا يوجد" and lon_col != "لا يوجد":
-                valid_coords = df.dropna(subset=[lat_col, lon_col])
-                if not valid_coords.empty:
-                    avg_lat = pd.to_numeric(valid_coords[lat_col], errors='coerce').mean()
-                    avg_lon = pd.to_numeric(valid_coords[lon_col], errors='coerce').mean()
-                    
-                    # 1️⃣ إنشاء الخريطة
-                    m = folium.Map(location=[avg_lat, avg_lon], zoom_start=9, tiles=None)
+            st.subheader("📊 مصفوفة المسافات اللسانية (Distance Matrix)")
+            dist_df = pd.DataFrame(dist_matrix, index=locations, columns=locations)
+            st.dataframe(dist_df.style.background_gradient(cmap="Blues"))
 
-                    # 2️⃣ إضافة طبقة الأقمار الصناعية (Google Satellite)
-                    folium.TileLayer(
-                        tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-                        attr='Google Satellite',
-                        name='🛰️ خريطة أطلس الفضائية (Satellite)',
-                        overlay=False,
-                        control=True
-                    ).add_to(m)
-
-                    # 3️⃣ إضافة الطبقة الجغرافية العادية
-                    folium.TileLayer(
-                        tiles='OpenStreetMap',
-                        name='🗺️ الخريطة العادية (Street Map)',
-                        overlay=False,
-                        control=True
-                    ).add_to(m)
-
-                    # 4️⃣ إضافة طبقة حدود الجماعات والإقليم (GeoJSON)
-                    geojson_data = None
-                    
-                    # خيار أ: إذا تم رفع الملف من الشريط الجانبي
-                    if geojson_file is not None:
-                        geojson_data = json.load(geojson_file)
-                    # خيار ب: إذا كان ملف GeoJSON موجوداً في مجلد المشروع باسم boundaries.geojson
-                    elif os.path.exists("boundaries.geojson"):
-                        with open("boundaries.geojson", "r", encoding="utf-8") as f:
-                            geojson_data = json.load(f)
-
-                    if geojson_data is not None:
-                        folium.GeoJson(
-                            geojson_data,
-                            name="🟩 حدود الجماعات المحلية والإقليم",
-                            style_function=lambda x: {
-                                'fillColor': '#00ffaa',
-                                'color': '#ffcc00',      # لون الحدود (أصفر زاهي مثل تطبيقك)
-                                'weight': 2.5,          # سمك الخط
-                                'fillOpacity': 0.12     # الشفافية
-                            },
-                            tooltip=folium.GeoJsonTooltip(
-                                fields=list(geojson_data['features'][0]['properties'].keys())[:2],
-                                aliases=['اسم المنطقة/الجماعة:', 'الرمز/البيانات:'],
-                                localize=True
-                            )
-                        ).add_to(m)
-
-                    # 5️⃣ إضافة دبابيس المواقع والنقاط التفاعلية
-                    for idx, row in valid_coords.iterrows():
-                        try:
-                            info_html = f"<div style='font-family: Arial; direction: rtl; text-align: right; min-width: 160px;'>"
-                            info_html += f"<h3 style='margin:0; color:#1a73e8;'>📍 {row[loc_col]}</h3><hr style='margin:5px 0;'>"
-                            for col in feature_cols:
-                                info_html += f"<b>{col}:</b> {row[col]}<br>"
-                            info_html += "</div>"
-
-                            folium.Marker(
-                                location=[float(row[lat_col]), float(row[lon_col])],
-                                popup=folium.Popup(info_html, max_width=250),
-                                tooltip=str(row[loc_col]),
-                                icon=folium.Icon(color="red", icon="info-sign")
-                            ).add_to(m)
-                        except Exception as e:
-                            pass
-
-                    # 6️⃣ إضافة التحكم بالطبقات (Layer Control)
-                    folium.LayerControl(position='topright').add_to(m)
-                    
-                    # عرض الخريطة
-                    st_folium(m, width="100%", height=580)
+else:
+    st.warning("يرجى تحميل ملف البيانات لبدء التحليل.")
