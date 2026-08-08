@@ -10,7 +10,6 @@ from scipy.cluster.hierarchy import linkage, dendrogram
 from scipy.stats import pearsonr
 from sklearn.manifold import MDS
 import arabic_reshaper
-from bidi.algorithm import get_display
 
 # ----------------------------------------------------
 # 1. تهيئة المنصة والتصميم (CSS)
@@ -75,13 +74,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# 2. الدوال المساعدة والرياضية وتصحيح الرسم العربي
+# 2. تصحيح معالجة اللغة العربية للرسوم البيانية
 # ----------------------------------------------------
 def ar(text):
-    """تجهيز النص العربي للعرض في مكتبة Matplotlib فقط"""
+    """تشبيك الحروف العربية لتعرض بشكل صحيح ومستقيم في Matplotlib"""
     try:
-        reshaped = arabic_reshaper.reshape(str(text))
-        return get_display(reshaped)
+        return arabic_reshaper.reshape(str(text))
     except:
         return str(text)
 
@@ -126,7 +124,7 @@ sample_data = {
 df = pd.DataFrame(sample_data)
 
 # ----------------------------------------------------
-# 4. الهيدر العادي ومؤشرات الأداء
+# 4. الهيدر ومؤشرات الأداء
 # ----------------------------------------------------
 st.markdown("""
 <div class="hero-header">
@@ -161,7 +159,7 @@ selected_features = st.sidebar.multiselect(
 
 anchor_village = st.sidebar.selectbox("الجماعة المرجعية (Anchor):", df['Village'].values)
 
-# حساب مصفوفة المسافات اللسانية والجغرافية
+# حساب المصفوفات
 if len(selected_features) > 0:
     features_matrix = df[selected_features].values
     dist_matrix = pdist(features_matrix, metric='jaccard')
@@ -174,7 +172,7 @@ geo_matrix_sq = squareform(geo_dist_matrix)
 geo_matrix_df = pd.DataFrame(geo_matrix_sq, index=df['Village'], columns=df['Village'])
 
 # ----------------------------------------------------
-# 6. التبويبات الفائقة (10 تبويبات احترافية)
+# 6. التبويبات الفائقة
 # ----------------------------------------------------
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "🗺️ الخريطة والتحليل المرجعي", 
@@ -216,7 +214,7 @@ with tab1:
         
     st_folium(m, width="100%", height=480)
 
-# TAB 2: الذكاء الاصطناعي والمفسر الآلي
+# TAB 2: الذكاء الاصطناعي
 with tab2:
     st.subheader("🤖 المفسر اللساني الذكي (Automated Dialectological Analyst)")
     
@@ -228,32 +226,29 @@ with tab2:
     ai_analysis = f"""### 💡 القراءة التفسيرية الآلية للنتائج (جماعة {anchor_village}):
 
 1. **الامتداد واللهجة الأم:**
-   تُظهر نتائج الخوارزمية القياسية أن جماعة **[{most_sim}]** هي الأقرب لسانيًا لـ **[{anchor_village}]** بنسبة توافق تصل إلى **{sim_score:.1f}%**. يشير هذا إلى وجود اتصال جغرافي أو تاريخي يعزز التماثل في السمات الصوتية والمركبات المعجمية.
+   تُظهر نتائج الخوارزمية القياسية أن جماعة **[{most_sim}]** هي الأقرب لسانيًا لـ **[{anchor_village}]** بنسبة توافق تصل إلى **{sim_score:.1f}%**.
 
 2. **عوامل التباين والجدران اللسانية:**
-   تسجل جماعة **[{most_dist}]** أعلى مسافة تباين بـ **({dist_score:.2f})**. يعود هذا التباين بشكل عام إلى العوائق الجغرافية (مثل التضاريس الجبلية لإقليم بولمان) أو التحولات الديموغرافية واللسانية نحو المراكز الحضرية.
+   تسجل جماعة **[{most_dist}]** أعلى مسافة تباين بـ **({dist_score:.2f})**.
 
 3. **التوصية الميدانية للباحث:**
-   يُنصح بالتركيز على الشريط الانتقالي بين **{anchor_village}** و **{most_dist}** لجمع المزيد من العينات الميدانية لتحديد نقطة الانكسار اللساني (Isogloss Boundary) بدقة أكبر.
+   يُنصح بالتركيز على الشريط الانتقالي بين **{anchor_village}** و **{most_dist}** لجمع المزيد من العينات الميدانية.
 """
     st.markdown(f'<div class="ai-box">{ai_analysis}</div>', unsafe_allow_html=True)
 
-# TAB 3: مؤشر استقرار الظواهر
+# TAB 3: مؤشر الاستقرار
 with tab3:
     st.subheader("📊 مؤشر استقرار وانتشار الظواهر اللسانية")
-    
     feat_stats = []
     for f in selected_features:
         presence_rate = df[f].mean() * 100
         stability = "🟢 مرتفع جداً (شائع)" if presence_rate > 70 else ("🟡 متوسط (متذبذب)" if presence_rate >= 30 else "🔴 منخفض (مهدد/محلي)")
         feat_stats.append({'الظاهرة اللسانية': f, 'نسبة الانتشار (%)': f"{presence_rate:.1f}%", 'مستوى الاستقرار': stability})
-        
     st.table(pd.DataFrame(feat_stats))
 
-# TAB 4: الارتباط الجغرافي-اللساني
+# TAB 4: الارتباط
 with tab4:
-    st.subheader("📐 تحليل الارتباط واختبار الدلالة الإحصائية بين الجغرافيا واللسانيات")
-    
+    st.subheader("📐 تحليل الارتباط واختبار الدلالة الإحصائية")
     corr, p_val = pearsonr(geo_dist_matrix, dist_matrix)
     
     col_c1, col_c2 = st.columns(2)
@@ -264,15 +259,13 @@ with tab4:
         
     fig, ax = plt.subplots(figsize=(9, 4.5), dpi=300)
     ax.scatter(geo_dist_matrix, dist_matrix, color='#38bdf8', s=120, edgecolors='#0f172a')
-    
     m_slope, b_intercept = np.polyfit(geo_dist_matrix, dist_matrix, 1)
-    ax.plot(geo_dist_matrix, m_slope * geo_dist_matrix + b_intercept, color='#f43f5e', linestyle='--', label=f"Line of best fit (r={corr:.2f})")
+    ax.plot(geo_dist_matrix, m_slope * geo_dist_matrix + b_intercept, color='#f43f5e', linestyle='--')
     
     plt.xlabel(ar("المسافة الجغرافية (كم)"))
-    plt.ylabel(ar("المسافة اللسانية (Jaccard)"))
-    plt.title(ar("العلاقة بين التباعد الجغرافي والتمايز اللساني لإقليم بولمان"))
+    plt.ylabel(ar("المسافة اللسانية"))
+    plt.title(ar("العلاقة بين التباعد الجغرافي والتمايز اللساني"))
     plt.grid(True, linestyle='--', alpha=0.5)
-    plt.legend()
     st.pyplot(fig)
 
 # TAB 5: المقارن الثنائي
@@ -287,7 +280,6 @@ with tab5:
     if v1 and v2:
         v1_data = df[df['Village'] == v1].iloc[0]
         v2_data = df[df['Village'] == v2].iloc[0]
-        
         dist_v1_v2 = matrix_df.loc[v1, v2]
         geo_v1_v2 = geo_matrix_df.loc[v1, v2]
         similarity_pct = (1 - dist_v1_v2) * 100
@@ -314,7 +306,9 @@ with tab6:
     if len(selected_features) > 0:
         Z = linkage(dist_matrix, method='ward')
         fig, ax = plt.subplots(figsize=(10, 4.5), dpi=300)
+        
         labels = [ar(v) for v in df['Village'].values]
+        
         dendrogram(Z, labels=labels, ax=ax, color_threshold=0.5)
         plt.title(ar("الشجرة اللهجية لتكتلات إقليم بولمان"), fontsize=12, fontweight='bold')
         st.pyplot(fig)
@@ -333,7 +327,7 @@ with tab7:
         plt.grid(True, linestyle='--', alpha=0.5)
         st.pyplot(fig)
 
-# TAB 8: Levenshtein Distance
+# TAB 8: Levenshtein
 with tab8:
     st.subheader("🔤 حاسبة المسافة الصوتية بين الألفاظ (Levenshtein Distance)")
     col_a, col_b = st.columns(2)
@@ -347,31 +341,21 @@ with tab8:
     
     st.metric(label="مسافة التعديل الصوتي (Levenshtein Distance)", value=f"{lev_dist} عمليات")
     st.progress(int(similarity) / 100)
-    st.caption(f"نسبة التشابه الصوتي المباشر: **{similarity:.1f}%**")
 
-# TAB 9: LaTeX Export
+# TAB 9: LaTeX
 with tab9:
     st.subheader("📊 مصفوفات المسافة وتصدير LaTeX للأطروحة")
     st.write("📊 **مصفوفة المسافات اللسانية:**")
     st.dataframe(matrix_df.style.background_gradient(cmap='Blues'), use_container_width=True)
-    
-    st.write("🌐 **مصفوفة المسافات الجغرافية (بالكيلومتر):**")
-    st.dataframe(geo_matrix_df.style.background_gradient(cmap='Greens'), use_container_width=True)
-    
-    st.markdown("---")
-    st.subheader("📄 كود LaTeX للمصفوفة اللسانية:")
     st.code(matrix_df.to_latex(), language='latex')
 
-# TAB 10: Reproducibility Code
+# TAB 10: الملحق الأكاديمي
 with tab10:
     st.subheader("💻 أكواد الملحق الأكاديمي (Reproducibility Code)")
-    st.write("يمكنك إرفاق هذه الأكواد في ملحق الأطروحة لإتاحة إمكانية إعادة إنتاج النتائج بنفس الشفافية العلمية الدولية:")
-    
     python_code = """import pandas as pd
 from scipy.spatial.distance import pdist, squareform
-from scipy.stats import pearsonr
 
-# تحميل البيانات وحساب مصفوفة المسافات اللسانية
+# Re-producing Dialectological Distance Matrix
 features = ['الجهر_الصوتي', 'تضخيم_الراء', 'إمالة_الأليف', 'احتفاظ_بالتلازم']
 dist_matrix = pdist(df[features].values, metric='jaccard')
 print(squareform(dist_matrix))
