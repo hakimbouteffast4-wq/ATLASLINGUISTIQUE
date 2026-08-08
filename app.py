@@ -9,13 +9,11 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import linkage, dendrogram
 from scipy.stats import pearsonr
 from sklearn.manifold import MDS
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
 import arabic_reshaper
 from bidi.algorithm import get_display
 
 # ----------------------------------------------------
-# 1. تهيئة المنصة والتصميم العالمي (CSS)
+# 1. تهيئة المنصة والتصميم (CSS)
 # ----------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique | المنصة القياسية الفائقة للقياس اللساني",
@@ -73,28 +71,19 @@ st.markdown("""
         line-height: 1.9;
         color: #14532d;
     }
-    
-    .report-box {
-        background-color: #f8fafc;
-        border-right: 5px solid #38bdf8;
-        padding: 1.5rem;
-        border-radius: 10px;
-        font-size: 1.05rem;
-        line-height: 1.9;
-        color: #1e293b;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# 2. الدوال المساعدة والرياضية
+# 2. الدوال المساعدة والرياضية وتصحيح الرسم العربي
 # ----------------------------------------------------
 def ar(text):
+    """تجهيز النص العربي للعرض في مكتبة Matplotlib فقط"""
     try:
-        reshaped = arabic_reshaper.reshape(text)
+        reshaped = arabic_reshaper.reshape(str(text))
         return get_display(reshaped)
     except:
-        return text
+        return str(text)
 
 def levenshtein_distance(s1, s2):
     if len(s1) < len(s2):
@@ -121,7 +110,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 # ----------------------------------------------------
-# 3. بيانات متكاملة لإقليم بولمان
+# 3. قاعدة البيانات الميدانية لإقليم بولمان
 # ----------------------------------------------------
 sample_data = {
     'Village': ['كيكو', 'تيمحضيت', 'أنجيل', 'أوطاط الحاج', 'ميسور', 'بولمان'],
@@ -137,7 +126,7 @@ sample_data = {
 df = pd.DataFrame(sample_data)
 
 # ----------------------------------------------------
-# 4. الهيدر ومؤشرات الأداء
+# 4. الهيدر العادي ومؤشرات الأداء
 # ----------------------------------------------------
 st.markdown("""
 <div class="hero-header">
@@ -172,7 +161,7 @@ selected_features = st.sidebar.multiselect(
 
 anchor_village = st.sidebar.selectbox("الجماعة المرجعية (Anchor):", df['Village'].values)
 
-# حساب المصفوفات
+# حساب مصفوفة المسافات اللسانية والجغرافية
 if len(selected_features) > 0:
     features_matrix = df[selected_features].values
     dist_matrix = pdist(features_matrix, metric='jaccard')
@@ -227,7 +216,7 @@ with tab1:
         
     st_folium(m, width="100%", height=480)
 
-# TAB 2: الذكاء الاصطناعي والمفسر الآلي (ميزة حصرية)
+# TAB 2: الذكاء الاصطناعي والمفسر الآلي
 with tab2:
     st.subheader("🤖 المفسر اللساني الذكي (Automated Dialectological Analyst)")
     
@@ -249,7 +238,7 @@ with tab2:
 """
     st.markdown(f'<div class="ai-box">{ai_analysis}</div>', unsafe_allow_html=True)
 
-# TAB 3: مؤشر استقرار الظواهر (ميزة حصرية)
+# TAB 3: مؤشر استقرار الظواهر
 with tab3:
     st.subheader("📊 مؤشر استقرار وانتشار الظواهر اللسانية")
     
@@ -261,7 +250,7 @@ with tab3:
         
     st.table(pd.DataFrame(feat_stats))
 
-# TAB 4: الارتباط
+# TAB 4: الارتباط الجغرافي-اللساني
 with tab4:
     st.subheader("📐 تحليل الارتباط واختبار الدلالة الإحصائية بين الجغرافيا واللسانيات")
     
@@ -344,7 +333,7 @@ with tab7:
         plt.grid(True, linestyle='--', alpha=0.5)
         st.pyplot(fig)
 
-# TAB 8: Levenshtein
+# TAB 8: Levenshtein Distance
 with tab8:
     st.subheader("🔤 حاسبة المسافة الصوتية بين الألفاظ (Levenshtein Distance)")
     col_a, col_b = st.columns(2)
@@ -360,7 +349,7 @@ with tab8:
     st.progress(int(similarity) / 100)
     st.caption(f"نسبة التشابه الصوتي المباشر: **{similarity:.1f}%**")
 
-# TAB 9: LaTeX
+# TAB 9: LaTeX Export
 with tab9:
     st.subheader("📊 مصفوفات المسافة وتصدير LaTeX للأطروحة")
     st.write("📊 **مصفوفة المسافات اللسانية:**")
@@ -373,7 +362,7 @@ with tab9:
     st.subheader("📄 كود LaTeX للمصفوفة اللسانية:")
     st.code(matrix_df.to_latex(), language='latex')
 
-# TAB 10: أكواد الملحق الأكاديمي
+# TAB 10: Reproducibility Code
 with tab10:
     st.subheader("💻 أكواد الملحق الأكاديمي (Reproducibility Code)")
     st.write("يمكنك إرفاق هذه الأكواد في ملحق الأطروحة لإتاحة إمكانية إعادة إنتاج النتائج بنفس الشفافية العلمية الدولية:")
