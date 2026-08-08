@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import json
+import os
 
-# محاولة استيراد المكتبات المتقدمة مع حلول احتياطية
+# محاولة تحميل مكتبات الخرائط والرسوم البيانية المتقدمة
 try:
     import folium
     from streamlit_folium import st_folium
@@ -18,7 +20,7 @@ except ImportError:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة
+# 1. إعدادات الصفحة الرئيسية
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro - إقليم بولمان",
@@ -27,7 +29,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. الهيدر والمؤشرات العامة (Dashboard Header)
+# 2. الهيدر والمؤشرات العامة (Pro Dashboard Header)
 # ---------------------------------------------------------
 st.markdown("## 📘 AtlasLinguistique Pro")
 st.caption("المنصة الذكية المتقدمة للقياس اللساني والتحليل اللهجي - إقليم بولمان")
@@ -45,11 +47,11 @@ with col4:
 st.divider()
 
 # ---------------------------------------------------------
-# 3. قواعد البيانات اللسانية والجغرافية
+# 3. قواعد البيانات الجغرافية واللسانية للجماعات
 # ---------------------------------------------------------
 communes_data = {
     "بولمان": {"lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط"},
-    "كيكو": {"lat": 33.2089, "lon": -4.8483, "dialect": "أمازيغية آيت سغروشن/مغراوة", "group": "الأطلس المتوسط"},
+    "كيكو": {"lat": 33.2089, "lon": -4.8483, "dialect": "أمازيغية آيت سغروشن", "group": "الأطلس المتوسط"},
     "إموزار مرموشة": {"lat": 33.4833, "lon": -4.2833, "dialect": "أمازيغية آيت وراين", "group": "الأطلس المتوسط"},
     "ميسور": {"lat": 33.0486, "lon": -3.9961, "dialect": "عربية دارجة محليّة", "group": "السهوب الشرقية"},
     "أوطاط الحاج": {"lat": 33.3483, "lon": -3.7022, "dialect": "عربية دارجة شرقية", "group": "ملوية العليا"},
@@ -90,20 +92,42 @@ with tabs[0]:
     csv_stab = df_stability.to_csv(index=False).encode('utf-8')
     st.download_button("📥 تحميل جدول الاستقرار (CSV) للبحث", csv_stab, "stability_index.csv", "text/csv")
 
-# --- Tab 1: الخريطة التفاعلية ---
+# --- Tab 1: الخريطة التفاعلية (مع ربط ملف boundaries.geojson) ---
 with tabs[1]:
-    st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات")
-    st.write("إسقاط مكاني للمراكز والجماعات الترابية بالإقليم:")
+    st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات والحدود")
+    st.write("إسقاط مكاني للمراكز والحدود الجغرافية الرسمية لإقليم بولمان:")
     
     if HAS_FOLIUM:
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
+        
+        # تحميل رسم الحدود من ملف boundaries.geojson إن وجد
+        geojson_path = "boundaries.geojson"
+        if os.path.exists(geojson_path):
+            try:
+                with open(geojson_path, "r", encoding="utf-8") as f:
+                    geojson_data = json.load(f)
+                folium.GeoJson(
+                    geojson_data,
+                    name="حدود إقليم بولمان",
+                    style_function=lambda x: {
+                        'fillColor': '#3186cc',
+                        'color': '#000080',
+                        'weight': 2,
+                        'fillOpacity': 0.15
+                    }
+                ).add_to(m)
+            except Exception as e:
+                st.warning(f"تعذر قراءة GeoJSON: {e}")
+
+        # إضافة النقاط والمراكز
         for name, info in communes_data.items():
             folium.Marker(
                 location=[info["lat"], info["lon"]],
                 popup=f"<b>جماعة {name}</b><br>المجموعة: {info['group']}<br>النمط: {info['dialect']}",
                 tooltip=name,
-                icon=folium.Icon(color="blue", icon="info-sign")
+                icon=folium.Icon(color="red" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
             ).add_to(m)
+            
         st_folium(m, width=900, height=480)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
@@ -130,7 +154,7 @@ with tabs[2]:
 with tabs[3]:
     st.subheader("🎙️ التحليل الصوتي والفونولوجي")
     feature = st.selectbox("اختر الملمح الصوتي للتحليل الميداني:", ["الجهر والهمس", "الإمالة", "الترقيق والتفخيم", "احتياط الصوامت"])
-    st.info(f"تم تسجيل وتحليل الملمح (**{feature}**) عبر 120 عينة صوتية مسجلة بميدان البحث.")
+    st.info(f"تم تسجيل وتحليل الملمح (**{feature}**) عبر العينات الصوتية المسجلة بميدان البحث.")
 
 # --- Tab 4: المقارن الثنائي ---
 with tabs[4]:
@@ -139,7 +163,6 @@ with tabs[4]:
     g1 = c1.selectbox("الجماعة الأولى", list(communes_data.keys()), index=0)
     g2 = c2.selectbox("الجماعة الثانية", list(communes_data.keys()), index=1)
     
-    # خوارزمية قياس نسبة التماثل
     similarity = 100 - abs(len(g1) - len(g2)) * 4 - (0 if communes_data[g1]["group"] == communes_data[g2]["group"] else 15)
     st.success(f"درجة التماثل اللساني بين **{g1}** و **{g2}** هي: {max(similarity, 40)}%")
 
@@ -198,7 +221,6 @@ with tabs[8]:
     st.subheader("🔢 LaTeX مصفوفات المسافات اللسانية")
     st.latex(r"D_{ij} = \sqrt{\sum_{k=1}^{n} (w_k \cdot (x_{ik} - x_{jk}))^2}")
     
-    st.write("مصفوفة المسافات اللسانية البينية (Linguistic Distance Matrix):")
     matrix_data = pd.DataFrame(
         [
             [0, 12, 18, 25, 28, 14],
@@ -216,10 +238,9 @@ with tabs[8]:
 # --- Tab 9: الملحق التوثيقي ---
 with tabs[9]:
     st.subheader("📁 الملحق وتوثيق المنهجية")
-    st.write("بيانات توثيقية حول أطلس إقليم بولمان والمسح الميداني:")
     st.info("""
     - **منهجية البحث:** اعتُمد الاستبيان اللساني الميداني المباشر.
     - **عدد الإخباريين:** 36 إخبارياً (6 لكل جماعة ترابية).
     - **النطاق الجغرافي:** إقليم بولمان (جهة فاس-مكناس).
-    - **الأدوات البرمجية:** Python, Streamlit, Folium, Levenshtein Distance Algorithm.
+    - **الأدوات البرمجية:** Python, Streamlit, Folium, GeoJSON Boundaries.
     """)
