@@ -22,7 +22,7 @@ except ImportError:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة الأساسية (بدون شريط جانبي)
+# 1. إعدادات الصفحة الأساسية
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro - إقليم بولمان",
@@ -32,12 +32,19 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة بالوضع النهاري الدائم (Light Mode UI)
+# 2. إجبار الوضع النهاري الشامل (Full Light Mode CSS Override)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
+    /* إعادة تعيين المتغيرات الأساسية لستريمليت */
+    :root {
+        --background-color: #f8fafc !important;
+        --secondary-background-color: #ffffff !important;
+        --text-color: #0f172a !important;
+    }
+
     * {
         font-family: 'Cairo', sans-serif !important;
         scroll-behavior: smooth;
@@ -47,6 +54,8 @@ st.markdown("""
     html, body, [class*="css"] {
         direction: rtl;
         text-align: right;
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
     }
 
     .stApp {
@@ -55,29 +64,63 @@ st.markdown("""
         overflow-x: hidden !important;
     }
 
-    /* إخفاء القائمة الجانبية تماماً */
-    [data-testid="stSidebar"], [data-testid="collapsedControl"] {
+    /* إخفاء القائمة الجانبية والعناصر الشريطية */
+    [data-testid="stSidebar"], [data-testid="collapsedControl"], #MainMenu, footer, header {
         display: none !important;
     }
 
     /* تحسين الحاوية الرئيسية */
     [data-testid="stAppViewBlockContainer"] {
-        padding: 1.2rem 1.2rem 3rem 1.2rem !important;
+        padding: 1rem 1rem 3rem 1rem !important;
         max-width: 100% !important;
     }
 
-    /* ألوان النصوص والرموز */
-    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown {
+    /* إصلاح ألوان النصوص والرموز بشكل عام */
+    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown, small, div {
         color: #0f172a !important;
     }
 
-    /* إصلاح عناصر التحكم والقوائم المنسدلة */
+    /* --- إصلاح مربع رفع الملفات (File Uploader) --- */
+    section[data-testid="stFileUploaderDropzone"] {
+        background-color: #ffffff !important;
+        border: 2px dashed #0284c7 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    section[data-testid="stFileUploaderDropzone"] * {
+        color: #0f172a !important;
+        background-color: transparent !important;
+    }
+
+    section[data-testid="stFileUploaderDropzone"] button {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+    }
+
+    /* --- إصلاح الجداول (DataFrames & Tables) --- */
+    [data-testid="stDataFrame"], .stDataFrame, div[data-testid="stTable"] {
+        background-color: #ffffff !important;
+        border-radius: 16px !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+        overflow: hidden !important;
+    }
+
+    /* إجبار خلايا وعناوين الجدول على اللون الفاتح */
+    [data-testid="stDataFrame"] * {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+
+    /* --- عناصر التحكم والقوائم المنسدلة --- */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
         color: #0f172a !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
     }
 
     div[data-baseweb="select"] span {
@@ -101,25 +144,13 @@ st.markdown("""
         color: #0f172a !important;
     }
 
-    /* بطاقات المقاييس */
-    [data-testid="stMetricLabel"] p {
-        color: #475569 !important;
-        font-size: 1rem !important;
-        font-weight: 700 !important;
-    }
-
-    [data-testid="stMetricValue"] div {
-        color: #0284c7 !important;
-        font-weight: 900 !important;
-    }
-
-    /* العنوان الرئيسي */
+    /* --- العنوان والتبيينات --- */
     .main-title {
         background: linear-gradient(135deg, #0284c7 0%, #4338ca 50%, #6d28d9 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 900;
-        font-size: 2.6rem;
+        font-size: 2.2rem;
         text-align: center;
         margin-bottom: 2px;
     }
@@ -127,30 +158,29 @@ st.markdown("""
     .sub-title {
         text-align: center;
         color: #475569 !important;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 600;
-        margin-bottom: 22px;
+        margin-bottom: 20px;
     }
 
     /* شبكة بطاقات المؤشرات */
     .metric-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
         justify-content: center;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
     .cyber-card {
-        flex: 1 1 calc(20% - 12px);
-        min-width: 140px;
+        flex: 1 1 calc(20% - 10px);
+        min-width: 130px;
         background: #ffffff !important;
         border: 1px solid #e2e8f0;
         border-radius: 16px;
-        padding: 14px 10px;
+        padding: 12px 8px;
         text-align: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
     }
 
@@ -162,43 +192,31 @@ st.markdown("""
         background: linear-gradient(90deg, transparent, #0284c7, #6366f1, transparent);
     }
 
-    .cyber-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-    }
-
     .pulse-glow {
         width: 8px;
         height: 8px;
         background-color: #0284c7;
         border-radius: 50%;
         display: inline-block;
-        margin-left: 6px;
-        box-shadow: 0 0 8px #0284c7;
-        animation: pulse-ring 2s infinite;
-    }
-
-    @keyframes pulse-ring {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.6); }
-        70% { transform: scale(1.2); box-shadow: 0 0 0 6px rgba(2, 132, 199, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+        margin-left: 5px;
+        box-shadow: 0 0 6px #0284c7;
     }
 
     .cyber-card h4 {
         margin: 0;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #334155 !important;
         font-weight: 700;
     }
     
     .cyber-card p {
         margin: 4px 0 0 0;
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 900;
         color: #0284c7 !important;
     }
 
-    /* شريط التبويبات */
+    /* --- شريط التبويبات (Tabs Bar) --- */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
         gap: 8px;
@@ -216,13 +234,13 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         flex: 0 0 auto;
         border-radius: 30px;
-        padding: 8px 18px;
+        padding: 8px 16px;
         font-weight: 700;
-        font-size: 0.88rem;
-        background: #e2e8f0 !important;
+        font-size: 0.85rem;
+        background: #ffffff !important;
         color: #334155 !important;
         border: 1px solid #cbd5e1 !important;
-        transition: all 0.25s ease-in-out;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }
 
     .stTabs [aria-selected="true"] {
@@ -236,33 +254,21 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* الجداول */
-    [data-testid="stDataFrame"] {
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-        background-color: #ffffff !important;
-    }
-
     iframe {
         max-width: 100% !important;
         border-radius: 16px;
     }
 
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-
     @media (max-width: 768px) {
-        .main-title { font-size: 1.8rem !important; }
+        .main-title { font-size: 1.6rem !important; }
         .cyber-card { flex: 1 1 calc(50% - 10px); }
-        .stTabs [data-baseweb="tab"] { padding: 6px 14px !important; font-size: 0.8rem !important; }
+        .stTabs [data-baseweb="tab"] { padding: 6px 12px !important; font-size: 0.78rem !important; }
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. الهيدر والمؤشرات التفاعلية
+# 3. الهيدر والمؤشرات
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
