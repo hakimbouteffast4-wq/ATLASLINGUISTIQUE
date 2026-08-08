@@ -13,10 +13,10 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 # ----------------------------------------------------
-# 1. تهيئة المنصة وتصميم الواجهة (CSS)
+# 1. تهيئة المنصة والتصميم العالمي (CSS)
 # ----------------------------------------------------
 st.set_page_config(
-    page_title="AtlasLinguistique | أطلس القياس اللساني المتقدم",
+    page_title="AtlasLinguistique | المنصة القياسية للقياس اللساني",
     page_icon="🗺️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -101,7 +101,7 @@ def levenshtein_distance(s1, s2):
     return previous_row[-1]
 
 def haversine(lat1, lon1, lat2, lon2):
-    R = 6371.0 # نصف قطر الأرض بالكيلومتر
+    R = 6371.0
     dlat = np.radians(lat2 - lat1)
     dlon = np.radians(lon2 - lon1)
     a = np.sin(dlat / 2)**2 + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2)) * np.sin(dlon / 2)**2
@@ -125,12 +125,12 @@ sample_data = {
 df = pd.DataFrame(sample_data)
 
 # ----------------------------------------------------
-# 4. الواجهة الرئيسية
+# 4. الهيدر ومؤشرات الأداء
 # ----------------------------------------------------
 st.markdown("""
 <div class="hero-header">
     <div class="hero-title">🗺️ AtlasLinguistique</div>
-    <div class="hero-subtitle">المنصة القياسية الرقمية للجغرافيا اللسانية — أطلس إقليم بولمان المتقدم</div>
+    <div class="hero-subtitle">المنصة المرجعية والقياسية للتحليل اللساني الجغرافي — أطلس إقليم بولمان المتقدم</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -138,11 +138,11 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown(f'<div class="kpi-card"><div class="kpi-val">{len(df)}</div><div class="kpi-lbl">الجماعات الترابية</div></div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">Isogloss</div><div class="kpi-lbl">خرائط التمايز الجغرافي</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Isogloss</div><div class="kpi-lbl">الخطوط الفاصلة اللسانية</div></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">Pearson r</div><div class="kpi-lbl">الارتباط الجغرافي اللساني</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Mantel Test</div><div class="kpi-lbl">اختبار الدلالة الإحصائية</div></div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">LaTeX & Report</div><div class="kpi-lbl">تصدير التقرير النهائي</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">PhD Export</div><div class="kpi-lbl">تصدير الملحقات والأكواد</div></div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -167,16 +167,15 @@ if len(selected_features) > 0:
     matrix_sq = squareform(dist_matrix)
     matrix_df = pd.DataFrame(matrix_sq, index=df['Village'], columns=df['Village'])
 
-# حساب مصفوفة المسافات الجغرافية (Km)
 coords_array = df[['Latitude', 'Longitude']].values
 geo_dist_matrix = pdist(coords_array, lambda u, v: haversine(u[0], u[1], v[0], v[1]))
 geo_matrix_sq = squareform(geo_dist_matrix)
 geo_matrix_df = pd.DataFrame(geo_matrix_sq, index=df['Village'], columns=df['Village'])
 
 # ----------------------------------------------------
-# 6. التبويبات الفائقة والجديدة
+# 6. التبويبات الفائقة (9 تبويبات متكاملة)
 # ----------------------------------------------------
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "🗺️ الخريطة والتحليل المرجعي", 
     "📐 الارتباط الجغرافي-اللساني",
     "⚔️ المقارن الثنائي للجماعات",
@@ -184,7 +183,8 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "📍 التحليل ثنائي الأبعاد (MDS)", 
     "🔤 حاسبة المسافة الصوتية (IPA)", 
     "📊 مصفوفات المسافة وتصدير LaTeX", 
-    "📝 التقرير والتحميل الأكاديمي"
+    "📝 التقرير الأكاديمي الشامل",
+    "💻 أكواد الملحق الأكاديمي (R/Python)"
 ])
 
 # TAB 1: الخريطة
@@ -214,9 +214,9 @@ with tab1:
         
     st_folium(m, width="100%", height=480)
 
-# TAB 2: الارتباط الجغرافي اللساني (جديد)
+# TAB 2: الارتباط
 with tab2:
-    st.subheader("📐 تحليل الارتباط بين المسافة الجغرافية (Km) والمسافة اللسانية")
+    st.subheader("📐 تحليل الارتباط واختبار الدلالة الإحصائية بين الجغرافيا واللسانيات")
     
     corr, p_val = pearsonr(geo_dist_matrix, dist_matrix)
     
@@ -229,7 +229,6 @@ with tab2:
     fig, ax = plt.subplots(figsize=(9, 4.5), dpi=300)
     ax.scatter(geo_dist_matrix, dist_matrix, color='#38bdf8', s=120, edgecolors='#0f172a')
     
-    # خط الاتجاه العام
     m_slope, b_intercept = np.polyfit(geo_dist_matrix, dist_matrix, 1)
     ax.plot(geo_dist_matrix, m_slope * geo_dist_matrix + b_intercept, color='#f43f5e', linestyle='--', label=f"Line of best fit (r={corr:.2f})")
     
@@ -240,7 +239,7 @@ with tab2:
     plt.legend()
     st.pyplot(fig)
 
-# TAB 3: المقارن المزدوج
+# TAB 3: المقارن الثنائي
 with tab3:
     st.subheader("⚔️ التحليل المقارن المباشر بين جماعتين ترابيتين")
     col_g1, col_g2 = st.columns(2)
@@ -316,7 +315,7 @@ with tab6:
 
 # TAB 7: LaTeX
 with tab7:
-    st.subheader("📊 مصفوفة المسافات التراكمية وتصدير LaTeX")
+    st.subheader("📊 مصفوفات المسافة وتصدير LaTeX للأطروحة")
     st.write("📊 **مصفوفة المسافات اللسانية:**")
     st.dataframe(matrix_df.style.background_gradient(cmap='Blues'), use_container_width=True)
     
@@ -327,7 +326,7 @@ with tab7:
     st.subheader("📄 كود LaTeX للمصفوفة اللسانية:")
     st.code(matrix_df.to_latex(), language='latex')
 
-# TAB 8: التقرير والتحميل
+# TAB 8: التقرير الأكاديمي
 with tab8:
     st.subheader("📝 التقرير الأكاديمي المكتوب وتصدير الملفات")
     
@@ -336,8 +335,8 @@ with tab8:
     
     report_text = f"""# تقرير القياس اللساني الميداني — إقليم بولمان
     
-**الجماعة المرجعية المختارة:** {anchor_village}
-**معامل الارتباط الجغرافي-اللساني (r):** {corr:.3f} (p-value: {p_val:.4f})
+**الجماعة المرجعية المختارة:** {anchor_village}  
+**معامل الارتباط الجغرافي-اللساني (r):** {corr:.3f} (p-value: {p_val:.4f})  
 **تاريخ التحليل:** 2026
 
 ## 1. نتائج التحليل المرجعي:
@@ -356,3 +355,21 @@ with tab8:
         file_name=f"Linguistic_Report_{anchor_village}.md",
         mime="text/markdown"
     )
+
+# TAB 9: أكواد الملحق الأكاديمي (جديد)
+with tab9:
+    st.subheader("💻 أكواد الملحق الأكاديمي (Reproducibility Code)")
+    st.write("يمكنك إرفاق هذه الأكواد في ملحق الأطروحة لإتاحة إمكانية إعادة إنتاج النتائج بنفس الشفافية العلمية الدولية:")
+    
+    st.subheader("🐍 كود Python للتحليل:")
+    python_code = """import pandas as pd
+from scipy.spatial.distance import pdist, squareform
+from scipy.stats import pearsonr
+
+# تحميل البيانات وحساب مصفوفة المسافات اللسانية
+# Data loading and distance calculation
+features = ['الجهر_الصوتي', 'تضخيم_الراء', 'إمالة_الأليف']
+dist_matrix = pdist(df[features].values, metric='jaccard')
+print(squareform(dist_matrix))
+"""
+    st.code(python_code, language='python')
