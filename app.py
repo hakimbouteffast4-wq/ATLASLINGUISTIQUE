@@ -31,13 +31,13 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة الفاخر والمبهر (Glassmorphism & Responsive UI)
+# 2. تصميم الواجهة المبهر والمتقدم (Ultra-Luxury Glassmorphism & Cyber-Glow)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    /* ضبط الخط والاتجاه العام والحلفية الدرامية الفاخرة */
+    /* ضبط الخط والاتجاه العام والخلفية الدرامية الفاخرة */
     html, body, [class*="css"] {
         font-family: 'Cairo', sans-serif !important;
         direction: rtl;
@@ -45,116 +45,124 @@ st.markdown("""
     }
 
     .stApp {
-        background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #0f172a 100%);
+        background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
         color: #f8fafc;
     }
 
-    /* العناوين الرئيسية المضاءة بنسيج نيوني */
+    /* العنوان الرئيسي المتوهج */
     .main-title {
-        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 900;
-        font-size: 2.6rem;
+        font-size: 2.8rem;
         text-align: center;
-        margin-bottom: 4px;
-        filter: drop-shadow(0px 4px 10px rgba(96, 165, 250, 0.2));
+        margin-bottom: 2px;
+        letter-spacing: -0.5px;
+        filter: drop-shadow(0px 4px 15px rgba(56, 189, 248, 0.3));
     }
     
     .sub-title {
         text-align: center;
         color: #94a3b8;
-        font-size: 1.05rem;
+        font-size: 1.1rem;
         font-weight: 600;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
     }
 
-    /* شبكة بطاقات المؤشرات الزجاجية المبهرة (Glassmorphism Metrics) */
+    /* شبكة بطاقات المؤشرات النيونية الزجاجية (Cyber-Glass Grid) */
     .metric-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 14px;
-        margin-bottom: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 30px;
     }
 
-    .glass-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 18px;
-        padding: 18px 12px;
+    .cyber-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 20px 14px;
         text-align: center;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
     }
 
-    .glass-card:hover {
-        transform: translateY(-6px) scale(1.02);
-        border-color: rgba(96, 165, 250, 0.5);
-        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.25);
-        background: rgba(255, 255, 255, 0.08);
+    .cyber-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, transparent, #38bdf8, #c084fc, transparent);
+        opacity: 0.6;
     }
 
-    /* نضبة الضوء النيونية على البطاقات */
-    .pulse-dot {
-        width: 8px;
-        height: 8px;
+    .cyber-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: rgba(56, 189, 248, 0.4);
+        box-shadow: 0 20px 40px rgba(56, 189, 248, 0.2);
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .pulse-glow {
+        width: 10px;
+        height: 10px;
         background-color: #38bdf8;
         border-radius: 50%;
         display: inline-block;
-        margin-left: 6px;
-        box-shadow: 0 0 10px #38bdf8;
-        animation: pulse 1.8s infinite;
+        margin-left: 8px;
+        box-shadow: 0 0 12px #38bdf8;
+        animation: pulse-ring 2s infinite;
     }
 
-    @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
-        70% { transform: scale(1.2); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+    @keyframes pulse-ring {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
+        70% { transform: scale(1.3); box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
     }
 
-    .glass-card h4 {
+    .cyber-card h4 {
         margin: 0;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: #cbd5e1;
-        font-weight: 600;
+        font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
     }
     
-    .glass-card p {
-        margin: 8px 0 0 0;
-        font-size: 1.35rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+    .cyber-card p {
+        margin: 10px 0 0 0;
+        font-size: 1.45rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
-    /* التبويبات الفاخرة لللمس والتنقل التفاعلي */
+    /* تصميم شريط التبويبات الفاخر جداً */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         overflow-x: auto !important;
         white-space: nowrap !important;
-        padding: 6px 4px 12px 4px;
+        padding: 8px 6px 16px 6px;
         -webkit-overflow-scrolling: touch;
     }
     
     .stTabs [data-baseweb="tab"] {
         flex: 0 0 auto;
-        border-radius: 14px;
-        padding: 10px 20px;
+        border-radius: 16px;
+        padding: 12px 22px;
         font-weight: 700;
-        font-size: 0.9rem;
-        background: rgba(255, 255, 255, 0.04);
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.03);
         color: #94a3b8;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(10px);
         transition: all 0.3s ease;
     }
 
@@ -165,40 +173,41 @@ st.markdown("""
     }
     
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
     }
 
-    /* تحسين شكل الحاويات والجداول */
+    /* تحسين إطار الجداول */
     [data-testid="stDataFrame"] {
-        border-radius: 16px;
+        border-radius: 18px;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
     }
 
+    /* تحسين الأزرار */
     .stButton>button {
-        border-radius: 12px;
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        border-radius: 14px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: white;
         border: none;
         font-weight: 700;
-        padding: 10px 20px;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        transition: all 0.2s ease;
+        padding: 12px 24px;
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+        transition: all 0.25s ease;
     }
 
     .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(59, 130, 246, 0.6);
     }
 
     iframe {
         max-width: 100% !important;
-        border-radius: 16px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        border-radius: 18px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
     }
 
     /* إخفاء الهيدر والتزييل الافتراضي */
@@ -206,27 +215,27 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* 📱 قواعد خاصة بالشاشات الصغرى والمتوسطة (Media Queries) */
+    /* 📱 قواعد شاشات المحمول والتابلت (Media Queries) */
     @media (max-width: 768px) {
         .main-title {
-            font-size: 1.8rem !important;
+            font-size: 2rem !important;
         }
         .sub-title {
-            font-size: 0.85rem !important;
+            font-size: 0.9rem !important;
         }
-        .glass-card p {
-            font-size: 1.15rem !important;
+        .cyber-card p {
+            font-size: 1.25rem !important;
         }
         .stTabs [data-baseweb="tab"] {
-            padding: 8px 14px !important;
-            font-size: 0.82rem !important;
+            padding: 9px 16px !important;
+            font-size: 0.85rem !important;
         }
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. الشريط الجانبي (Sidebar) لاستيراد البيانات الميدانية
+# 3. الشريط الجانبي (Sidebar) لاستيراد البيانات
 # ---------------------------------------------------------
 st.sidebar.title("⚙️ لوحة التحكّم")
 st.sidebar.subheader("📥 استيراد المتن (Excel)")
@@ -242,28 +251,28 @@ if uploaded_file is not None:
         st.sidebar.error(f"خطأ أثناء قراءة الملف: {e}")
 
 # ---------------------------------------------------------
-# 4. الهيدر والمؤشرات الرئيسية (Responsive Glass Grid)
+# 4. الهيدر والمؤشرات الرئيسية
 # ---------------------------------------------------------
-st.markdown("<h1 class='main-title'>🧬 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# بطاقات مؤشرات زجاجية مضاءة بنبضات نيونية
+# بطاقات مؤشرات نيونية فاخرة
 st.markdown("""
     <div class="metric-grid">
-        <div class="glass-card">
-            <h4><span class="pulse-dot"></span> الجماعات الترابية</h4>
+        <div class="cyber-card">
+            <h4><span class="pulse-glow"></span> الجماعات الترابية</h4>
             <p>6 مراكز</p>
         </div>
-        <div class="glass-card">
-            <h4><span class="pulse-dot"></span> أدوات القياس</h4>
+        <div class="cyber-card">
+            <h4><span class="pulse-glow"></span> أدوات القياس</h4>
             <p>Dialectometry</p>
         </div>
-        <div class="glass-card">
-            <h4><span class="pulse-dot"></span> ارتباط مانتل</h4>
+        <div class="cyber-card">
+            <h4><span class="pulse-glow"></span> ارتباط مانتل</h4>
             <p>r = 0.84</p>
         </div>
-        <div class="glass-card">
-            <h4><span class="pulse-dot"></span> الاعتشاش اللساني</h4>
+        <div class="cyber-card">
+            <h4><span class="pulse-glow"></span> الاعتشاش اللساني</h4>
             <p>Entropy H</p>
         </div>
     </div>
@@ -319,9 +328,9 @@ with tabs[0]:
     csv_stab = df_stability.to_csv(index=False).encode('utf-8')
     st.download_button("📥 تحميل جدول الاستقرار (CSV)", csv_stab, "stability_index.csv", "text/csv")
 
-# --- Tab 1: الخريطة التفاعلية ---
+# --- Tab 1: الخريطة المظلمة التفاعلية ---
 with tabs[1]:
-    st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات")
+    st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات (CartoDB Dark Matter)")
     if HAS_FOLIUM:
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="CartoDB dark_matter")
         geojson_path = "boundaries.geojson"
@@ -332,7 +341,7 @@ with tabs[1]:
                 folium.GeoJson(
                     geojson_data,
                     name="حدود إقليم بولمان",
-                    style_function=lambda x: {'fillColor': '#8b5cf6', 'color': '#60a5fa', 'weight': 2, 'fillOpacity': 0.25}
+                    style_function=lambda x: {'fillColor': '#8b5cf6', 'color': '#38bdf8', 'weight': 2, 'fillOpacity': 0.2}
                 ).add_to(m)
             except Exception as e:
                 st.warning(f"تعذر قراءة GeoJSON: {e}")
@@ -345,7 +354,7 @@ with tabs[1]:
                 icon=folium.Icon(color="purple" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
             ).add_to(m)
             
-        st_folium(m, use_container_width=True, height=420)
+        st_folium(m, use_container_width=True, height=450)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
@@ -419,7 +428,7 @@ with tabs[6]:
         entropy_data.append({"الجماعة": c, "النمط": communes_data[c]["dialect"], "مؤشر H": round(ent, 3)})
     st.dataframe(pd.DataFrame(entropy_data), use_container_width=True)
 
-# --- Tab 7: الشجرة اللهجية ---
+# --- Tab 7: الشجرة اللهجية المظلمة ---
 with tabs[7]:
     st.subheader("🌲 الشجرة اللهجية التراتبية (Dendrogram)")
     if HAS_PLOTLY:
@@ -433,7 +442,7 @@ with tabs[7]:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-# --- Tab 8: تحليل MDS ---
+# --- Tab 8: تحليل MDS المظلم ---
 with tabs[8]:
     st.subheader("📉 MDS تحليل التعدد البعدي")
     if HAS_PLOTLY:
