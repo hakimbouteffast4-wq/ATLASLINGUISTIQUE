@@ -31,7 +31,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة المبهر والمتقدم (Ultra-Luxury Glassmorphism & Cyber-Glow)
+# 2. تصميم الواجهة مع إصلاح مشكلة الشريط العمودي للهاتف
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -47,6 +47,22 @@ st.markdown("""
     .stApp {
         background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
         color: #f8fafc;
+        overflow-x: hidden !important;
+    }
+
+    /* 🚨 حل مشكلة الشريط العمودي في القائمة الجانبية 🚨 */
+    [data-testid="stSidebar"] {
+        background: rgba(15, 23, 42, 0.95) !important;
+        backdrop-filter: blur(25px) !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: -10px 0px 30px rgba(0, 0, 0, 0.7) !important;
+    }
+
+    /* إصلاح استجابة الحاويات لمنع التقطيع الرسومي على الهاتف */
+    [data-testid="stAppViewBlockContainer"] {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        max-width: 100% !important;
     }
 
     /* العنوان الرئيسي المتوهج */
@@ -73,8 +89,8 @@ st.markdown("""
     /* شبكة بطاقات المؤشرات النيونية الزجاجية */
     .metric-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px;
         margin-bottom: 30px;
     }
 
@@ -84,7 +100,7 @@ st.markdown("""
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
-        padding: 20px 14px;
+        padding: 16px 10px;
         text-align: center;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
         transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -100,20 +116,13 @@ st.markdown("""
         opacity: 0.6;
     }
 
-    .cyber-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        border-color: rgba(56, 189, 248, 0.4);
-        box-shadow: 0 20px 40px rgba(56, 189, 248, 0.2);
-        background: rgba(255, 255, 255, 0.06);
-    }
-
     .pulse-glow {
         width: 10px;
         height: 10px;
         background-color: #38bdf8;
         border-radius: 50%;
         display: inline-block;
-        margin-left: 8px;
+        margin-left: 6px;
         box-shadow: 0 0 12px #38bdf8;
         animation: pulse-ring 2s infinite;
     }
@@ -126,7 +135,7 @@ st.markdown("""
 
     .cyber-card h4 {
         margin: 0;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         color: #cbd5e1;
         font-weight: 700;
         display: flex;
@@ -135,8 +144,8 @@ st.markdown("""
     }
     
     .cyber-card p {
-        margin: 10px 0 0 0;
-        font-size: 1.45rem;
+        margin: 8px 0 0 0;
+        font-size: 1.3rem;
         font-weight: 900;
         background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
         -webkit-background-clip: text;
@@ -146,19 +155,19 @@ st.markdown("""
     /* تصميم شريط التبويبات الفاخر */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         overflow-x: auto !important;
         white-space: nowrap !important;
-        padding: 8px 6px 16px 6px;
+        padding: 8px 4px 16px 4px;
         -webkit-overflow-scrolling: touch;
     }
     
     .stTabs [data-baseweb="tab"] {
         flex: 0 0 auto;
-        border-radius: 16px;
-        padding: 12px 22px;
+        border-radius: 14px;
+        padding: 10px 18px;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         background: rgba(255, 255, 255, 0.03);
         color: #94a3b8;
         border: 1px solid rgba(255, 255, 255, 0.06);
@@ -166,76 +175,41 @@ st.markdown("""
         transition: all 0.3s ease;
     }
 
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #f1f5f9;
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-    
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
     }
 
-    /* تحسين إطار الجداول */
+    /* تحسين الجداول والأزرار */
     [data-testid="stDataFrame"] {
-        border-radius: 18px;
+        border-radius: 16px;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    /* تحسين الأزرار */
-    .stButton>button {
-        border-radius: 14px;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        border: none;
-        font-weight: 700;
-        padding: 12px 24px;
-        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
-        transition: all 0.25s ease;
-    }
-
-    .stButton>button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 24px rgba(59, 130, 246, 0.6);
     }
 
     iframe {
         max-width: 100% !important;
-        border-radius: 18px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        border-radius: 16px;
     }
 
-    /* إخفاء الهيدر والتزييل الافتراضي */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* شاشات المحمول والتابلت */
+    /* تعديلات تخص الهواتف فقط */
     @media (max-width: 768px) {
-        .main-title {
-            font-size: 2rem !important;
-        }
-        .sub-title {
-            font-size: 0.9rem !important;
-        }
-        .cyber-card p {
-            font-size: 1.25rem !important;
-        }
-        .stTabs [data-baseweb="tab"] {
-            padding: 9px 16px !important;
-            font-size: 0.85rem !important;
-        }
+        .main-title { font-size: 1.8rem !important; }
+        .sub-title { font-size: 0.85rem !important; }
+        .cyber-card p { font-size: 1.1rem !important; }
+        .stTabs [data-baseweb="tab"] { padding: 8px 14px !important; font-size: 0.8rem !important; }
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. الشريط الجانبي (Sidebar) لاستيراد البيانات
+# 3. الشريط الجانبي (Sidebar)
 # ---------------------------------------------------------
 st.sidebar.title("⚙️ لوحة التحكّم")
 st.sidebar.subheader("📥 استيراد المتن (Excel)")
@@ -328,21 +302,18 @@ with tabs[0]:
     csv_stab = df_stability.to_csv(index=False).encode('utf-8')
     st.download_button("📥 تحميل جدول الاستقرار (CSV)", csv_stab, "stability_index.csv", "text/csv")
 
-# --- Tab 1: الخريطة المحدثة بالألوان الحقيقية ---
+# --- Tab 1: الخريطة ---
 with tabs[1]:
     st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات")
     if HAS_FOLIUM:
-        # إنشاء الخريطة بالألوان الجغرافية الحقيقية (OpenStreetMap)
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap", name="الخريطة القياسية")
         
-        # إضافة خريطة الأقمار الصناعية (Esri World Imagery)
         folium.TileLayer(
             tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
             attr='Esri',
             name='أقمار صناعية (Satellite)'
         ).add_to(m)
 
-        # إضافة حدود الإقليم GeoJSON بألوان متناسقة وشفافة
         geojson_path = "boundaries.geojson"
         if os.path.exists(geojson_path):
             try:
@@ -361,7 +332,6 @@ with tabs[1]:
             except Exception as e:
                 st.warning(f"تعذر قراءة GeoJSON: {e}")
 
-        # إضافة النقاط والعلامات بألوان واضحة
         for name, info in communes_data.items():
             folium.Marker(
                 location=[info["lat"], info["lon"]],
@@ -370,10 +340,9 @@ with tabs[1]:
                 icon=folium.Icon(color="red" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
             ).add_to(m)
             
-        # التحكم بالطبقات والتبديل للأقمار الصناعية
         folium.LayerControl(position='topright').add_to(m)
             
-        st_folium(m, use_container_width=True, height=480)
+        st_folium(m, use_container_width=True, height=450)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
