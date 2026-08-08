@@ -31,38 +31,44 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة مع إصلاح مشكلة الشريط العمودي للهاتف
+# 2. تصميم الواجهة الانسيابي المطور (Ultra-Smooth Fluid Design)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    /* ضبط الخط والاتجاه العام والخلفية */
-    html, body, [class*="css"] {
+    /* ضبط الخط وانسيابية الحركة العامة */
+    * {
         font-family: 'Cairo', sans-serif !important;
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body, [class*="css"] {
         direction: rtl;
         text-align: right;
     }
 
     .stApp {
-        background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+        background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
         color: #f8fafc;
         overflow-x: hidden !important;
     }
 
-    /* 🚨 حل مشكلة الشريط العمودي في القائمة الجانبية 🚨 */
-    [data-testid="stSidebar"] {
-        background: rgba(15, 23, 42, 0.95) !important;
-        backdrop-filter: blur(25px) !important;
-        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: -10px 0px 30px rgba(0, 0, 0, 0.7) !important;
+    /* تحسين الحاويات الرئيسية */
+    [data-testid="stAppViewBlockContainer"] {
+        padding: 1rem 1rem 3rem 1rem !important;
+        max-width: 100% !important;
     }
 
-    /* إصلاح استجابة الحاويات لمنع التقطيع الرسومي على الهاتف */
-    [data-testid="stAppViewBlockContainer"] {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        max-width: 100% !important;
+    /* القائمة الجانبية العائمة العصرية (Floating Overlay Sidebar) */
+    [data-testid="stSidebar"] {
+        background: rgba(15, 23, 42, 0.92) !important;
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: -10px 0px 30px rgba(0, 0, 0, 0.6) !important;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     /* العنوان الرئيسي المتوهج */
@@ -71,39 +77,42 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 900;
-        font-size: 2.8rem;
+        font-size: 2.5rem;
         text-align: center;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
         letter-spacing: -0.5px;
-        filter: drop-shadow(0px 4px 15px rgba(56, 189, 248, 0.3));
+        filter: drop-shadow(0px 4px 20px rgba(56, 189, 248, 0.3));
     }
     
     .sub-title {
         text-align: center;
         color: #94a3b8;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
 
-    /* شبكة بطاقات المؤشرات النيونية الزجاجية */
+    /* شبكة بطاقات المؤشرات المرنة الانسيابية */
     .metric-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 14px;
-        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 25px;
     }
 
     .cyber-card {
+        flex: 1 1 calc(25% - 12px);
+        min-width: 140px;
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 20px;
-        padding: 16px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 18px;
+        padding: 14px 10px;
         text-align: center;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-        transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
     }
@@ -113,29 +122,35 @@ st.markdown("""
         position: absolute;
         top: 0; left: 0; right: 0; height: 2px;
         background: linear-gradient(90deg, transparent, #38bdf8, #c084fc, transparent);
-        opacity: 0.6;
+        opacity: 0.5;
+    }
+
+    .cyber-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(56, 189, 248, 0.3);
+        background: rgba(255, 255, 255, 0.06);
     }
 
     .pulse-glow {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         background-color: #38bdf8;
         border-radius: 50%;
         display: inline-block;
         margin-left: 6px;
-        box-shadow: 0 0 12px #38bdf8;
+        box-shadow: 0 0 10px #38bdf8;
         animation: pulse-ring 2s infinite;
     }
 
     @keyframes pulse-ring {
         0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
-        70% { transform: scale(1.3); box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+        70% { transform: scale(1.2); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
     }
 
     .cyber-card h4 {
         margin: 0;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #cbd5e1;
         font-weight: 700;
         display: flex;
@@ -144,49 +159,55 @@ st.markdown("""
     }
     
     .cyber-card p {
-        margin: 8px 0 0 0;
-        font-size: 1.3rem;
+        margin: 6px 0 0 0;
+        font-size: 1.25rem;
         font-weight: 900;
         background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
-    /* تصميم شريط التبويبات الفاخر */
+    /* شريط التبويبات الفائق الانسيابية والمرونة */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         overflow-x: auto !important;
         white-space: nowrap !important;
-        padding: 8px 4px 16px 4px;
+        padding: 6px 2px 14px 2px;
+        scrollbar-width: none; /* إخفاء شريط التمرير المزعج */
         -webkit-overflow-scrolling: touch;
+    }
+
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+        display: none;
     }
     
     .stTabs [data-baseweb="tab"] {
         flex: 0 0 auto;
-        border-radius: 14px;
-        padding: 10px 18px;
+        border-radius: 30px; /* تصميم الحبوب الانسيابي Pills */
+        padding: 8px 18px;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         background: rgba(255, 255, 255, 0.03);
         color: #94a3b8;
         border: 1px solid rgba(255, 255, 255, 0.06);
         backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
+        transition: all 0.25s ease-in-out;
     }
 
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
     }
 
-    /* تحسين الجداول والأزرار */
+    /* تحسين إطارات الجداول والخرائط */
     [data-testid="stDataFrame"] {
         border-radius: 16px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     }
 
     iframe {
@@ -194,16 +215,18 @@ st.markdown("""
         border-radius: 16px;
     }
 
+    /* العناصر غير الضرورية */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* تعديلات تخص الهواتف فقط */
+    /* استجابة سلسة للهواتف المحمولة */
     @media (max-width: 768px) {
         .main-title { font-size: 1.8rem !important; }
-        .sub-title { font-size: 0.85rem !important; }
+        .sub-title { font-size: 0.82rem !important; }
+        .cyber-card { flex: 1 1 calc(50% - 10px); }
         .cyber-card p { font-size: 1.1rem !important; }
-        .stTabs [data-baseweb="tab"] { padding: 8px 14px !important; font-size: 0.8rem !important; }
+        .stTabs [data-baseweb="tab"] { padding: 7px 14px !important; font-size: 0.8rem !important; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -230,7 +253,7 @@ if uploaded_file is not None:
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# بطاقات مؤشرات نيونية
+# بطاقات مؤشرات مرنة وانسيابية
 st.markdown("""
     <div class="metric-grid">
         <div class="cyber-card">
@@ -272,7 +295,7 @@ def geo_distance(c1, c2):
     return math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
 
 # ---------------------------------------------------------
-# 6. شريط التبويبات التفاعلي
+# 6. شريط التبويبات التفاعلي الانسيابي
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", 
