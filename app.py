@@ -31,134 +31,195 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم المظهر المتقدم والمتجاوب كلياً مع الهاتف والتابلت
+# 2. تصميم الواجهة الفاخر والمبهر (Glassmorphism & Responsive UI)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    /* ضبط الخط والاتجاه العام */
+    /* ضبط الخط والاتجاه العام والحلفية الدرامية الفاخرة */
     html, body, [class*="css"] {
         font-family: 'Cairo', sans-serif !important;
         direction: rtl;
         text-align: right;
-        background-color: #f8fafc;
     }
 
-    /* العناوين الرئيسية */
+    .stApp {
+        background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #0f172a 100%);
+        color: #f8fafc;
+    }
+
+    /* العناوين الرئيسية المضاءة بنسيج نيوني */
     .main-title {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 900;
-        font-size: 2.2rem;
+        font-size: 2.6rem;
         text-align: center;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
+        filter: drop-shadow(0px 4px 10px rgba(96, 165, 250, 0.2));
     }
     
     .sub-title {
         text-align: center;
-        color: #475569;
-        font-size: 1rem;
+        color: #94a3b8;
+        font-size: 1.05rem;
         font-weight: 600;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
 
-    /* شبكة بطاقات المؤشرات المتجاوبة للمحمول والتابلت */
+    /* شبكة بطاقات المؤشرات الزجاجية المبهرة (Glassmorphism Metrics) */
     .metric-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 12px;
-        margin-bottom: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px;
+        margin-bottom: 25px;
     }
 
-    .metric-card {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: #ffffff;
-        padding: 16px 10px;
-        border-radius: 14px;
-        box-shadow: 0 6px 12px -2px rgba(30, 58, 138, 0.2);
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 18px 12px;
         text-align: center;
-        transition: transform 0.2s ease;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .metric-card:hover {
-        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
     }
 
-    .metric-card h4 {
+    .glass-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: rgba(96, 165, 250, 0.5);
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.25);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* نضبة الضوء النيونية على البطاقات */
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #38bdf8;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 6px;
+        box-shadow: 0 0 10px #38bdf8;
+        animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+        70% { transform: scale(1.2); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
+
+    .glass-card h4 {
         margin: 0;
         font-size: 0.85rem;
         color: #cbd5e1;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    .metric-card p {
-        margin: 6px 0 0 0;
-        font-size: 1.25rem;
+    .glass-card p {
+        margin: 8px 0 0 0;
+        font-size: 1.35rem;
         font-weight: 800;
+        background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
-    /* شريط التبويبات المخصص لللمس والتمرير السلس */
+    /* التبويبات الفاخرة لللمس والتنقل التفاعلي */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         overflow-x: auto !important;
         white-space: nowrap !important;
-        padding-bottom: 8px;
+        padding: 6px 4px 12px 4px;
         -webkit-overflow-scrolling: touch;
     }
     
     .stTabs [data-baseweb="tab"] {
         flex: 0 0 auto;
-        border-radius: 10px 10px 0px 0px;
-        padding: 8px 16px;
+        border-radius: 14px;
+        padding: 10px 20px;
         font-weight: 700;
         font-size: 0.9rem;
-        background-color: #ffffff;
-        color: #475569;
-        border: 1px solid #e2e8f0;
+        background: rgba(255, 255, 255, 0.04);
+        color: #94a3b8;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #f1f5f9;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
     }
     
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
     }
 
-    /* تحسين إطار الجداول والخرائط والشاشات الصغيرة */
+    /* تحسين شكل الحاويات والجداول */
     [data-testid="stDataFrame"] {
-        border-radius: 12px;
+        border-radius: 16px;
         overflow: hidden;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .stButton>button {
+        border-radius: 12px;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        border: none;
+        font-weight: 700;
+        padding: 10px 20px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
     }
 
     iframe {
         max-width: 100% !important;
-        border-radius: 12px;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
     }
 
-    /* إخفاء الهيدر الافتراضي للتطبيق */
+    /* إخفاء الهيدر والتزييل الافتراضي */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* 📱 قواعد خاصة بشاشات الهاتف والتابلت (Media Queries) */
+    /* 📱 قواعد خاصة بالشاشات الصغرى والمتوسطة (Media Queries) */
     @media (max-width: 768px) {
         .main-title {
-            font-size: 1.6rem !important;
+            font-size: 1.8rem !important;
         }
         .sub-title {
             font-size: 0.85rem !important;
         }
-        .metric-card p {
-            font-size: 1.1rem !important;
+        .glass-card p {
+            font-size: 1.15rem !important;
         }
         .stTabs [data-baseweb="tab"] {
-            padding: 7px 12px !important;
-            font-size: 0.8rem !important;
+            padding: 8px 14px !important;
+            font-size: 0.82rem !important;
         }
     }
     </style>
@@ -181,18 +242,30 @@ if uploaded_file is not None:
         st.sidebar.error(f"خطأ أثناء قراءة الملف: {e}")
 
 # ---------------------------------------------------------
-# 4. الهيدر والمؤشرات الرئيسية (Responsive Grid)
+# 4. الهيدر والمؤشرات الرئيسية (Responsive Glass Grid)
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>🧬 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# بطاقات مؤشرات متجاوبة أوتوماتيكياً مع الهاتف والتابلت والحاسوب
+# بطاقات مؤشرات زجاجية مضاءة بنبضات نيونية
 st.markdown("""
     <div class="metric-grid">
-        <div class="metric-card"><h4>الجماعات الترابية</h4><p>6 مراكز</p></div>
-        <div class="metric-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
-        <div class="metric-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
-        <div class="metric-card"><h4>الاعتشاش اللساني</h4><p>Entropy H</p></div>
+        <div class="glass-card">
+            <h4><span class="pulse-dot"></span> الجماعات الترابية</h4>
+            <p>6 مراكز</p>
+        </div>
+        <div class="glass-card">
+            <h4><span class="pulse-dot"></span> أدوات القياس</h4>
+            <p>Dialectometry</p>
+        </div>
+        <div class="glass-card">
+            <h4><span class="pulse-dot"></span> ارتباط مانتل</h4>
+            <p>r = 0.84</p>
+        </div>
+        <div class="glass-card">
+            <h4><span class="pulse-dot"></span> الاعتشاش اللساني</h4>
+            <p>Entropy H</p>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
@@ -216,7 +289,7 @@ def geo_distance(c1, c2):
     return math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
 
 # ---------------------------------------------------------
-# 6. شريط التبويبات التفاعلي المتجاوب
+# 6. شريط التبويبات التفاعلي الزجاجي
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", 
@@ -250,7 +323,7 @@ with tabs[0]:
 with tabs[1]:
     st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات")
     if HAS_FOLIUM:
-        m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
+        m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="CartoDB dark_matter")
         geojson_path = "boundaries.geojson"
         if os.path.exists(geojson_path):
             try:
@@ -259,7 +332,7 @@ with tabs[1]:
                 folium.GeoJson(
                     geojson_data,
                     name="حدود إقليم بولمان",
-                    style_function=lambda x: {'fillColor': '#3b82f6', 'color': '#1e3a8a', 'weight': 2, 'fillOpacity': 0.15}
+                    style_function=lambda x: {'fillColor': '#8b5cf6', 'color': '#60a5fa', 'weight': 2, 'fillOpacity': 0.25}
                 ).add_to(m)
             except Exception as e:
                 st.warning(f"تعذر قراءة GeoJSON: {e}")
@@ -269,10 +342,10 @@ with tabs[1]:
                 location=[info["lat"], info["lon"]],
                 popup=f"<b>جماعة {name}</b><br>المجموعة: {info['group']}<br>النمط: {info['dialect']}",
                 tooltip=name,
-                icon=folium.Icon(color="red" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
+                icon=folium.Icon(color="purple" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
             ).add_to(m)
             
-        st_folium(m, use_container_width=True, height=400)
+        st_folium(m, use_container_width=True, height=420)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
@@ -352,7 +425,12 @@ with tabs[7]:
     if HAS_PLOTLY:
         X = np.array([[1, 2], [1, 3], [2, 2], [7, 8], [8, 8], [6, 7]])
         fig = ff.create_dendrogram(X, labels=communes_list)
-        fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=10, r=10, t=10, b=10)
+        )
         st.plotly_chart(fig, use_container_width=True)
 
 # --- Tab 8: تحليل MDS ---
@@ -365,8 +443,13 @@ with tabs[8]:
             'الجماعة': communes_list
         })
         fig_mds = px.scatter(df_mds, x='المحور الأول', y='المحور الثاني', text='الجماعة', color='الجماعة')
-        fig_mds.update_traces(textposition='top center', marker=dict(size=12))
-        fig_mds.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+        fig_mds.update_traces(textposition='top center', marker=dict(size=14))
+        fig_mds.update_layout(
+            template="plotly_dark",
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=10, r=10, t=10, b=10)
+        )
         st.plotly_chart(fig_mds, use_container_width=True)
 
 # --- Tab 9: مصفوفات المسافة ---
