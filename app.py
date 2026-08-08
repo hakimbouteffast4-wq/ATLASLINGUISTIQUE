@@ -22,7 +22,7 @@ except ImportError:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة الأساسية (بدون شريط جانبي)
+# 1. إعدادات الصفحة الأساسية
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro - إقليم بولمان",
@@ -32,7 +32,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة المستقبلية والانسيابية (Futuristic Cyber UI)
+# 2. تصميم الواجهة وإصلاح وضوح النصوص والقوائم (Ultra Contrast CSS)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -51,7 +51,7 @@ st.markdown("""
 
     .stApp {
         background: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 75%, #000000 100%);
-        color: #f8fafc;
+        color: #f8fafc !important;
         overflow-x: hidden !important;
     }
 
@@ -64,6 +64,53 @@ st.markdown("""
     [data-testid="stAppViewBlockContainer"] {
         padding: 1.2rem 1.2rem 3rem 1.2rem !important;
         max-width: 100% !important;
+    }
+
+    /* 🚨 إجبار جميع العناوين والنصوص على الظهور باللون الأبيض الناصع 🚨 */
+    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown {
+        color: #f8fafc !important;
+    }
+
+    /* إصلاح عناصر التحكم والقوائم المنسدلة (Selectbox / Inputs) */
+    div[data-baseweb="select"] > div {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        border-radius: 12px !important;
+    }
+
+    div[data-baseweb="select"] span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    div[data-baseweb="popover"] div {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+    }
+
+    /* إصلاح مدخلات النصوص */
+    div[data-baseweb="input"] > div {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        border-radius: 12px !important;
+    }
+
+    input {
+        color: #ffffff !important;
+    }
+
+    /* إصلاح بطاقات المقاييس (st.metric) */
+    [data-testid="stMetricLabel"] p {
+        color: #cbd5e1 !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+    }
+
+    [data-testid="stMetricValue"] div {
+        color: #38bdf8 !important;
+        font-weight: 900 !important;
     }
 
     /* العنوان الرئيسي المضيء */
@@ -80,7 +127,7 @@ st.markdown("""
     
     .sub-title {
         text-align: center;
-        color: #94a3b8;
+        color: #cbd5e1 !important;
         font-size: 0.95rem;
         font-weight: 600;
         margin-bottom: 22px;
@@ -98,10 +145,10 @@ st.markdown("""
     .cyber-card {
         flex: 1 1 calc(20% - 12px);
         min-width: 140px;
-        background: rgba(15, 23, 42, 0.65);
+        background: rgba(30, 41, 59, 0.7) !important;
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 16px;
         padding: 14px 10px;
         text-align: center;
@@ -142,8 +189,8 @@ st.markdown("""
 
     .cyber-card h4 {
         margin: 0;
-        font-size: 0.82rem;
-        color: #cbd5e1;
+        font-size: 0.85rem;
+        color: #f1f5f9 !important;
         font-weight: 700;
     }
     
@@ -151,10 +198,10 @@ st.markdown("""
         margin: 4px 0 0 0;
         font-size: 1.25rem;
         font-weight: 900;
-        color: #38bdf8;
+        color: #38bdf8 !important;
     }
 
-    /* شريط التبويبات الفائق الانسيابية */
+    /* شريط التبويبات الفائق الوضوح */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
         gap: 8px;
@@ -175,9 +222,9 @@ st.markdown("""
         padding: 8px 18px;
         font-weight: 700;
         font-size: 0.88rem;
-        background: rgba(255, 255, 255, 0.03);
-        color: #94a3b8;
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
         transition: all 0.25s ease-in-out;
     }
 
@@ -188,11 +235,15 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
 
+    .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
+        color: #ffffff !important;
+    }
+
     /* تحسين الجداول والأطر */
     [data-testid="stDataFrame"] {
         border-radius: 16px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     iframe {
@@ -319,7 +370,7 @@ with tabs[1]:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
 
-# --- Tab 2: تقنية شبكة العلاقات اللسانية (NEW) ---
+# --- Tab 2: شبكة العلاقات اللسانية ---
 with tabs[2]:
     st.subheader("🕸️ شبكة التفاعل والقرب اللساني بين المراكز (Linguistic Network)")
     if HAS_PLOTLY:
@@ -375,7 +426,7 @@ with tabs[3]:
 with tabs[4]:
     st.subheader("📐 قياس التماثل النسبي (RIV) والتباعد المعجمي (Jaccard)")
     c_a, c_b = st.columns(2)
-    comm_1 = c_a.selectbox("الجماعة A:", communes_list, index=0)
+    comm_1 = c_a.selectbox("الجماعة A:", communes_list, index=2)
     comm_2 = c_b.selectbox("الجماعة B:", communes_list, index=1)
     
     is_same = communes_data[comm_1]["group"] == communes_data[comm_2]["group"]
@@ -385,10 +436,10 @@ with tabs[4]:
     jaccard_dist = round(1.0 - (riv_score / 100.0), 3)
     
     col_r1, col_r2 = st.columns(2)
-    col_r1.metric(label=f"التماثل النسبـي (RIV)", value=f"{riv_score:.1f} %")
-    col_r2.metric(label=f"تباعد جاكارد (Jaccard)", value=f"{jaccard_dist}")
+    col_r1.metric(label="التماثل النسبـي (RIV)", value=f"{riv_score:.1f} %")
+    col_r2.metric(label="تباعد جاكارد (Jaccard)", value=f"{jaccard_dist}")
 
-# --- Tab 5: محاكي التحول الفونولوجي (NEW) ---
+# --- Tab 5: محاكي التحول الفونولوجي ---
 with tabs[5]:
     st.subheader("⚡ محاكي قواعد الانتقال والتحول الصوتي (Sound Shift Simulator)")
     col_s1, col_s2 = st.columns(2)
@@ -405,7 +456,7 @@ with tabs[5]:
         
     st.success(f"النتيجة بعد تطبيق التحول الصوتي: **{transformed}**")
 
-# --- Tab 6: الملف الراداري (NEW) ---
+# --- Tab 6: الملف الراداري ---
 with tabs[6]:
     st.subheader("🎯 مقارنة البصمة اللسانية بالشكل الراداري (Radar Profile)")
     if HAS_PLOTLY:
