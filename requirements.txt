@@ -1,11 +1,10 @@
 streamlit
 pandas
 numpy
+folium
+streamlit-folium
 matplotlib
 scipy
 scikit-learn
-arabic-reshaper
+arabic_reshaper
 python-bidi
-folium
-streamlit-folium
-openpyxl
