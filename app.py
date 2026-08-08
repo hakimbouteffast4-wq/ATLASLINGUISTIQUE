@@ -32,13 +32,13 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. إجبار الوضع النهاري الشامل (Full Light Mode CSS Override)
+# 2. إجبار الوضع النهاري المتقدم والكامل (Comprehensive Light Theme CSS)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    /* إعادة تعيين المتغيرات الأساسية لستريمليت */
+    /* متغيرات النظام الموحّدة للوضع النهاري */
     :root {
         --background-color: #f8fafc !important;
         --secondary-background-color: #ffffff !important;
@@ -64,23 +64,61 @@ st.markdown("""
         overflow-x: hidden !important;
     }
 
-    /* إخفاء القائمة الجانبية والعناصر الشريطية */
+    /* إخفاء القائمة الجانبية وعناصر التحكم الإضافية */
     [data-testid="stSidebar"], [data-testid="collapsedControl"], #MainMenu, footer, header {
         display: none !important;
     }
 
-    /* تحسين الحاوية الرئيسية */
     [data-testid="stAppViewBlockContainer"] {
         padding: 1rem 1rem 3rem 1rem !important;
         max-width: 100% !important;
     }
 
-    /* إصلاح ألوان النصوص والرموز بشكل عام */
-    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown, small, div {
+    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown, small {
         color: #0f172a !important;
     }
 
-    /* --- إصلاح مربع رفع الملفات (File Uploader) --- */
+    /* =========================================================
+       إصلاح القوائم المنسدلة (Selectbox Dropdowns) بالكامل
+       ========================================================= */
+    /* مربع القائمة نفسه */
+    div[data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.03) !important;
+    }
+
+    div[data-baseweb="select"] span {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+    }
+
+    /* القائمة المنسدلة المنبثقة (Dropdown Menu Box) */
+    div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* خيارات القائمة المنسدلة (Dropdown Items) */
+    li[role="option"], div[data-baseweb="option"] {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        font-weight: 600 !important;
+    }
+
+    /* تأثير الحوام والتحشية الخيار المحدد داخل القائمة */
+    li[role="option"]:hover, li[aria-selected="true"], div[data-baseweb="option"]:hover {
+        background-color: #f1f5f9 !important;
+        color: #0284c7 !important;
+    }
+
+    /* =========================================================
+       إصلاح مربع رفع الملفات (File Uploader)
+       ========================================================= */
     section[data-testid="stFileUploaderDropzone"] {
         background-color: #ffffff !important;
         border: 2px dashed #0284c7 !important;
@@ -100,7 +138,9 @@ st.markdown("""
         border-radius: 10px !important;
     }
 
-    /* --- إصلاح الجداول (DataFrames & Tables) --- */
+    /* =========================================================
+       إصلاح الجداول (DataFrames)
+       ========================================================= */
     [data-testid="stDataFrame"], .stDataFrame, div[data-testid="stTable"] {
         background-color: #ffffff !important;
         border-radius: 16px !important;
@@ -109,42 +149,14 @@ st.markdown("""
         overflow: hidden !important;
     }
 
-    /* إجبار خلايا وعناوين الجدول على اللون الفاتح */
     [data-testid="stDataFrame"] * {
         background-color: #ffffff !important;
         color: #0f172a !important;
     }
 
-    /* --- عناصر التحكم والقوائم المنسدلة --- */
-    div[data-baseweb="select"] > div {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-    }
-
-    div[data-baseweb="select"] span {
-        color: #0f172a !important;
-        font-weight: 700 !important;
-    }
-
-    div[data-baseweb="popover"] div {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-    }
-
-    div[data-baseweb="input"] > div {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-    }
-
-    input {
-        color: #0f172a !important;
-    }
-
-    /* --- العنوان والتبيينات --- */
+    /* =========================================================
+       العناوين والبطاقات
+       ========================================================= */
     .main-title {
         background: linear-gradient(135deg, #0284c7 0%, #4338ca 50%, #6d28d9 100%);
         -webkit-background-clip: text;
@@ -163,7 +175,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* شبكة بطاقات المؤشرات */
     .metric-grid {
         display: flex;
         flex-wrap: wrap;
@@ -216,7 +227,7 @@ st.markdown("""
         color: #0284c7 !important;
     }
 
-    /* --- شريط التبويبات (Tabs Bar) --- */
+    /* شريط التبويبات */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
         gap: 8px;
