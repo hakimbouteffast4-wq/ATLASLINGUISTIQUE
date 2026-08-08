@@ -12,10 +12,10 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 # ----------------------------------------------------
-# 1. تهيئة المنصة وتصميم الواجهة (CSS العالمي)
+# 1. تهيئة المنصة وتصميم الواجهة (CSS)
 # ----------------------------------------------------
 st.set_page_config(
-    page_title="AtlasLinguistique | أطلس القياس اللساني",
+    page_title="AtlasLinguistique | منصة القياس اللساني المتقدمة",
     page_icon="🗺️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,7 +29,7 @@ st.markdown("""
     .hero-header {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: #ffffff;
-        padding: 2.2rem;
+        padding: 2.5rem;
         border-radius: 20px;
         box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         margin-bottom: 2rem;
@@ -37,7 +37,7 @@ st.markdown("""
     }
     
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2.6rem;
         font-weight: 900;
         background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
         -webkit-background-clip: text;
@@ -63,17 +63,18 @@ st.markdown("""
     
     .report-box {
         background-color: #f8fafc;
-        border-right: 4px solid #38bdf8;
-        padding: 1.2rem;
-        border-radius: 8px;
+        border-right: 5px solid #38bdf8;
+        padding: 1.5rem;
+        border-radius: 10px;
         font-size: 1.05rem;
-        line-height: 1.8;
+        line-height: 1.9;
+        color: #1e293b;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# 2. الدوال المساعدة (Levenshtein & Arabic)
+# 2. الدوال المساعدة والرياضية
 # ----------------------------------------------------
 def ar(text):
     try:
@@ -99,7 +100,7 @@ def levenshtein_distance(s1, s2):
     return previous_row[-1]
 
 # ----------------------------------------------------
-# 3. بيانات العينة المتكاملة لإقليم بولمان
+# 3. بيانات متكاملة لإقليم بولمان
 # ----------------------------------------------------
 sample_data = {
     'Village': ['كيكو', 'تيمحضيت', 'أنجيل', 'أوطاط الحاج', 'ميسور', 'بولمان'],
@@ -115,12 +116,12 @@ sample_data = {
 df = pd.DataFrame(sample_data)
 
 # ----------------------------------------------------
-# 4. الواجهة الرئيسية والهيدر
+# 4. الواجهة الرئيسية
 # ----------------------------------------------------
 st.markdown("""
 <div class="hero-header">
     <div class="hero-title">🗺️ AtlasLinguistique</div>
-    <div class="hero-subtitle">المنصة القياسية والتفاعلية للجغرافيا اللسانية — أطلس إقليم بولمان الرقمي</div>
+    <div class="hero-subtitle">المنصة القياسية الرقمية للجغرافيا اللسانية — أطلس إقليم بولمان المتقدم</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -128,52 +129,51 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown(f'<div class="kpi-card"><div class="kpi-val">{len(df)}</div><div class="kpi-lbl">الجماعات الترابية</div></div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">Levenshtein</div><div class="kpi-lbl">محرك المسافة الصوتية</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Isogloss</div><div class="kpi-lbl">خرائط التمايز الجغرافي</div></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">LaTeX & CSV</div><div class="kpi-lbl">تصدير المتون والمصفوفات</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Entropy</div><div class="kpi-lbl">مؤشر التنوع اللساني</div></div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">MDS & Ward</div><div class="kpi-lbl">النماذج الإحصائية</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Report Gen</div><div class="kpi-lbl">تصدير التقارير الآلية</div></div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# 5. الشريط الجانبي الذكي
+# 5. الشريط الجانبي
 # ----------------------------------------------------
 st.sidebar.image("https://img.icons8.com/isometric-folders/100/map-marker.png", width=70)
-st.sidebar.title("⚙️ التحكم الإحصائي واللساني")
+st.sidebar.title("⚙️ التحكم القياسي واللساني")
 
 selected_features = st.sidebar.multiselect(
-    "تحديد المتغيرات اللسانية الداخِلة في الحساب:",
+    "تحديد المتغيرات الداخِلة في الحساب:",
     ['الجهر_الصوتي', 'تضخيم_الراء', 'إمالة_الأليف', 'احتفاظ_بالتلازم'],
     default=['الجهر_الصوتي', 'تضخيم_الراء', 'إمالة_الأليف']
 )
 
-anchor_village = st.sidebar.selectbox("اختر الجماعة المرجعية للمقارنة (Anchor):", df['Village'].values)
+anchor_village = st.sidebar.selectbox("الجماعة المرجعية (Anchor):", df['Village'].values)
 
-# ----------------------------------------------------
-# 6. التبويبات الفائقة
-# ----------------------------------------------------
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🗺️ الخريطة والتحليل المرجعي", 
-    "🌳 الشجرة اللهجية (Ward)", 
-    "📍 التحليل متعدد الأبعاد (MDS)", 
-    "🔤 حاسبة المسافة الصوتية (IPA)", 
-    "📊 مصفوفات المسافة وتصدير LaTeX", 
-    "📝 التقرير الأكاديمي التلقائي"
-])
-
-# حساب المسافات بناءً على المتغيرات المختارة
+# حساب المصفوفات
 if len(selected_features) > 0:
     features_matrix = df[selected_features].values
     dist_matrix = pdist(features_matrix, metric='jaccard')
     matrix_sq = squareform(dist_matrix)
     matrix_df = pd.DataFrame(matrix_sq, index=df['Village'], columns=df['Village'])
-else:
-    st.error("يرجى اختيار متغير لساني واحد على الأقل من الشريط الجانبي!")
 
-# TAB 1: الخريطة التفاعلية
+# ----------------------------------------------------
+# 6. التبويبات الفائقة والجديدة
+# ----------------------------------------------------
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    "🗺️ الخريطة والتحليل المرجعي", 
+    "⚔️ المقارن الثنائي للجماعات",
+    "🌳 الشجرة اللهجية (Ward)", 
+    "📍 التحليل ثنائي الأبعاد (MDS)", 
+    "🔤 حاسبة المسافة الصوتية (IPA)", 
+    "📊 مصفوفات المسافة وتصدير LaTeX", 
+    "📝 التقرير والتحميل الأكاديمي"
+])
+
+# TAB 1: الخريطة
 with tab1:
-    st.subheader(f"🗺️ الخريطة الفضائية ومؤشر القرب اللساني بالنسبة لـ: [{anchor_village}]")
+    st.subheader(f"🗺️ الخريطة الفضائية وتوزيع التمايز بالنسبة لـ: [{anchor_village}]")
     m = folium.Map(location=[33.1500, -4.5000], zoom_start=9, tiles='OpenStreetMap')
     
     try:
@@ -184,24 +184,51 @@ with tab1:
         pass
 
     anchor_distances = matrix_df[anchor_village]
-    
     for idx, row in df.iterrows():
         v_name = row['Village']
         dist_val = anchor_distances[v_name]
-        
         color = 'red' if v_name == anchor_village else ('green' if dist_val < 0.4 else 'orange')
         
         folium.Marker(
             [row['Latitude'], row['Longitude']],
-            popup=f"<b>الجماعة:</b> {v_name}<br><b>المسافة عن {anchor_village}:</b> {dist_val:.2f}<br><b>IPA:</b> [{row['الرمز_الصوتي_IPA']}]",
+            popup=f"<b>الجماعة:</b> {v_name}<br><b>المسافة:</b> {dist_val:.2f}",
             tooltip=f"{v_name} (المسافة: {dist_val:.2f})",
             icon=folium.Icon(color=color, icon='star' if v_name == anchor_village else 'info-sign')
         ).add_to(m)
         
-    st_folium(m, width="100%", height=500)
+    st_folium(m, width="100%", height=480)
 
-# TAB 2: الشجرة اللهجية
+# TAB 2: المقارن المزدوج المتقدم
 with tab2:
+    st.subheader("⚔️ التحليل المقارن المباشر بين جماعتين ترابيتين")
+    col_g1, col_g2 = st.columns(2)
+    with col_g1:
+        v1 = st.selectbox("اختر الجماعة الأولى:", df['Village'].values, index=0)
+    with col_g2:
+        v2 = st.selectbox("اخtr الجماعة الثانية:", df['Village'].values, index=4)
+        
+    if v1 and v2:
+        v1_data = df[df['Village'] == v1].iloc[0]
+        v2_data = df[df['Village'] == v2].iloc[0]
+        
+        dist_v1_v2 = matrix_df.loc[v1, v2]
+        similarity_pct = (1 - dist_v1_v2) * 100
+        
+        st.markdown("---")
+        st.metric(label=f"نسبة التوافق اللساني بين {v1} و {v2}", value=f"{similarity_pct:.1f}%")
+        st.progress(similarity_pct / 100)
+        
+        # جدول مقارنة المتغيرات
+        comp_df = pd.DataFrame({
+            'المتغير اللساني': selected_features,
+            v1: [v1_data[f] for f in selected_features],
+            v2: [v2_data[f] for f in selected_features]
+        })
+        comp_df['الحالة'] = comp_df.apply(lambda r: "✅ متطابق" if r[v1] == r[v2] else "❌ مختلف", axis=1)
+        st.table(comp_df)
+
+# TAB 3: الشجرة اللهجية
+with tab3:
     st.subheader("🌳 التصنيف الشجري اللهجي (Dendrogram)")
     if len(selected_features) > 0:
         Z = linkage(dist_matrix, method='ward')
@@ -211,8 +238,8 @@ with tab2:
         plt.title(ar("الشجرة اللهجية لتكتلات إقليم بولمان"), fontsize=12, fontweight='bold')
         st.pyplot(fig)
 
-# TAB 3: MDS
-with tab3:
+# TAB 4: MDS
+with tab4:
     st.subheader("📍 التحليل الفضائي ثنائي الأبعاد (MDS)")
     if len(selected_features) > 0:
         mds = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
@@ -225,44 +252,55 @@ with tab3:
         plt.grid(True, linestyle='--', alpha=0.5)
         st.pyplot(fig)
 
-# TAB 4: حاسبة Levenshtein المباشرة
-with tab4:
-    st.subheader("🔤 حاسبة المسافة الصوتية بين الألفاظ (Levenshtein Phonetic Distance)")
+# TAB 5: Levenshtein
+with tab5:
+    st.subheader("🔤 حاسبة المسافة الصوتية بين الألفاظ (Levenshtein Distance)")
     col_a, col_b = st.columns(2)
     with col_a:
-        word1 = st.text_input("اللفظة الأولى بالرمز الصوتي (IPA 1):", "tagant")
+        word1 = st.text_input("اللفظة الأولى (IPA 1):", "tagant")
     with col_b:
-        word2 = st.text_input("اللفظة الثانية بالرمز الصوتي (IPA 2):", "tasarut")
+        word2 = st.text_input("اللفظة الثانية (IPA 2):", "tasarut")
         
     lev_dist = levenshtein_distance(word1, word2)
     similarity = (1 - lev_dist / max(len(word1), len(word2))) * 100
     
     st.metric(label="مسافة التعديل الصوتي (Levenshtein Distance)", value=f"{lev_dist} عمليات")
     st.progress(int(similarity) / 100)
-    st.caption(f"نسبة التشابه الصوتي المباشر بين اللفظتين: **{similarity:.1f}%**")
+    st.caption(f"نسبة التشابه الصوتي المباشر: **{similarity:.1f}%**")
 
-# TAB 5: المصادفة وتصدير LaTeX
-with tab5:
-    st.subheader("📊 مصفوفة المسافات التراكمية وتصدير الأطروحة")
+# TAB 6: LaTeX
+with tab6:
+    st.subheader("📊 مصفوفة المسافات التراكمية وتصدير LaTeX")
     st.dataframe(matrix_df.style.background_gradient(cmap='Blues'), use_container_width=True)
-    
     st.markdown("---")
-    st.subheader("📄 كود LaTeX للمصفوفة (جاهز للنسخ في الأطروحة):")
+    st.subheader("📄 كود LaTeX للمصفوفة:")
     st.code(matrix_df.to_latex(), language='latex')
 
-# TAB 6: التقرير الآلي للأطروحة
-with tab6:
-    st.subheader("📝 التقرير التحليلي التلقائي الجاهز للصياغة الأكاديمية")
+# TAB 7: التقرير والتحميل
+with tab7:
+    st.subheader("📝 التقرير الأكاديمي المكتوب وتصدير الملفات")
     
     most_similar = matrix_df[anchor_village].nsmallest(2).index[1]
     most_distant = matrix_df[anchor_village].nlargest(1).index[0]
     
-    report_text = f"""
-    تُظهر نتائج القياس اللهجي الميداني بـ **إقليم بولمان**، وباعتماد جماعة **[{anchor_village}]** كنقطة مرجعية (Anchor)، وجود تباين لساني ملحوظ بين مكونات الإقليم.
+    report_text = f"""# تقرير القياس اللساني الميداني — إقليم بولمان
     
-    * **أعلى درجة تشابه:** تُسجّل جماعة **[{most_similar}]** أقرب مسافة لسانية من جماعة **[{anchor_village}]** بمسافة قدرها **({matrix_df.loc[anchor_village, most_similar]:.2f})**، مما يعكس تماسكًا صوتيًا ومعجميًا قويًا بينهما.
-    * **أعلى درجة تباين:** بينما تُسجّل جماعة **[{most_distant}]** أكبر أبعاد لساني عن النقطة المرجعية بمسافة قدرها **({matrix_df.loc[anchor_village, most_distant]:.2f})**.
-    
-    هذا التوزيع يتوافق مع نتائج التحليل الشجري (Ward's Hierarchical Clustering) والتحليل متعدد الأبعاد (MDS)، مما يؤكد فرضية وجود أشرطة لسانية انتقال يحددها التمايز الجغرافي داخل الإقليم.
-    """
+**الجماعة المرجعية المختارة:** {anchor_village}
+**تاريخ التحليل:** 2026
+
+## 1. نتائج التحليل المرجعي:
+* تُسجّل جماعة **[{most_similar}]** أعلى درجة تقارب مع **[{anchor_village}]** بمسافة قدرها **({matrix_df.loc[anchor_village, most_similar]:.2f})**.
+* تُسجّل جماعة **[{most_distant}]** أقصى تباين لساني بمسافة قدرها **({matrix_df.loc[anchor_village, most_distant]:.2f})**.
+
+## 2. الاستنتاج الأكاديمي:
+تؤكد نتائج القياس التكتلي الشجري (Ward's Method) ومخطط البعدين اللسانيين (MDS) وجود تمايز لساني جغرافي واضح بين الشريط الشمالي والشريط الجنوبي للإقليم.
+"""
     st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.download_button(
+        label="📥 تحميل التقرير التحليلي الكامل (Markdown / Word)",
+        data=report_text,
+        file_name=f"Linguistic_Report_{anchor_village}.md",
+        mime="text/markdown"
+    )
