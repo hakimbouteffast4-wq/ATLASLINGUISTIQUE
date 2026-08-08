@@ -32,13 +32,12 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. إجبار الوضع النهاري المتقدم والكامل (Comprehensive Light Theme CSS)
+# 2. إجبار الوضع النهاري المتقدم وتصحيح نصوص الجداول
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    /* متغيرات النظام الموحّدة للوضع النهاري */
     :root {
         --background-color: #f8fafc !important;
         --secondary-background-color: #ffffff !important;
@@ -64,7 +63,7 @@ st.markdown("""
         overflow-x: hidden !important;
     }
 
-    /* إخفاء القائمة الجانبية وعناصر التحكم الإضافية */
+    /* إخفاء العناصر الجانبية والهيدر */
     [data-testid="stSidebar"], [data-testid="collapsedControl"], #MainMenu, footer, header {
         display: none !important;
     }
@@ -79,15 +78,41 @@ st.markdown("""
     }
 
     /* =========================================================
-       إصلاح القوائم المنسدلة (Selectbox Dropdowns) بالكامل
+       إصلاح الجداول (DataFrames & Tables) وإظهار النصوص
        ========================================================= */
-    /* مربع القائمة نفسه */
+    div[data-testid="stDataFrame"], div[data-testid="stTable"] {
+        background-color: #ffffff !important;
+        border-radius: 12px !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+        padding: 4px;
+    }
+
+    /* ألوان خلايا جدول HTML */
+    table {
+        color: #0f172a !important;
+        background-color: #ffffff !important;
+    }
+
+    th {
+        background-color: #f1f5f9 !important;
+        color: #0284c7 !important;
+        font-weight: 800 !important;
+    }
+
+    td {
+        color: #0f172a !important;
+        background-color: #ffffff !important;
+    }
+
+    /* =========================================================
+       إصلاح القوائم المنسدلة (Selectbox)
+       ========================================================= */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
         color: #0f172a !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.03) !important;
     }
 
     div[data-baseweb="select"] span {
@@ -95,24 +120,20 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* القائمة المنسدلة المنبثقة (Dropdown Menu Box) */
     div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* خيارات القائمة المنسدلة (Dropdown Items) */
     li[role="option"], div[data-baseweb="option"] {
         background-color: #ffffff !important;
         color: #0f172a !important;
         font-weight: 600 !important;
     }
 
-    /* تأثير الحوام والتحشية الخيار المحدد داخل القائمة */
-    li[role="option"]:hover, li[aria-selected="true"], div[data-baseweb="option"]:hover {
-        background-color: #f1f5f9 !important;
+    li[role="option"]:hover, li[aria-selected="true"] {
+        background-color: #e2e8f0 !important;
         color: #0284c7 !important;
     }
 
@@ -123,34 +144,9 @@ st.markdown("""
         background-color: #ffffff !important;
         border: 2px dashed #0284c7 !important;
         border-radius: 16px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
     }
 
     section[data-testid="stFileUploaderDropzone"] * {
-        color: #0f172a !important;
-        background-color: transparent !important;
-    }
-
-    section[data-testid="stFileUploaderDropzone"] button {
-        background-color: #e2e8f0 !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 10px !important;
-    }
-
-    /* =========================================================
-       إصلاح الجداول (DataFrames)
-       ========================================================= */
-    [data-testid="stDataFrame"], .stDataFrame, div[data-testid="stTable"] {
-        background-color: #ffffff !important;
-        border-radius: 16px !important;
-        border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
-        overflow: hidden !important;
-    }
-
-    [data-testid="stDataFrame"] * {
-        background-color: #ffffff !important;
         color: #0f172a !important;
     }
 
@@ -251,14 +247,12 @@ st.markdown("""
         background: #ffffff !important;
         color: #334155 !important;
         border: 1px solid #cbd5e1 !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }
 
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #0284c7 0%, #4338ca 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
     }
 
     .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
@@ -503,6 +497,8 @@ with tabs[7]:
             probs = [0.5, 0.5] if communes_data[c]["dialect"] == "أمازيغية/عربية" else [0.85, 0.15]
             ent = -sum(p * math.log2(p) for p in probs if p > 0)
             entropy_data.append({"الجماعة": c, "مؤشر H": round(ent, 3)})
+        
+        # استخدام st.dataframe مع ضمان الوضوح التام
         st.dataframe(pd.DataFrame(entropy_data), use_container_width=True)
 
 # --- Tab 8: الشجرة و MDS ---
