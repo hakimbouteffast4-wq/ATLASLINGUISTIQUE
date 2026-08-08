@@ -9,7 +9,10 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import linkage, dendrogram
 from scipy.stats import pearsonr
 from sklearn.manifold import MDS
+
+# مكتبات تصحيح اللغة العربية في Matplotlib
 import arabic_reshaper
+from bidi.algorithm import get_display
 
 # ----------------------------------------------------
 # 1. تهيئة المنصة والتصميم (CSS)
@@ -74,12 +77,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# 2. تصحيح معالجة اللغة العربية للرسوم البيانية
+# 2. الدوال المساعدة ومعالجة النص العربي للرسومات
 # ----------------------------------------------------
 def ar(text):
-    """تشبيك الحروف العربية لتعرض بشكل صحيح ومستقيم في Matplotlib"""
+    """إعادة تشكيل وعكس الاتجاه للنصوص العربية لترسم بشكل صحيح في Matplotlib"""
+    if not text:
+        return ""
     try:
-        return arabic_reshaper.reshape(str(text))
+        reshaped = arabic_reshaper.reshape(str(text))
+        return get_display(reshaped)
     except:
         return str(text)
 
@@ -129,7 +135,7 @@ df = pd.DataFrame(sample_data)
 st.markdown("""
 <div class="hero-header">
     <div class="hero-title">🗺️ AtlasLinguistique Pro</div>
-    <div class="hero-subtitle">المنصة الذكية المتقدمة للقياس اللساني والتحليل الجغرافي الآلي</div>
+    <div class="hero-subtitle">المنصة الذكية المتقدمة للقياس اللساني والتحليل الجغرافي - إقليم بولمان</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -187,18 +193,49 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "💻 أكواد الملحق الأكاديمي (R/Python)"
 ])
 
-# TAB 1: الخريطة
+# TAB 1: الخريطة المقتصرة على إقليم بولمان
 with tab1:
-    st.subheader(f"🗺️ الخريطة الفضائية وتوزيع التمايز بالنسبة لـ: [{anchor_village}]")
-    m = folium.Map(location=[33.1500, -4.5000], zoom_start=9, tiles='OpenStreetMap')
+    st.subheader(f"🗺️ خريطة إقليم بولمان وتوزيع التمايز بالنسبة لـ: [{anchor_village}]")
     
+    # خريطة ممركزة على بولمان
+    m = folium.Map(location=[33.1500, -4.4000], zoom_start=9, tiles='OpenStreetMap')
+    
+    # تصفية GeoJSON لإقليم بولمان فقط
     try:
         with open("boundaries.geojson", "r", encoding="utf-8") as f:
             geojson_data = json.load(f)
-            folium.GeoJson(geojson_data, style_function=lambda x: {'fillColor': '#38bdf8', 'color': '#0f172a', 'weight': 1, 'fillOpacity': 0.1}).add_to(m)
-    except:
+            
+        boulemane_features = []
+        target_villages = set(df['Village'].unique())
+        
+        for feature in geojson_data.get('features', []):
+            props = feature.get('properties', {})
+            prov_name = str(props.get('province') or props.get('PROVINCE') or props.get('nom_province') or props.get('NAME_2') or props.get('Nom_Provin') or '')
+            commune_name = str(props.get('nom_commune') or props.get('NAME_3') or props.get('name') or props.get('Commune') or '')
+            
+            # فلترة إقليم بولمان أو الجماعات التابعة له في الجدول
+            if 'boulemane' in prov_name.lower() or 'بولمان' in prov_name or commune_name in target_villages:
+                boulemane_features.append(feature)
+        
+        if boulemane_features:
+            boulemane_geojson = {"type": "FeatureCollection", "features": boulemane_features}
+            folium.GeoJson(
+                boulemane_geojson,
+                style_function=lambda x: {
+                    'fillColor': '#38bdf8',
+                    'color': '#1e293b',
+                    'weight': 2,
+                    'fillOpacity': 0.25
+                },
+                tooltip=folium.GeoJsonTooltip(
+                    fields=[col for col in ['nom_commune', 'NAME_3', 'name', 'Commune'] if col in boulemane_features[0]['properties']],
+                    aliases=['الجماعة:']
+                )
+            ).add_to(m)
+    except Exception as e:
         pass
 
+    # إضافة الدبابيس للجماعات الميدانية
     anchor_distances = matrix_df[anchor_village]
     for idx, row in df.iterrows():
         v_name = row['Village']
@@ -207,12 +244,12 @@ with tab1:
         
         folium.Marker(
             [row['Latitude'], row['Longitude']],
-            popup=f"<b>الجماعة:</b> {v_name}<br><b>المسافة:</b> {dist_val:.2f}",
+            popup=f"<b>الجماعة:</b> {v_name}<br><b>المسافة اللسانية:</b> {dist_val:.2f}",
             tooltip=f"{v_name} (المسافة: {dist_val:.2f})",
             icon=folium.Icon(color=color, icon='star' if v_name == anchor_village else 'info-sign')
         ).add_to(m)
         
-    st_folium(m, width="100%", height=480)
+    st_folium(m, width="100%", height=500)
 
 # TAB 2: الذكاء الاصطناعي
 with tab2:
