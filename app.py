@@ -32,177 +32,201 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة وإصلاح وضوح النصوص والقوائم (Ultra Contrast CSS)
+# 2. إدارة الوضع (الليل / النهار) عبر Session State
 # ---------------------------------------------------------
-st.markdown("""
+if "theme_mode" not in st.session_state:
+    st.session_state["theme_mode"] = "dark"
+
+# زر التبديل أعلى الصفحة
+col_theme1, col_theme2 = st.columns([8, 2])
+with col_theme2:
+    if st.session_state["theme_mode"] == "dark":
+        if st.button("☀️ الوضع النهاري", use_container_width=True):
+            st.session_state["theme_mode"] = "light"
+            st.rerun()
+    else:
+        if st.button("🌙 الوضع الليلة", use_container_width=True):
+            st.session_state["theme_mode"] = "dark"
+            st.rerun()
+
+is_dark = st.session_state["theme_mode"] == "dark"
+
+# ---------------------------------------------------------
+# 3. إعدادات الثيم والتنسيقات الديناميكية (Dynamic CSS)
+# ---------------------------------------------------------
+bg_gradient = "radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 75%, #000000 100%)" if is_dark else "#f8fafc"
+text_color = "#f8fafc" if is_dark else "#0f172a"
+sub_text_color = "#cbd5e1" if is_dark else "#475569"
+card_bg = "rgba(30, 41, 59, 0.7)" if is_dark else "#ffffff"
+card_border = "rgba(255, 255, 255, 0.15)" if is_dark else "rgba(0, 0, 0, 0.1)"
+input_bg = "#1e293b" if is_dark else "#ffffff"
+input_text = "#ffffff" if is_dark else "#0f172a"
+tab_bg = "rgba(255, 255, 255, 0.08)" if is_dark else "#e2e8f0"
+tab_text = "#cbd5e1" if is_dark else "#334155"
+plotly_template = "plotly_dark" if is_dark else "plotly_white"
+
+st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    * {
+    * {{
         font-family: 'Cairo', sans-serif !important;
         scroll-behavior: smooth;
         -webkit-tap-highlight-color: transparent;
-    }
+    }}
 
-    html, body, [class*="css"] {
+    html, body, [class*="css"] {{
         direction: rtl;
         text-align: right;
-    }
+    }}
 
-    .stApp {
-        background: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 75%, #000000 100%);
-        color: #f8fafc !important;
+    .stApp {{
+        background: {bg_gradient};
+        color: {text_color} !important;
         overflow-x: hidden !important;
-    }
+    }}
 
     /* إخفاء القائمة الجانبية تماماً */
-    [data-testid="stSidebar"], [data-testid="collapsedControl"] {
+    [data-testid="stSidebar"], [data-testid="collapsedControl"] {{
         display: none !important;
-    }
+    }}
 
     /* تحسين الحاوية الرئيسية */
-    [data-testid="stAppViewBlockContainer"] {
+    [data-testid="stAppViewBlockContainer"] {{
         padding: 1.2rem 1.2rem 3rem 1.2rem !important;
         max-width: 100% !important;
-    }
+    }}
 
-    /* 🚨 إجبار جميع العناوين والنصوص على الظهور باللون الأبيض الناصع 🚨 */
-    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown {
-        color: #f8fafc !important;
-    }
+    /* ألوان النصوص */
+    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown {{
+        color: {text_color} !important;
+    }}
 
-    /* إصلاح عناصر التحكم والقوائم المنسدلة (Selectbox / Inputs) */
-    div[data-baseweb="select"] > div {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    /* عناصر التحكم والقوائم المنسدلة */
+    div[data-baseweb="select"] > div {{
+        background-color: {input_bg} !important;
+        color: {input_text} !important;
+        border: 1px solid {card_border} !important;
         border-radius: 12px !important;
-    }
+    }}
 
-    div[data-baseweb="select"] span {
-        color: #ffffff !important;
+    div[data-baseweb="select"] span {{
+        color: {input_text} !important;
         font-weight: 700 !important;
-    }
+    }}
 
-    div[data-baseweb="popover"] div {
-        background-color: #0f172a !important;
-        color: #ffffff !important;
-    }
+    div[data-baseweb="popover"] div {{
+        background-color: {input_bg} !important;
+        color: {input_text} !important;
+    }}
 
-    /* إصلاح مدخلات النصوص */
-    div[data-baseweb="input"] > div {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    div[data-baseweb="input"] > div {{
+        background-color: {input_bg} !important;
+        color: {input_text} !important;
+        border: 1px solid {card_border} !important;
         border-radius: 12px !important;
-    }
+    }}
 
-    input {
-        color: #ffffff !important;
-    }
+    input {{
+        color: {input_text} !important;
+    }}
 
-    /* إصلاح بطاقات المقاييس (st.metric) */
-    [data-testid="stMetricLabel"] p {
-        color: #cbd5e1 !important;
+    /* بطاقات المقاييس */
+    [data-testid="stMetricLabel"] p {{
+        color: {sub_text_color} !important;
         font-size: 1rem !important;
         font-weight: 700 !important;
-    }
+    }}
 
-    [data-testid="stMetricValue"] div {
-        color: #38bdf8 !important;
+    [data-testid="stMetricValue"] div {{
+        color: #0284c7 !important;
         font-weight: 900 !important;
-    }
+    }}
 
-    /* العنوان الرئيسي المضيء */
-    .main-title {
-        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+    /* العنوان الرئيسي */
+    .main-title {{
+        background: linear-gradient(135deg, #0284c7 0%, #6366f1 50%, #a855f7 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 900;
         font-size: 2.6rem;
         text-align: center;
         margin-bottom: 2px;
-        filter: drop-shadow(0px 4px 20px rgba(56, 189, 248, 0.4));
-    }
+        filter: drop-shadow(0px 4px 20px rgba(2, 132, 199, 0.3));
+    }}
     
-    .sub-title {
+    .sub-title {{
         text-align: center;
-        color: #cbd5e1 !important;
+        color: {sub_text_color} !important;
         font-size: 0.95rem;
         font-weight: 600;
         margin-bottom: 22px;
-    }
+    }}
 
-    /* شبكة بطاقات المؤشرات النيونية */
-    .metric-grid {
+    /* شبكة بطاقات المؤشرات */
+    .metric-grid {{
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
         justify-content: center;
         margin-bottom: 25px;
-    }
+    }}
 
-    .cyber-card {
+    .cyber-card {{
         flex: 1 1 calc(20% - 12px);
         min-width: 140px;
-        background: rgba(30, 41, 59, 0.7) !important;
+        background: {card_bg} !important;
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        border: 1px solid {card_border};
         border-radius: 16px;
         padding: 14px 10px;
         text-align: center;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.08);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-    }
+    }}
 
-    .cyber-card::before {
+    .cyber-card::before {{
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; height: 2px;
-        background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, transparent);
-    }
+        background: linear-gradient(90deg, transparent, #0284c7, #6366f1, transparent);
+    }}
 
-    .cyber-card:hover {
-        transform: translateY(-4px) scale(1.01);
-        border-color: rgba(56, 189, 248, 0.4);
-        box-shadow: 0 12px 20px rgba(56, 189, 248, 0.15);
-    }
-
-    .pulse-glow {
+    .pulse-glow {{
         width: 8px;
         height: 8px;
-        background-color: #38bdf8;
+        background-color: #0284c7;
         border-radius: 50%;
         display: inline-block;
         margin-left: 6px;
-        box-shadow: 0 0 10px #38bdf8;
+        box-shadow: 0 0 10px #0284c7;
         animation: pulse-ring 2s infinite;
-    }
+    }}
 
-    @keyframes pulse-ring {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
-        70% { transform: scale(1.2); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
-    }
+    @keyframes pulse-ring {{
+        0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.8); }}
+        70% {{ transform: scale(1.2); box-shadow: 0 0 0 8px rgba(2, 132, 199, 0); }}
+        100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }}
+    }}
 
-    .cyber-card h4 {
+    .cyber-card h4 {{
         margin: 0;
         font-size: 0.85rem;
-        color: #f1f5f9 !important;
+        color: {text_color} !important;
         font-weight: 700;
-    }
+    }}
     
-    .cyber-card p {
+    .cyber-card p {{
         margin: 4px 0 0 0;
         font-size: 1.25rem;
         font-weight: 900;
-        color: #38bdf8 !important;
-    }
+        color: #0284c7 !important;
+    }}
 
-    /* شريط التبويبات الفائق الوضوح */
-    .stTabs [data-baseweb="tab-list"] {
+    /* شريط التبويبات */
+    .stTabs [data-baseweb="tab-list"] {{
         display: flex;
         gap: 8px;
         overflow-x: auto !important;
@@ -210,61 +234,60 @@ st.markdown("""
         padding: 6px 2px 14px 2px;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
-    }
+    }}
 
-    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{
         display: none;
-    }
+    }}
     
-    .stTabs [data-baseweb="tab"] {
+    .stTabs [data-baseweb="tab"] {{
         flex: 0 0 auto;
         border-radius: 30px;
         padding: 8px 18px;
         font-weight: 700;
         font-size: 0.88rem;
-        background: rgba(255, 255, 255, 0.08) !important;
-        color: #cbd5e1 !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        background: {tab_bg} !important;
+        color: {tab_text} !important;
+        border: 1px solid {card_border} !important;
         transition: all 0.25s ease-in-out;
-    }
+    }}
 
-    .stTabs [aria-selected="true"] {
+    .stTabs [aria-selected="true"] {{
         background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%) !important;
         color: #ffffff !important;
         border: none !important;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-    }
+    }}
 
-    .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
+    .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {{
         color: #ffffff !important;
-    }
+    }}
 
-    /* تحسين الجداول والأطر */
-    [data-testid="stDataFrame"] {
+    [data-testid="stDataFrame"] {{
         border-radius: 16px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-    }
+        border: 1px solid {card_border};
+    }}
 
-    iframe {
+    iframe {{
         max-width: 100% !important;
         border-radius: 16px;
-    }
+    }}
 
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
 
-    @media (max-width: 768px) {
-        .main-title { font-size: 1.8rem !important; }
-        .cyber-card { flex: 1 1 calc(50% - 10px); }
-        .stTabs [data-baseweb="tab"] { padding: 6px 14px !important; font-size: 0.8rem !important; }
-    }
+    @media (max-width: 768px) {{
+        .main-title {{ font-size: 1.8rem !important; }}
+        .cyber-card {{ flex: 1 1 calc(50% - 10px); }}
+        .stTabs [data-baseweb="tab"] {{ padding: 6px 14px !important; font-size: 0.8rem !important; }}
+    }}
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. الهيدر والمؤشرات التفاعلية
+# 4. الهيدر والمؤشرات
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
@@ -295,7 +318,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. البيانات الإقليمية
+# 5. البيانات الإقليمية
 # ---------------------------------------------------------
 communes_data = {
     "بولمان": {"lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط", "phon": 8, "lex": 7, "morph": 6},
@@ -314,7 +337,7 @@ def geo_distance(c1, c2):
     return math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
 
 # ---------------------------------------------------------
-# 5. التبويبات المتقدمة
+# 6. التبويبات المتقدمة
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", 
@@ -353,8 +376,8 @@ with tabs[0]:
 with tabs[1]:
     st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات")
     if HAS_FOLIUM:
-        m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
-        folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='أقمار صناعية').add_to(m)
+        tiles_theme = "CartoDB dark_matter" if is_dark else "OpenStreetMap"
+        m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles=tiles_theme)
 
         for name, info in communes_data.items():
             folium.Marker(
@@ -382,7 +405,7 @@ with tabs[2]:
                     edge_x.extend([p1["lon"], p2["lon"], None])
                     edge_y.extend([p1["lat"], p2["lat"], None])
 
-        edge_trace = go.Scatter(x=edge_x, y=edge_y, line=dict(width=1.2, color='#38bdf8'), hoverinfo='none', mode='lines')
+        edge_trace = go.Scatter(x=edge_x, y=edge_y, line=dict(width=1.2, color='#0284c7'), hoverinfo='none', mode='lines')
         
         node_x = [v["lon"] for v in communes_data.values()]
         node_y = [v["lat"] for v in communes_data.values()]
@@ -390,12 +413,12 @@ with tabs[2]:
         
         node_trace = go.Scatter(
             x=node_x, y=node_y, mode='markers+text', text=node_text, textposition="top center",
-            marker=dict(size=18, color='#818cf8', line=dict(width=2, color='#ffffff'))
+            marker=dict(size=18, color='#6366f1', line=dict(width=2, color='#ffffff'))
         )
 
         fig_net = go.Figure(data=[edge_trace, node_trace])
         fig_net.update_layout(
-            template="plotly_dark", showlegend=False,
+            template=plotly_template, showlegend=False,
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             margin=dict(l=10, r=10, t=10, b=10)
         )
@@ -472,7 +495,7 @@ with tabs[6]:
             
         fig_radar.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
-            template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            template=plotly_template, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             margin=dict(l=10, r=10, t=20, b=10)
         )
         st.plotly_chart(fig_radar, use_container_width=True)
@@ -497,7 +520,7 @@ with tabs[8]:
     if HAS_PLOTLY:
         X = np.array([[1, 2], [1, 3], [2, 2], [7, 8], [8, 8], [6, 7]])
         fig_tree = ff.create_dendrogram(X, labels=communes_list)
-        fig_tree.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+        fig_tree.update_layout(template=plotly_template, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig_tree, use_container_width=True)
 
 # --- Tab 9: المصفوفات ---
