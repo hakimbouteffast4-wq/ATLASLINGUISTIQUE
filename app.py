@@ -37,7 +37,7 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    /* ضبط الخط والاتجاه العام والخلفية الدرامية الفاخرة */
+    /* ضبط الخط والاتجاه العام والخلفية */
     html, body, [class*="css"] {
         font-family: 'Cairo', sans-serif !important;
         direction: rtl;
@@ -70,7 +70,7 @@ st.markdown("""
         margin-bottom: 30px;
     }
 
-    /* شبكة بطاقات المؤشرات النيونية الزجاجية (Cyber-Glass Grid) */
+    /* شبكة بطاقات المؤشرات النيونية الزجاجية */
     .metric-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -143,7 +143,7 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
     }
 
-    /* تصميم شريط التبويبات الفاخر جداً */
+    /* تصميم شريط التبويبات الفاخر */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
         gap: 12px;
@@ -215,7 +215,7 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* 📱 قواعد شاشات المحمول والتابلت (Media Queries) */
+    /* شاشات المحمول والتابلت */
     @media (max-width: 768px) {
         .main-title {
             font-size: 2rem !important;
@@ -256,7 +256,7 @@ if uploaded_file is not None:
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# بطاقات مؤشرات نيونية فاخرة
+# بطاقات مؤشرات نيونية
 st.markdown("""
     <div class="metric-grid">
         <div class="cyber-card">
@@ -298,7 +298,7 @@ def geo_distance(c1, c2):
     return math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
 
 # ---------------------------------------------------------
-# 6. شريط التبويبات التفاعلي الزجاجي
+# 6. شريط التبويبات التفاعلي
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", 
@@ -328,11 +328,21 @@ with tabs[0]:
     csv_stab = df_stability.to_csv(index=False).encode('utf-8')
     st.download_button("📥 تحميل جدول الاستقرار (CSV)", csv_stab, "stability_index.csv", "text/csv")
 
-# --- Tab 1: الخريطة المظلمة التفاعلية ---
+# --- Tab 1: الخريطة المحدثة بالألوان الحقيقية ---
 with tabs[1]:
-    st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات (CartoDB Dark Matter)")
+    st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات")
     if HAS_FOLIUM:
-        m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="CartoDB dark_matter")
+        # إنشاء الخريطة بالألوان الجغرافية الحقيقية (OpenStreetMap)
+        m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap", name="الخريطة القياسية")
+        
+        # إضافة خريطة الأقمار الصناعية (Esri World Imagery)
+        folium.TileLayer(
+            tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            attr='Esri',
+            name='أقمار صناعية (Satellite)'
+        ).add_to(m)
+
+        # إضافة حدود الإقليم GeoJSON بألوان متناسقة وشفافة
         geojson_path = "boundaries.geojson"
         if os.path.exists(geojson_path):
             try:
@@ -341,20 +351,29 @@ with tabs[1]:
                 folium.GeoJson(
                     geojson_data,
                     name="حدود إقليم بولمان",
-                    style_function=lambda x: {'fillColor': '#8b5cf6', 'color': '#38bdf8', 'weight': 2, 'fillOpacity': 0.2}
+                    style_function=lambda x: {
+                        'fillColor': '#2563eb', 
+                        'color': '#1e3a8a', 
+                        'weight': 2.5, 
+                        'fillOpacity': 0.15
+                    }
                 ).add_to(m)
             except Exception as e:
                 st.warning(f"تعذر قراءة GeoJSON: {e}")
 
+        # إضافة النقاط والعلامات بألوان واضحة
         for name, info in communes_data.items():
             folium.Marker(
                 location=[info["lat"], info["lon"]],
                 popup=f"<b>جماعة {name}</b><br>المجموعة: {info['group']}<br>النمط: {info['dialect']}",
                 tooltip=name,
-                icon=folium.Icon(color="purple" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
+                icon=folium.Icon(color="red" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
             ).add_to(m)
             
-        st_folium(m, use_container_width=True, height=450)
+        # التحكم بالطبقات والتبديل للأقمار الصناعية
+        folium.LayerControl(position='topright').add_to(m)
+            
+        st_folium(m, use_container_width=True, height=480)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
@@ -428,7 +447,7 @@ with tabs[6]:
         entropy_data.append({"الجماعة": c, "النمط": communes_data[c]["dialect"], "مؤشر H": round(ent, 3)})
     st.dataframe(pd.DataFrame(entropy_data), use_container_width=True)
 
-# --- Tab 7: الشجرة اللهجية المظلمة ---
+# --- Tab 7: الشجرة اللهجية ---
 with tabs[7]:
     st.subheader("🌲 الشجرة اللهجية التراتبية (Dendrogram)")
     if HAS_PLOTLY:
@@ -442,7 +461,7 @@ with tabs[7]:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-# --- Tab 8: تحليل MDS المظلم ---
+# --- Tab 8: تحليل MDS ---
 with tabs[8]:
     st.subheader("📉 MDS تحليل التعدد البعدي")
     if HAS_PLOTLY:
