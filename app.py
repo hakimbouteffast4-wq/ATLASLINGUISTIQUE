@@ -29,7 +29,23 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. الهيدر والمؤشرات العامة (Pro Dashboard Header)
+# 2. الشريط الجانبي (Sidebar) لاستيراد ملفات Excel
+# ---------------------------------------------------------
+st.sidebar.title("⚙️ إدارة البيانات الميدانية")
+st.sidebar.subheader("📥 استيراد المتن اللساني")
+
+uploaded_file = st.sidebar.file_uploader("قم برفع ملف Excel (.xlsx)", type=["xlsx", "xls"])
+
+corpus_df = None
+if uploaded_file is not None:
+    try:
+        corpus_df = pd.read_excel(uploaded_file)
+        st.sidebar.success("تم استيراد ملف Excel بنجاح! 🚀")
+    except Exception as e:
+        st.sidebar.error(f"خطأ أثناء قراءة الملف: {e}")
+
+# ---------------------------------------------------------
+# 3. الهيدر والمؤشرات العامة (Dashboard Header)
 # ---------------------------------------------------------
 st.markdown("## 📘 AtlasLinguistique Pro")
 st.caption("المنصة الذكية المتقدمة للقياس اللساني والتحليل اللهجي - إقليم بولمان")
@@ -47,7 +63,7 @@ with col4:
 st.divider()
 
 # ---------------------------------------------------------
-# 3. قواعد البيانات الجغرافية واللسانية للجماعات
+# 4. قواعد البيانات الجغرافية واللسانية للجماعات
 # ---------------------------------------------------------
 communes_data = {
     "بولمان": {"lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط"},
@@ -59,7 +75,7 @@ communes_data = {
 }
 
 # ---------------------------------------------------------
-# 4. شريط التبويبات الرئيسي (10 تبويبات)
+# 5. شريط التبويبات الرئيسي (10 تبويبات)
 # ---------------------------------------------------------
 tabs = st.tabs([
     "الرئيسية", 
@@ -88,11 +104,10 @@ with tabs[0]:
     ])
     st.table(df_stability)
     
-    # زر تصدير البيانات للبحث العلمي
     csv_stab = df_stability.to_csv(index=False).encode('utf-8')
     st.download_button("📥 تحميل جدول الاستقرار (CSV) للبحث", csv_stab, "stability_index.csv", "text/csv")
 
-# --- Tab 1: الخريطة التفاعلية (مع ربط ملف boundaries.geojson) ---
+# --- Tab 1: الخريطة التفاعلية ---
 with tabs[1]:
     st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات والحدود")
     st.write("إسقاط مكاني للمراكز والحدود الجغرافية الرسمية لإقليم بولمان:")
@@ -100,7 +115,6 @@ with tabs[1]:
     if HAS_FOLIUM:
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
         
-        # تحميل رسم الحدود من ملف boundaries.geojson إن وجد
         geojson_path = "boundaries.geojson"
         if os.path.exists(geojson_path):
             try:
@@ -109,17 +123,11 @@ with tabs[1]:
                 folium.GeoJson(
                     geojson_data,
                     name="حدود إقليم بولمان",
-                    style_function=lambda x: {
-                        'fillColor': '#3186cc',
-                        'color': '#000080',
-                        'weight': 2,
-                        'fillOpacity': 0.15
-                    }
+                    style_function=lambda x: {'fillColor': '#3186cc', 'color': '#000080', 'weight': 2, 'fillOpacity': 0.15}
                 ).add_to(m)
             except Exception as e:
                 st.warning(f"تعذر قراءة GeoJSON: {e}")
 
-        # إضافة النقاط والمراكز
         for name, info in communes_data.items():
             folium.Marker(
                 location=[info["lat"], info["lon"]],
@@ -133,22 +141,32 @@ with tabs[1]:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
 
-# --- Tab 2: المعجم اللساني ---
+# --- Tab 2: المعجم اللساني (مع دعم Excel المستورد) ---
 with tabs[2]:
     st.subheader("📖 المعجم اللساني المقارن")
-    search_word = st.text_input("🔍 ابحث في المدونة المعجمية (عربي / أمازيغي):", "")
     
-    dict_data = pd.DataFrame([
-        {"الكلمة": "أغروم", "المعنى": "خبز", "التصنيف": "أمازيغي مشترك", "الجماعات": "كيكو، إموزار مرموشة، بولمان"},
-        {"الكلمة": "أمان", "المعنى": "ماء", "التصنيف": "أمازيغي مشترك", "الجماعات": "جميع جماعات الإقليم"},
-        {"الكلمة": "الدشرا", "المعنى": "القرية", "التصنيف": "عربي دارج", "الجماعات": "ميسور، أوطاط الحاج"},
-        {"الكلمة": "تليلت", "المعنى": "العين / النبع", "التصنيف": "أمازيغي محلي", "الجماعات": "سرغينة، كيكو"}
-    ])
-    
-    if search_word:
-        dict_data = dict_data[dict_data['الكلمة'].str.contains(search_word) | dict_data['المعنى'].str.contains(search_word)]
-    
-    st.dataframe(dict_data, use_container_width=True)
+    if corpus_df is not None:
+        st.success("📊 يتم حالياً عرض المتن اللساني المستورد من ملف Excel:")
+        search_word = st.text_input("🔍 ابحث داخل ملف Excel المرفوع:", "")
+        if search_word:
+            filtered_df = corpus_df[corpus_df.astype(str).apply(lambda x: x.str.contains(search_word, case=False)).any(axis=1)]
+            st.dataframe(filtered_df, use_container_width=True)
+        else:
+            st.dataframe(corpus_df, use_container_width=True)
+    else:
+        st.info("💡 يمكنك رفع ملف Excel من الشريط الجانبي لعرض مدونتك الخاصة. إليك العينة الافتراضية:")
+        search_word = st.text_input("🔍 ابحث في المدونة المعجمية (عربي / أمازيغي):", "")
+        
+        dict_data = pd.DataFrame([
+            {"الكلمة": "أغروم", "المعنى": "خبز", "التصنيف": "أمازيغي مشترك", "الجماعات": "كيكو، إموزار مرموشة، بولمان"},
+            {"الكلمة": "أمان", "المعنى": "ماء", "التصنيف": "أمازيغي مشترك", "الجماعات": "جميع جماعات الإقليم"},
+            {"الكلمة": "الدشرا", "المعنى": "القرية", "التصنيف": "عربي دارج", "الجماعات": "ميسور، أوطاط الحاج"},
+            {"الكلمة": "تليلت", "المعنى": "العين / النبع", "التصنيف": "أمازيغي محلي", "الجماعات": "سرغينة، كيكو"}
+        ])
+        
+        if search_word:
+            dict_data = dict_data[dict_data['الكلمة'].str.contains(search_word) | dict_data['المعنى'].str.contains(search_word)]
+        st.dataframe(dict_data, use_container_width=True)
 
 # --- Tab 3: التحليل الصوتي ---
 with tabs[3]:
@@ -242,5 +260,5 @@ with tabs[9]:
     - **منهجية البحث:** اعتُمد الاستبيان اللساني الميداني المباشر.
     - **عدد الإخباريين:** 36 إخبارياً (6 لكل جماعة ترابية).
     - **النطاق الجغرافي:** إقليم بولمان (جهة فاس-مكناس).
-    - **الأدوات البرمجية:** Python, Streamlit, Folium, GeoJSON Boundaries.
+    - **الأدوات البرمجية:** Python, Streamlit, Folium, Excel Import Engine.
     """)
