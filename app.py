@@ -15,13 +15,13 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 # ----------------------------------------------------
-# 1. تهيئة المنصة والتصميم (CSS)
+# 1. تهيئة المنصة والتصميم التجاوبي للجوال والتابلت (Responsive CSS)
 # ----------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique | المنصة القياسية الفائقة للقياس اللساني",
     page_icon="🗺️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 st.markdown("""
@@ -29,49 +29,86 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap');
     * { font-family: 'Cairo', sans-serif !important; }
     
+    /* الهيدر الرئيس للمستعرضات الكبيرة */
     .hero-header {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: #ffffff;
-        padding: 2.5rem;
-        border-radius: 20px;
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        margin-bottom: 2rem;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        margin-bottom: 1.5rem;
         border-bottom: 4px solid #38bdf8;
     }
     
     .hero-title {
-        font-size: 2.6rem;
+        font-size: 2.2rem;
         font-weight: 900;
         background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.3rem;
     }
     
+    .hero-subtitle {
+        font-size: 1rem;
+        color: #94a3b8;
+    }
+    
+    /* بطاقات المؤشرات KPI */
     .kpi-card {
         background: #ffffff;
-        padding: 1.2rem;
-        border-radius: 14px;
+        padding: 1rem;
+        border-radius: 12px;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         text-align: center;
-        transition: all 0.3s ease;
+        margin-bottom: 0.5rem;
     }
-    .kpi-card:hover {
-        transform: translateY(-4px);
-        border-color: #38bdf8;
-    }
-    .kpi-val { font-size: 1.8rem; font-weight: 800; color: #0f172a; }
-    .kpi-lbl { font-size: 0.85rem; color: #64748b; font-weight: 600; }
+    .kpi-val { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+    .kpi-lbl { font-size: 0.8rem; color: #64748b; font-weight: 600; }
     
     .ai-box {
         background-color: #f0fdf4;
         border-right: 5px solid #22c55e;
-        padding: 1.5rem;
+        padding: 1.2rem;
         border-radius: 10px;
-        font-size: 1.05rem;
-        line-height: 1.9;
+        font-size: 0.95rem;
+        line-height: 1.8;
         color: #14532d;
+    }
+
+    /* 📱 استجابة التنسيق للهواتف والأجهزة اللوحية (Mobile & Tablet Optimization) */
+    @media (max-width: 768px) {
+        .hero-header {
+            padding: 1.2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .hero-title {
+            font-size: 1.5rem;
+        }
+        .hero-subtitle {
+            font-size: 0.85rem;
+        }
+        .kpi-card {
+            padding: 0.8rem;
+        }
+        .kpi-val {
+            font-size: 1.2rem;
+        }
+        .kpi-lbl {
+            font-size: 0.75rem;
+        }
+        /* تحسين التبويبات لتلائم سحب الأصبع على الهاتف */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 4px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -135,7 +172,7 @@ df = pd.DataFrame(sample_data)
 st.markdown("""
 <div class="hero-header">
     <div class="hero-title">🗺️ AtlasLinguistique Pro</div>
-    <div class="hero-subtitle">المنصة الذكية المتقدمة للقياس اللساني والتحليل الجغرافي - إقليم بولمان</div>
+    <div class="hero-subtitle">المنصة الذكية المتقدمة للقياس اللساني - إقليم بولمان</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -145,16 +182,16 @@ with col1:
 with col2:
     st.markdown('<div class="kpi-card"><div class="kpi-val">AI Engine</div><div class="kpi-lbl">مفسر الذكاء الاصطناعي</div></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">Auto-KMeans</div><div class="kpi-lbl">التجميع اللهجي التلقائي</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Auto-KMeans</div><div class="kpi-lbl">التجميع التلقائي</div></div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">Stability</div><div class="kpi-lbl">مؤشر استقرار الظواهر</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Stability</div><div class="kpi-lbl">استقرار الظواهر</div></div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ----------------------------------------------------
 # 5. الشريط الجانبي
 # ----------------------------------------------------
-st.sidebar.image("https://img.icons8.com/isometric-folders/100/map-marker.png", width=70)
+st.sidebar.image("https://img.icons8.com/isometric-folders/100/map-marker.png", width=60)
 st.sidebar.title("⚙️ التحكم القياسي واللساني")
 
 selected_features = st.sidebar.multiselect(
@@ -178,29 +215,27 @@ geo_matrix_sq = squareform(geo_dist_matrix)
 geo_matrix_df = pd.DataFrame(geo_matrix_sq, index=df['Village'], columns=df['Village'])
 
 # ----------------------------------------------------
-# 6. التبويبات الفائقة
+# 6. التبويبات الفائقة التجاوب
 # ----------------------------------------------------
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
-    "🗺️ الخريطة والتحليل المرجعي", 
-    "🤖 المفسر الآلي (AI Engine)",
-    "📊 استقرار الظواهر اللسانية",
-    "📐 الارتباط الجغرافي-اللساني",
-    "⚔️ المقارن الثنائي للجماعات",
-    "🌳 الشجرة اللهجية (Ward)", 
-    "📍 التحليل ثنائي الأبعاد (MDS)", 
-    "🔤 حاسبة المسافة الصوتية (IPA)", 
-    "📊 مصفوفات المسافة وتصدير LaTeX", 
-    "💻 أكواد الملحق الأكاديمي (R/Python)"
+    "🗺️ الخريطة", 
+    "🤖 المفسر الآلي",
+    "📊 استقرار الظواهر",
+    "📐 الارتباط",
+    "⚔️ المقارن الثنائي",
+    "🌳 الشجرة اللهجية", 
+    "📍 تحليل MDS", 
+    "🔤 مسافة IPA", 
+    "📊 مصفوفات LaTeX", 
+    "💻 أكواد الملحق"
 ])
 
 # TAB 1: الخريطة المقتصرة على إقليم بولمان
 with tab1:
     st.subheader(f"🗺️ خريطة إقليم بولمان وتوزيع التمايز بالنسبة لـ: [{anchor_village}]")
     
-    # خريطة ممركزة على بولمان
-    m = folium.Map(location=[33.1500, -4.4000], zoom_start=9, tiles='OpenStreetMap')
+    m = folium.Map(location=[33.1500, -4.4000], zoom_start=8, tiles='OpenStreetMap')
     
-    # تصفية GeoJSON لإقليم بولمان فقط
     try:
         with open("boundaries.geojson", "r", encoding="utf-8") as f:
             geojson_data = json.load(f)
@@ -213,7 +248,6 @@ with tab1:
             prov_name = str(props.get('province') or props.get('PROVINCE') or props.get('nom_province') or props.get('NAME_2') or props.get('Nom_Provin') or '')
             commune_name = str(props.get('nom_commune') or props.get('NAME_3') or props.get('name') or props.get('Commune') or '')
             
-            # فلترة إقليم بولمان أو الجماعات التابعة له في الجدول
             if 'boulemane' in prov_name.lower() or 'بولمان' in prov_name or commune_name in target_villages:
                 boulemane_features.append(feature)
         
@@ -235,7 +269,6 @@ with tab1:
     except Exception as e:
         pass
 
-    # إضافة الدبابيس للجماعات الميدانية
     anchor_distances = matrix_df[anchor_village]
     for idx, row in df.iterrows():
         v_name = row['Village']
@@ -249,11 +282,11 @@ with tab1:
             icon=folium.Icon(color=color, icon='star' if v_name == anchor_village else 'info-sign')
         ).add_to(m)
         
-    st_folium(m, width="100%", height=500)
+    st_folium(m, use_container_width=True, height=400)
 
 # TAB 2: الذكاء الاصطناعي
 with tab2:
-    st.subheader("🤖 المفسر اللساني الذكي (Automated Dialectological Analyst)")
+    st.subheader("🤖 المفسر اللساني الذكي")
     
     most_sim = matrix_df[anchor_village].nsmallest(2).index[1]
     most_dist = matrix_df[anchor_village].nlargest(1).index[0]
@@ -263,13 +296,13 @@ with tab2:
     ai_analysis = f"""### 💡 القراءة التفسيرية الآلية للنتائج (جماعة {anchor_village}):
 
 1. **الامتداد واللهجة الأم:**
-   تُظهر نتائج الخوارزمية القياسية أن جماعة **[{most_sim}]** هي الأقرب لسانيًا لـ **[{anchor_village}]** بنسبة توافق تصل إلى **{sim_score:.1f}%**.
+   تُظهر نتائج الخوارزمية أن جماعة **[{most_sim}]** هي الأقرب لسانيًا لـ **[{anchor_village}]** بنسبة توافق **{sim_score:.1f}%**.
 
-2. **عوامل التباين والجدران اللسانية:**
+2. **عوامل التباين:**
    تسجل جماعة **[{most_dist}]** أعلى مسافة تباين بـ **({dist_score:.2f})**.
 
-3. **التوصية الميدانية للباحث:**
-   يُنصح بالتركيز على الشريط الانتقالي بين **{anchor_village}** و **{most_dist}** لجمع المزيد من العينات الميدانية.
+3. **التوصية الميدانية:**
+   يُنصح بالتركيز على الشريط الانتقالي بين **{anchor_village}** و **{most_dist}**.
 """
     st.markdown(f'<div class="ai-box">{ai_analysis}</div>', unsafe_allow_html=True)
 
@@ -279,40 +312,39 @@ with tab3:
     feat_stats = []
     for f in selected_features:
         presence_rate = df[f].mean() * 100
-        stability = "🟢 مرتفع جداً (شائع)" if presence_rate > 70 else ("🟡 متوسط (متذبذب)" if presence_rate >= 30 else "🔴 منخفض (مهدد/محلي)")
+        stability = "🟢 مرتفع (شائع)" if presence_rate > 70 else ("🟡 متوسط" if presence_rate >= 30 else "🔴 منخفض (محلي)")
         feat_stats.append({'الظاهرة اللسانية': f, 'نسبة الانتشار (%)': f"{presence_rate:.1f}%", 'مستوى الاستقرار': stability})
-    st.table(pd.DataFrame(feat_stats))
+    st.dataframe(pd.DataFrame(feat_stats), use_container_width=True)
 
 # TAB 4: الارتباط
 with tab4:
-    st.subheader("📐 تحليل الارتباط واختبار الدلالة الإحصائية")
+    st.subheader("📐 تحليل الارتباط الإحصائي")
     corr, p_val = pearsonr(geo_dist_matrix, dist_matrix)
     
     col_c1, col_c2 = st.columns(2)
     with col_c1:
-        st.metric(label="معامل ارتباط بيرسون (Pearson r)", value=f"{corr:.3f}")
+        st.metric(label="معامل ارتباط بيرسون (r)", value=f"{corr:.3f}")
     with col_c2:
         st.metric(label="القيمة الاحتمالية (p-value)", value=f"{p_val:.4f}")
         
-    fig, ax = plt.subplots(figsize=(9, 4.5), dpi=300)
-    ax.scatter(geo_dist_matrix, dist_matrix, color='#38bdf8', s=120, edgecolors='#0f172a')
+    fig, ax = plt.subplots(figsize=(7, 4), dpi=200)
+    ax.scatter(geo_dist_matrix, dist_matrix, color='#38bdf8', s=100, edgecolors='#0f172a')
     m_slope, b_intercept = np.polyfit(geo_dist_matrix, dist_matrix, 1)
     ax.plot(geo_dist_matrix, m_slope * geo_dist_matrix + b_intercept, color='#f43f5e', linestyle='--')
     
     plt.xlabel(ar("المسافة الجغرافية (كم)"))
     plt.ylabel(ar("المسافة اللسانية"))
-    plt.title(ar("العلاقة بين التباعد الجغرافي والتمايز اللساني"))
     plt.grid(True, linestyle='--', alpha=0.5)
-    st.pyplot(fig)
+    st.pyplot(fig, use_container_width=True)
 
 # TAB 5: المقارن الثنائي
 with tab5:
-    st.subheader("⚔️ التحليل المقارن المباشر بين جماعتين ترابيتين")
+    st.subheader("⚔️ المقارن الثنائي للجماعات")
     col_g1, col_g2 = st.columns(2)
     with col_g1:
-        v1 = st.selectbox("اختر الجماعة الأولى:", df['Village'].values, index=0)
+        v1 = st.selectbox("الجماعة الأولى:", df['Village'].values, index=0)
     with col_g2:
-        v2 = st.selectbox("اختر الجماعة الثانية:", df['Village'].values, index=4)
+        v2 = st.selectbox("الجماعة الثانية:", df['Village'].values, index=4)
         
     if v1 and v2:
         v1_data = df[df['Village'] == v1].iloc[0]
@@ -324,10 +356,10 @@ with tab5:
         st.markdown("---")
         col_m1, col_m2 = st.columns(2)
         with col_m1:
-            st.metric(label=f"نسبة التوافق اللساني بين {v1} و {v2}", value=f"{similarity_pct:.1f}%")
+            st.metric(label=f"التوافق اللساني ({v1} / {v2})", value=f"{similarity_pct:.1f}%")
             st.progress(similarity_pct / 100)
         with col_m2:
-            st.metric(label=f"المسافة الجغرافية المباشرة", value=f"{geo_v1_v2:.1f} كم")
+            st.metric(label="المسافة الجغرافية", value=f"{geo_v1_v2:.1f} كم")
         
         comp_df = pd.DataFrame({
             'المتغير اللساني': selected_features,
@@ -335,38 +367,36 @@ with tab5:
             v2: [v2_data[f] for f in selected_features]
         })
         comp_df['الحالة'] = comp_df.apply(lambda r: "✅ متطابق" if r[v1] == r[v2] else "❌ مختلف", axis=1)
-        st.table(comp_df)
+        st.dataframe(comp_df, use_container_width=True)
 
 # TAB 6: الشجرة اللهجية
 with tab6:
-    st.subheader("🌳 التصنيف الشجري اللهجي (Dendrogram)")
+    st.subheader("🌳 التصنيف الشجري اللهجي (Ward)")
     if len(selected_features) > 0:
         Z = linkage(dist_matrix, method='ward')
-        fig, ax = plt.subplots(figsize=(10, 4.5), dpi=300)
-        
+        fig, ax = plt.subplots(figsize=(8, 4), dpi=200)
         labels = [ar(v) for v in df['Village'].values]
-        
         dendrogram(Z, labels=labels, ax=ax, color_threshold=0.5)
-        plt.title(ar("الشجرة اللهجية لتكتلات إقليم بولمان"), fontsize=12, fontweight='bold')
-        st.pyplot(fig)
+        plt.title(ar("الشجرة اللهجية - إقليم بولمان"), fontsize=11, fontweight='bold')
+        st.pyplot(fig, use_container_width=True)
 
 # TAB 7: MDS
 with tab7:
-    st.subheader("📍 التحليل الفضائي ثنائي الأبعاد (MDS)")
+    st.subheader("📍 التحليل الفضائي (MDS)")
     if len(selected_features) > 0:
         mds = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
         coords = mds.fit_transform(matrix_sq)
         
-        fig, ax = plt.subplots(figsize=(9, 4.5), dpi=300)
-        ax.scatter(coords[:, 0], coords[:, 1], color='#38bdf8', s=160, edgecolors='#0f172a')
+        fig, ax = plt.subplots(figsize=(7, 4), dpi=200)
+        ax.scatter(coords[:, 0], coords[:, 1], color='#38bdf8', s=120, edgecolors='#0f172a')
         for i, txt in enumerate(df['Village']):
-            ax.annotate(ar(txt), (coords[i, 0]+0.02, coords[i, 1]+0.02), fontsize=11, fontweight='bold')
+            ax.annotate(ar(txt), (coords[i, 0]+0.02, coords[i, 1]+0.02), fontsize=10, fontweight='bold')
         plt.grid(True, linestyle='--', alpha=0.5)
-        st.pyplot(fig)
+        st.pyplot(fig, use_container_width=True)
 
 # TAB 8: Levenshtein
 with tab8:
-    st.subheader("🔤 حاسبة المسافة الصوتية بين الألفاظ (Levenshtein Distance)")
+    st.subheader("🔤 حاسبة المسافة الصوتية (IPA)")
     col_a, col_b = st.columns(2)
     with col_a:
         word1 = st.text_input("اللفظة الأولى (IPA 1):", "tagant")
@@ -376,23 +406,21 @@ with tab8:
     lev_dist = levenshtein_distance(word1, word2)
     similarity = (1 - lev_dist / max(len(word1), len(word2))) * 100
     
-    st.metric(label="مسافة التعديل الصوتي (Levenshtein Distance)", value=f"{lev_dist} عمليات")
+    st.metric(label="مسافة Levenshtein", value=f"{lev_dist} عمليات")
     st.progress(int(similarity) / 100)
 
 # TAB 9: LaTeX
 with tab9:
-    st.subheader("📊 مصفوفات المسافة وتصدير LaTeX للأطروحة")
-    st.write("📊 **مصفوفة المسافات اللسانية:**")
+    st.subheader("📊 مصفوفات المسافة وتصدير LaTeX")
     st.dataframe(matrix_df.style.background_gradient(cmap='Blues'), use_container_width=True)
     st.code(matrix_df.to_latex(), language='latex')
 
 # TAB 10: الملحق الأكاديمي
 with tab10:
-    st.subheader("💻 أكواد الملحق الأكاديمي (Reproducibility Code)")
+    st.subheader("💻 أكواد الملحق الأكاديمي")
     python_code = """import pandas as pd
 from scipy.spatial.distance import pdist, squareform
 
-# Re-producing Dialectological Distance Matrix
 features = ['الجهر_الصوتي', 'تضخيم_الراء', 'إمالة_الأليف', 'احتفاظ_بالتلازم']
 dist_matrix = pdist(df[features].values, metric='jaccard')
 print(squareform(dist_matrix))
