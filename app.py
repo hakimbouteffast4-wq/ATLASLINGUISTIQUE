@@ -32,38 +32,37 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. إجبار الوضع النهاري المتقدم وتصحيح نصوص الجداول
+# 2. إجبار النص باللون الأسود الكامل (#000000)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
+    /* إجبار المتغيرات العامة على الألوان الفاتحة والخط الأسود */
     :root {
-        --background-color: #f8fafc !important;
-        --secondary-background-color: #ffffff !important;
-        --text-color: #0f172a !important;
+        --background-color: #ffffff !important;
+        --secondary-background-color: #f8fafc !important;
+        --text-color: #000000 !important;
     }
 
     * {
         font-family: 'Cairo', sans-serif !important;
-        scroll-behavior: smooth;
-        -webkit-tap-highlight-color: transparent;
+        color: #000000 !important;
     }
 
     html, body, [class*="css"] {
         direction: rtl;
         text-align: right;
         background-color: #f8fafc !important;
-        color: #0f172a !important;
+        color: #000000 !important;
     }
 
     .stApp {
         background-color: #f8fafc !important;
-        color: #0f172a !important;
-        overflow-x: hidden !important;
+        color: #000000 !important;
     }
 
-    /* إخفاء العناصر الجانبية والهيدر */
+    /* إخفاء القائمة الجانبية والهيدر */
     [data-testid="stSidebar"], [data-testid="collapsedControl"], #MainMenu, footer, header {
         display: none !important;
     }
@@ -73,36 +72,41 @@ st.markdown("""
         max-width: 100% !important;
     }
 
-    label, p, span, h1, h2, h3, h4, h5, h6, .stMarkdown, small {
-        color: #0f172a !important;
+    /* فرض اللون الأسود الصريح لكل عناصر النصوص */
+    p, span, h1, h2, h3, h4, h5, h6, label, div, small, code, li, td, th {
+        color: #000000 !important;
     }
 
     /* =========================================================
-       إصلاح الجداول (DataFrames & Tables) وإظهار النصوص
+       إصلاح الجداول بفرض ألوان خلفية ونص أسود صريح
        ========================================================= */
     div[data-testid="stDataFrame"], div[data-testid="stTable"] {
         background-color: #ffffff !important;
         border-radius: 12px !important;
-        border: 1px solid #cbd5e1 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
-        padding: 4px;
+        border: 2px solid #cbd5e1 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
     }
 
-    /* ألوان خلايا جدول HTML */
+    /* استهداف نصوص خلايا جداول Streamlit الداخلية */
+    div[data-testid="stDataFrame"] * {
+        color: #000000 !important;
+    }
+
     table {
-        color: #0f172a !important;
         background-color: #ffffff !important;
+        color: #000000 !important;
     }
 
     th {
-        background-color: #f1f5f9 !important;
-        color: #0284c7 !important;
+        background-color: #e2e8f0 !important;
+        color: #000000 !important;
         font-weight: 800 !important;
     }
 
     td {
-        color: #0f172a !important;
         background-color: #ffffff !important;
+        color: #000000 !important;
+        font-weight: 600 !important;
     }
 
     /* =========================================================
@@ -110,26 +114,24 @@ st.markdown("""
        ========================================================= */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #94a3b8 !important;
         border-radius: 12px !important;
     }
 
-    div[data-baseweb="select"] span {
-        color: #0f172a !important;
+    div[data-baseweb="select"] span, div[data-baseweb="select"] input {
+        color: #000000 !important;
         font-weight: 700 !important;
     }
 
     div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
         background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 12px !important;
+        border: 1px solid #94a3b8 !important;
     }
 
     li[role="option"], div[data-baseweb="option"] {
         background-color: #ffffff !important;
-        color: #0f172a !important;
-        font-weight: 600 !important;
+        color: #000000 !important;
+        font-weight: 700 !important;
     }
 
     li[role="option"]:hover, li[aria-selected="true"] {
@@ -147,16 +149,14 @@ st.markdown("""
     }
 
     section[data-testid="stFileUploaderDropzone"] * {
-        color: #0f172a !important;
+        color: #000000 !important;
     }
 
     /* =========================================================
        العناوين والبطاقات
        ========================================================= */
     .main-title {
-        background: linear-gradient(135deg, #0284c7 0%, #4338ca 50%, #6d28d9 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #0284c7 !important;
         font-weight: 900;
         font-size: 2.2rem;
         text-align: center;
@@ -165,9 +165,9 @@ st.markdown("""
     
     .sub-title {
         text-align: center;
-        color: #475569 !important;
+        color: #334155 !important;
         font-size: 0.9rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 20px;
     }
 
@@ -183,37 +183,18 @@ st.markdown("""
         flex: 1 1 calc(20% - 10px);
         min-width: 130px;
         background: #ffffff !important;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-radius: 16px;
         padding: 12px 8px;
         text-align: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        position: relative;
-    }
-
-    .cyber-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; height: 3px;
-        border-radius: 16px 16px 0 0;
-        background: linear-gradient(90deg, transparent, #0284c7, #6366f1, transparent);
-    }
-
-    .pulse-glow {
-        width: 8px;
-        height: 8px;
-        background-color: #0284c7;
-        border-radius: 50%;
-        display: inline-block;
-        margin-left: 5px;
-        box-shadow: 0 0 6px #0284c7;
     }
 
     .cyber-card h4 {
         margin: 0;
         font-size: 0.8rem;
-        color: #334155 !important;
-        font-weight: 700;
+        color: #000000 !important;
+        font-weight: 800;
     }
     
     .cyber-card p {
@@ -230,44 +211,26 @@ st.markdown("""
         overflow-x: auto !important;
         white-space: nowrap !important;
         padding: 6px 2px 14px 2px;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
-        display: none;
     }
     
     .stTabs [data-baseweb="tab"] {
-        flex: 0 0 auto;
         border-radius: 30px;
         padding: 8px 16px;
         font-weight: 700;
         font-size: 0.85rem;
         background: #ffffff !important;
-        color: #334155 !important;
+        color: #000000 !important;
         border: 1px solid #cbd5e1 !important;
     }
 
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0284c7 0%, #4338ca 100%) !important;
+        background: #0284c7 !important;
         color: #ffffff !important;
         border: none !important;
     }
 
     .stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] span {
         color: #ffffff !important;
-    }
-
-    iframe {
-        max-width: 100% !important;
-        border-radius: 16px;
-    }
-
-    @media (max-width: 768px) {
-        .main-title { font-size: 1.6rem !important; }
-        .cyber-card { flex: 1 1 calc(50% - 10px); }
-        .stTabs [data-baseweb="tab"] { padding: 6px 12px !important; font-size: 0.78rem !important; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -281,23 +244,23 @@ st.markdown("<p class='sub-title'>المنصة الرقمية للقياس ال�
 st.markdown("""
     <div class="metric-grid">
         <div class="cyber-card">
-            <h4><span class="pulse-glow"></span> الجماعات الترابية</h4>
+            <h4>الجماعات الترابية</h4>
             <p>6 مراكز</p>
         </div>
         <div class="cyber-card">
-            <h4><span class="pulse-glow"></span> أدوات القياس</h4>
+            <h4>أدوات القياس</h4>
             <p>Dialectometry</p>
         </div>
         <div class="cyber-card">
-            <h4><span class="pulse-glow"></span> ارتباط مانتل</h4>
+            <h4>ارتباط مانتل</h4>
             <p>r = 0.84</p>
         </div>
         <div class="cyber-card">
-            <h4><span class="pulse-glow"></span> الاعتشاش اللساني</h4>
+            <h4>الاعتشاش اللساني</h4>
             <p>Entropy H</p>
         </div>
         <div class="cyber-card">
-            <h4><span class="pulse-glow"></span> الدقة الإحصائية</h4>
+            <h4>الدقة الإحصائية</h4>
             <p>99.2%</p>
         </div>
     </div>
@@ -348,39 +311,27 @@ with tabs[0]:
         {"الظاهرة اللسانية": "الترقيق_الفونولوجي", "(%) نسبة الانتشار": "82.0%", "مستوى الاستقرار": "مرتفع جداً", "معامل الثبات": 0.91},
         {"الظاهرة اللسانية": "الكشكشة / إبدال الكاف", "(%) نسبة الانتشار": "33.3%", "مستوى الاستقرار": "محدود", "معامل الثبات": 0.35}
     ])
-    st.dataframe(df_stability, use_container_width=True)
-    
-    col_d1, col_d2 = st.columns(2)
-    with col_d1:
-        csv_stab = df_stability.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 تحميل جدول الاستقرار (CSV)", csv_stab, "stability_index.csv", "text/csv", use_container_width=True)
-    with col_d2:
-        report_json = json.dumps(communes_data, ensure_ascii=False, indent=2)
-        st.download_button("📑 تصدير تقرير التوزيع الجغرافي (JSON)", report_json, "linguistic_report.json", "application/json", use_container_width=True)
+    st.table(df_stability)
 
 # --- Tab 1: الخريطة ---
 with tabs[1]:
     st.subheader("🗺️ الخريطة التفاعلية لتوزيع اللهجات")
     if HAS_FOLIUM:
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
-
         for name, info in communes_data.items():
             folium.Marker(
                 location=[info["lat"], info["lon"]],
                 popup=f"<b>جماعة {name}</b><br>المجموعة: {info['group']}<br>النمط: {info['dialect']}",
-                tooltip=name,
-                icon=folium.Icon(color="red" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
+                tooltip=name
             ).add_to(m)
-            
-        folium.LayerControl(position='topright').add_to(m)
         st_folium(m, use_container_width=True, height=450)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
 
-# --- Tab 2: شبكة العلاقات اللسانية ---
+# --- Tab 2: شبكة العلاقات ---
 with tabs[2]:
-    st.subheader("🕸️ شبكة التفاعل والقرب اللساني بين المراكز (Linguistic Network)")
+    st.subheader("🕸️ شبكة التفاعل والقرب اللساني بين المراكز")
     if HAS_PLOTLY:
         edge_x, edge_y = [], []
         for i, c1 in enumerate(communes_list):
@@ -391,44 +342,29 @@ with tabs[2]:
                     edge_y.extend([p1["lat"], p2["lat"], None])
 
         edge_trace = go.Scatter(x=edge_x, y=edge_y, line=dict(width=1.5, color='#0284c7'), hoverinfo='none', mode='lines')
-        
         node_x = [v["lon"] for v in communes_data.values()]
         node_y = [v["lat"] for v in communes_data.values()]
         node_text = list(communes_data.keys())
         
         node_trace = go.Scatter(
             x=node_x, y=node_y, mode='markers+text', text=node_text, textposition="top center",
-            marker=dict(size=18, color='#4338ca', line=dict(width=2, color='#ffffff'))
+            marker=dict(size=18, color='#0284c7')
         )
 
         fig_net = go.Figure(data=[edge_trace, node_trace])
-        fig_net.update_layout(
-            template="plotly_white", showlegend=False,
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=10, r=10, t=10, b=10)
-        )
+        fig_net.update_layout(template="plotly_white", showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
         st.plotly_chart(fig_net, use_container_width=True)
 
 # --- Tab 3: المعجم ---
 with tabs[3]:
     st.subheader("📖 المعجم اللساني المقارن")
-    uploaded_file = st.file_uploader("📥 استيراد بيانات المعجم من Excel (.xlsx):", type=["xlsx", "xls"])
-
-    if uploaded_file is not None:
-        try:
-            corpus_df = pd.read_excel(uploaded_file)
-            st.success("📊 تم تحميل الملف بنجاح:")
-            st.dataframe(corpus_df, use_container_width=True)
-        except Exception as e:
-            st.error(f"خطأ أثناء قراءة الملف: {e}")
-    else:
-        dict_data = pd.DataFrame([
-            {"الكلمة": "أغروم", "المعنى": "خبز", "التصنيف": "أمازيغي مشترك", "الجماعات": "كيكو، مرموشة، بولمان"},
-            {"الكلمة": "أمان", "المعنى": "ماء", "التصنيف": "أمازيغي مشترك", "الجماعات": "جميع جماعات الإقليم"},
-            {"الكلمة": "الدشرا", "المعنى": "القرية", "التصنيف": "عربي دارج", "الجماعات": "ميسور، أوطاط الحاج"},
-            {"الكلمة": "تليلت", "المعنى": "العين / النبع", "التصنيف": "أمازيغي محلي", "الجماعات": "سرغينة، كيكو"}
-        ])
-        st.dataframe(dict_data, use_container_width=True)
+    dict_data = pd.DataFrame([
+        {"الكلمة": "أغروم", "المعنى": "خبز", "التصنيف": "أمازيغي مشترك", "الجماعات": "كيكو، مرموشة، بولمان"},
+        {"الكلمة": "أمان", "المعنى": "ماء", "التصنيف": "أمازيغي مشترك", "الجماعات": "جميع جماعات الإقليم"},
+        {"الكلمة": "الدشرا", "المعنى": "القرية", "التصنيف": "عربي دارج", "الجماعات": "ميسور، أوطاط الحاج"},
+        {"الكلمة": "تليلت", "المعنى": "العين / النبع", "التصنيف": "أمازيغي محلي", "الجماعات": "سرغينة، كيكو"}
+    ])
+    st.table(dict_data)
 
 # --- Tab 4: RIV & Jaccard ---
 with tabs[4]:
@@ -439,7 +375,6 @@ with tabs[4]:
     
     is_same = communes_data[comm_1]["group"] == communes_data[comm_2]["group"]
     dist_km = geo_distance(comm_1, comm_2)
-    
     riv_score = max(min(95.0 - (dist_km * 0.4) if is_same else 50.0 - (dist_km * 0.2), 100.0), 20.0)
     jaccard_dist = round(1.0 - (riv_score / 100.0), 3)
     
@@ -447,9 +382,9 @@ with tabs[4]:
     col_r1.metric(label="التماثل النسبـي (RIV)", value=f"{riv_score:.1f} %")
     col_r2.metric(label="تباعد جاكارد (Jaccard)", value=f"{jaccard_dist}")
 
-# --- Tab 5: محاكي التحول الفونولوجي ---
+# --- Tab 5: محاكي التحول ---
 with tabs[5]:
-    st.subheader("⚡ محاكي قواعد الانتقال والتحول الصوتي (Sound Shift Simulator)")
+    st.subheader("⚡ محاكي قواعد الانتقال والتحول الصوتي")
     col_s1, col_s2 = st.columns(2)
     input_word = col_s1.text_input("أدخل النص/الكلمة الصوتية الأصلية:", "kalb")
     shift_rule = col_s2.selectbox("اختر قاعدة التحول الفونولوجي:", ["الكشكشة (k ➔ š)", "الإمالة (a ➔ e)", "الجهر (t ➔ d)"])
@@ -466,26 +401,19 @@ with tabs[5]:
 
 # --- Tab 6: الملف الراداري ---
 with tabs[6]:
-    st.subheader("🎯 مقارنة البصمة اللسانية بالشكل الراداري (Radar Profile)")
+    st.subheader("🎯 مقارنة البصمة اللسانية بالشكل الراداري")
     if HAS_PLOTLY:
         selected_communes = st.multiselect("اختر الجماعات للمقارنة:", communes_list, default=["كيكو", "ميسور"])
         fig_radar = go.Figure()
-        
         for c in selected_communes:
             fig_radar.add_trace(go.Scatterpolar(
                 r=[communes_data[c]["phon"], communes_data[c]["lex"], communes_data[c]["morph"]],
-                theta=['الصوتيات (Phonetics)', 'المعجم (Lexicon)', 'الصرف (Morphology)'],
-                fill='toself', name=c
+                theta=['الصوتيات', 'المعجم', 'الصرف'], fill='toself', name=c
             ))
-            
-        fig_radar.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
-            template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=10, r=10, t=20, b=10)
-        )
+        fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 10])), template="plotly_white")
         st.plotly_chart(fig_radar, use_container_width=True)
 
-# --- Tab 7: اختبار مانتل و Entropy ---
+# --- Tab 7: مانتل و Entropy ---
 with tabs[7]:
     st.subheader("🌐 اختبار مانتل ومؤشر شانون للاعتشاش")
     col_m1, col_m2 = st.columns(2)
@@ -498,8 +426,8 @@ with tabs[7]:
             ent = -sum(p * math.log2(p) for p in probs if p > 0)
             entropy_data.append({"الجماعة": c, "مؤشر H": round(ent, 3)})
         
-        # استخدام st.dataframe مع ضمان الوضوح التام
-        st.dataframe(pd.DataFrame(entropy_data), use_container_width=True)
+        # استبدال st.dataframe بـ st.table لضمان ظهور النصوص باللون الأسود الداكن 100%
+        st.table(pd.DataFrame(entropy_data))
 
 # --- Tab 8: الشجرة و MDS ---
 with tabs[8]:
@@ -507,7 +435,7 @@ with tabs[8]:
     if HAS_PLOTLY:
         X = np.array([[1, 2], [1, 3], [2, 2], [7, 8], [8, 8], [6, 7]])
         fig_tree = ff.create_dendrogram(X, labels=communes_list)
-        fig_tree.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+        fig_tree.update_layout(template="plotly_white")
         st.plotly_chart(fig_tree, use_container_width=True)
 
 # --- Tab 9: المصفوفات ---
@@ -522,4 +450,4 @@ with tabs[9]:
             ling_mat[i][j] = g_d * 0.3 if is_same else 40 + g_d * 0.2
             
     matrix_df = pd.DataFrame(ling_mat.round(1), index=communes_list, columns=communes_list)
-    st.dataframe(matrix_df, use_container_width=True)
+    st.table(matrix_df)
