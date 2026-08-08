@@ -31,13 +31,12 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة الانسيابي المطور (Ultra-Smooth Fluid Design)
+# 2. تصميم الواجهة وإصلاح القائمة الجانبية باليمين (Sidebar Right Align Fix)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    /* ضبط الخط وانسيابية الحركة العامة */
     * {
         font-family: 'Cairo', sans-serif !important;
         scroll-behavior: smooth;
@@ -55,20 +54,21 @@ st.markdown("""
         overflow-x: hidden !important;
     }
 
-    /* تحسين الحاويات الرئيسية */
+    /* 🚨 تثبيت القائمة الجانبية في أقصى اليمين تماماً ومنع وصولها للوسط 🚨 */
+    [data-testid="stSidebar"] {
+        right: 0 !important;
+        left: auto !important;
+        background: rgba(15, 23, 42, 0.96) !important;
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: -10px 0px 30px rgba(0, 0, 0, 0.7) !important;
+    }
+
+    /* تكييف مساحة المحتوى الرئيسي لكي لا ينكمش بشكل خاطئ */
     [data-testid="stAppViewBlockContainer"] {
         padding: 1rem 1rem 3rem 1rem !important;
         max-width: 100% !important;
-    }
-
-    /* القائمة الجانبية العائمة العصرية (Floating Overlay Sidebar) */
-    [data-testid="stSidebar"] {
-        background: rgba(15, 23, 42, 0.92) !important;
-        backdrop-filter: blur(25px) !important;
-        -webkit-backdrop-filter: blur(25px) !important;
-        border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: -10px 0px 30px rgba(0, 0, 0, 0.6) !important;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     /* العنوان الرئيسي المتوهج */
@@ -92,7 +92,7 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* شبكة بطاقات المؤشرات المرنة الانسيابية */
+    /* شبكة بطاقات المؤشرات المرنة */
     .metric-grid {
         display: flex;
         flex-wrap: wrap;
@@ -112,7 +112,7 @@ st.markdown("""
         padding: 14px 10px;
         text-align: center;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
     }
@@ -174,7 +174,7 @@ st.markdown("""
         overflow-x: auto !important;
         white-space: nowrap !important;
         padding: 6px 2px 14px 2px;
-        scrollbar-width: none; /* إخفاء شريط التمرير المزعج */
+        scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -184,7 +184,7 @@ st.markdown("""
     
     .stTabs [data-baseweb="tab"] {
         flex: 0 0 auto;
-        border-radius: 30px; /* تصميم الحبوب الانسيابي Pills */
+        border-radius: 30px;
         padding: 8px 18px;
         font-weight: 700;
         font-size: 0.88rem;
@@ -202,7 +202,7 @@ st.markdown("""
         box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
     }
 
-    /* تحسين إطارات الجداول والخرائط */
+    /* تحسين الجداول والأطر */
     [data-testid="stDataFrame"] {
         border-radius: 16px;
         overflow: hidden;
@@ -215,12 +215,10 @@ st.markdown("""
         border-radius: 16px;
     }
 
-    /* العناصر غير الضرورية */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* استجابة سلسة للهواتف المحمولة */
     @media (max-width: 768px) {
         .main-title { font-size: 1.8rem !important; }
         .sub-title { font-size: 0.82rem !important; }
@@ -253,7 +251,7 @@ if uploaded_file is not None:
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# بطاقات مؤشرات مرنة وانسيابية
+# بطاقات مؤشرات مرنة
 st.markdown("""
     <div class="metric-grid">
         <div class="cyber-card">
