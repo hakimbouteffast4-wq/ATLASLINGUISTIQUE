@@ -27,7 +27,7 @@ st.set_page_config(
     page_title="AtlasLinguistique Pro - إقليم بولمان",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state="collapsed"  # إغلاق القائمة الجانبية تلقائياً في الهواتف لمنح مساحة عرض أكبر
+    initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
@@ -96,7 +96,7 @@ st.markdown("""
         border-radius: 10px;
     }
     </style>
-""", unsafe_allow_allowed_html=True)
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # 3. الشريط الجانبي (Sidebar) لاستيراد البيانات الميدانية
