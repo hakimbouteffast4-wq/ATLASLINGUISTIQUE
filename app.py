@@ -7,6 +7,7 @@ import json
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import linkage, dendrogram
+from scipy.stats import pearsonr
 from sklearn.manifold import MDS
 import arabic_reshaper
 from bidi.algorithm import get_display
@@ -15,7 +16,7 @@ from bidi.algorithm import get_display
 # 1. تهيئة المنصة وتصميم الواجهة (CSS)
 # ----------------------------------------------------
 st.set_page_config(
-    page_title="AtlasLinguistique | منصة القياس اللساني المتقدمة",
+    page_title="AtlasLinguistique | أطلس القياس اللساني المتقدم",
     page_icon="🗺️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -99,6 +100,14 @@ def levenshtein_distance(s1, s2):
         previous_row = current_row
     return previous_row[-1]
 
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371.0 # نصف قطر الأرض بالكيلومتر
+    dlat = np.radians(lat2 - lat1)
+    dlon = np.radians(lon2 - lon1)
+    a = np.sin(dlat / 2)**2 + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2)) * np.sin(dlon / 2)**2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    return R * c
+
 # ----------------------------------------------------
 # 3. بيانات متكاملة لإقليم بولمان
 # ----------------------------------------------------
@@ -131,9 +140,9 @@ with col1:
 with col2:
     st.markdown('<div class="kpi-card"><div class="kpi-val">Isogloss</div><div class="kpi-lbl">خرائط التمايز الجغرافي</div></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">Entropy</div><div class="kpi-lbl">مؤشر التنوع اللساني</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">Pearson r</div><div class="kpi-lbl">الارتباط الجغرافي اللساني</div></div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="kpi-card"><div class="kpi-val">Report Gen</div><div class="kpi-lbl">تصدير التقارير الآلية</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-card"><div class="kpi-val">LaTeX & Report</div><div class="kpi-lbl">تصدير التقرير النهائي</div></div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -158,11 +167,18 @@ if len(selected_features) > 0:
     matrix_sq = squareform(dist_matrix)
     matrix_df = pd.DataFrame(matrix_sq, index=df['Village'], columns=df['Village'])
 
+# حساب مصفوفة المسافات الجغرافية (Km)
+coords_array = df[['Latitude', 'Longitude']].values
+geo_dist_matrix = pdist(coords_array, lambda u, v: haversine(u[0], u[1], v[0], v[1]))
+geo_matrix_sq = squareform(geo_dist_matrix)
+geo_matrix_df = pd.DataFrame(geo_matrix_sq, index=df['Village'], columns=df['Village'])
+
 # ----------------------------------------------------
 # 6. التبويبات الفائقة والجديدة
 # ----------------------------------------------------
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "🗺️ الخريطة والتحليل المرجعي", 
+    "📐 الارتباط الجغرافي-اللساني",
     "⚔️ المقارن الثنائي للجماعات",
     "🌳 الشجرة اللهجية (Ward)", 
     "📍 التحليل ثنائي الأبعاد (MDS)", 
@@ -198,27 +214,57 @@ with tab1:
         
     st_folium(m, width="100%", height=480)
 
-# TAB 2: المقارن المزدوج المتقدم
+# TAB 2: الارتباط الجغرافي اللساني (جديد)
 with tab2:
+    st.subheader("📐 تحليل الارتباط بين المسافة الجغرافية (Km) والمسافة اللسانية")
+    
+    corr, p_val = pearsonr(geo_dist_matrix, dist_matrix)
+    
+    col_c1, col_c2 = st.columns(2)
+    with col_c1:
+        st.metric(label="معامل ارتباط بيرسون (Pearson r)", value=f"{corr:.3f}")
+    with col_c2:
+        st.metric(label="القيمة الاحتمالية (p-value)", value=f"{p_val:.4f}")
+        
+    fig, ax = plt.subplots(figsize=(9, 4.5), dpi=300)
+    ax.scatter(geo_dist_matrix, dist_matrix, color='#38bdf8', s=120, edgecolors='#0f172a')
+    
+    # خط الاتجاه العام
+    m_slope, b_intercept = np.polyfit(geo_dist_matrix, dist_matrix, 1)
+    ax.plot(geo_dist_matrix, m_slope * geo_dist_matrix + b_intercept, color='#f43f5e', linestyle='--', label=f"Line of best fit (r={corr:.2f})")
+    
+    plt.xlabel(ar("المسافة الجغرافية (كم)"))
+    plt.ylabel(ar("المسافة اللسانية (Jaccard)"))
+    plt.title(ar("العلاقة بين التباعد الجغرافي والتمايز اللساني لإقليم بولمان"))
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.legend()
+    st.pyplot(fig)
+
+# TAB 3: المقارن المزدوج
+with tab3:
     st.subheader("⚔️ التحليل المقارن المباشر بين جماعتين ترابيتين")
     col_g1, col_g2 = st.columns(2)
     with col_g1:
         v1 = st.selectbox("اختر الجماعة الأولى:", df['Village'].values, index=0)
     with col_g2:
-        v2 = st.selectbox("اخtr الجماعة الثانية:", df['Village'].values, index=4)
+        v2 = st.selectbox("اختر الجماعة الثانية:", df['Village'].values, index=4)
         
     if v1 and v2:
         v1_data = df[df['Village'] == v1].iloc[0]
         v2_data = df[df['Village'] == v2].iloc[0]
         
         dist_v1_v2 = matrix_df.loc[v1, v2]
+        geo_v1_v2 = geo_matrix_df.loc[v1, v2]
         similarity_pct = (1 - dist_v1_v2) * 100
         
         st.markdown("---")
-        st.metric(label=f"نسبة التوافق اللساني بين {v1} و {v2}", value=f"{similarity_pct:.1f}%")
-        st.progress(similarity_pct / 100)
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            st.metric(label=f"نسبة التوافق اللساني بين {v1} و {v2}", value=f"{similarity_pct:.1f}%")
+            st.progress(similarity_pct / 100)
+        with col_m2:
+            st.metric(label=f"المسافة الجغرافية المباشرة", value=f"{geo_v1_v2:.1f} كم")
         
-        # جدول مقارنة المتغيرات
         comp_df = pd.DataFrame({
             'المتغير اللساني': selected_features,
             v1: [v1_data[f] for f in selected_features],
@@ -227,8 +273,8 @@ with tab2:
         comp_df['الحالة'] = comp_df.apply(lambda r: "✅ متطابق" if r[v1] == r[v2] else "❌ مختلف", axis=1)
         st.table(comp_df)
 
-# TAB 3: الشجرة اللهجية
-with tab3:
+# TAB 4: الشجرة اللهجية
+with tab4:
     st.subheader("🌳 التصنيف الشجري اللهجي (Dendrogram)")
     if len(selected_features) > 0:
         Z = linkage(dist_matrix, method='ward')
@@ -238,8 +284,8 @@ with tab3:
         plt.title(ar("الشجرة اللهجية لتكتلات إقليم بولمان"), fontsize=12, fontweight='bold')
         st.pyplot(fig)
 
-# TAB 4: MDS
-with tab4:
+# TAB 5: MDS
+with tab5:
     st.subheader("📍 التحليل الفضائي ثنائي الأبعاد (MDS)")
     if len(selected_features) > 0:
         mds = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
@@ -252,8 +298,8 @@ with tab4:
         plt.grid(True, linestyle='--', alpha=0.5)
         st.pyplot(fig)
 
-# TAB 5: Levenshtein
-with tab5:
+# TAB 6: Levenshtein
+with tab6:
     st.subheader("🔤 حاسبة المسافة الصوتية بين الألفاظ (Levenshtein Distance)")
     col_a, col_b = st.columns(2)
     with col_a:
@@ -268,16 +314,21 @@ with tab5:
     st.progress(int(similarity) / 100)
     st.caption(f"نسبة التشابه الصوتي المباشر: **{similarity:.1f}%**")
 
-# TAB 6: LaTeX
-with tab6:
+# TAB 7: LaTeX
+with tab7:
     st.subheader("📊 مصفوفة المسافات التراكمية وتصدير LaTeX")
+    st.write("📊 **مصفوفة المسافات اللسانية:**")
     st.dataframe(matrix_df.style.background_gradient(cmap='Blues'), use_container_width=True)
+    
+    st.write("🌐 **مصفوفة المسافات الجغرافية (بالكيلومتر):**")
+    st.dataframe(geo_matrix_df.style.background_gradient(cmap='Greens'), use_container_width=True)
+    
     st.markdown("---")
-    st.subheader("📄 كود LaTeX للمصفوفة:")
+    st.subheader("📄 كود LaTeX للمصفوفة اللسانية:")
     st.code(matrix_df.to_latex(), language='latex')
 
-# TAB 7: التقرير والتحميل
-with tab7:
+# TAB 8: التقرير والتحميل
+with tab8:
     st.subheader("📝 التقرير الأكاديمي المكتوب وتصدير الملفات")
     
     most_similar = matrix_df[anchor_village].nsmallest(2).index[1]
@@ -286,6 +337,7 @@ with tab7:
     report_text = f"""# تقرير القياس اللساني الميداني — إقليم بولمان
     
 **الجماعة المرجعية المختارة:** {anchor_village}
+**معامل الارتباط الجغرافي-اللساني (r):** {corr:.3f} (p-value: {p_val:.4f})
 **تاريخ التحليل:** 2026
 
 ## 1. نتائج التحليل المرجعي:
@@ -293,7 +345,7 @@ with tab7:
 * تُسجّل جماعة **[{most_distant}]** أقصى تباين لساني بمسافة قدرها **({matrix_df.loc[anchor_village, most_distant]:.2f})**.
 
 ## 2. الاستنتاج الأكاديمي:
-تؤكد نتائج القياس التكتلي الشجري (Ward's Method) ومخطط البعدين اللسانيين (MDS) وجود تمايز لساني جغرافي واضح بين الشريط الشمالي والشريط الجنوبي للإقليم.
+تؤكد نتائج القياس التكتلي الشجري (Ward's Method) ومعامل ارتباط بيرسون وجود تباين لساني يتناسب طردياً مع المسافة الجغرافية الفاصلة بين الجماعات في إقليم بولمان.
 """
     st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
     
