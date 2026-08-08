@@ -21,7 +21,7 @@ except ImportError:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة الأساسية
+# 1. إعدادات الصفحة الأساسية (بدون شريط جانبي)
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro - إقليم بولمان",
@@ -31,7 +31,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم الواجهة وإصلاح القائمة الجانبية باليمين (Sidebar Right Align Fix)
+# 2. تصميم الواجهة الانسيابي (Ultra-Smooth Design)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -54,20 +54,14 @@ st.markdown("""
         overflow-x: hidden !important;
     }
 
-    /* 🚨 تثبيت القائمة الجانبية في أقصى اليمين تماماً ومنع وصولها للوسط 🚨 */
-    [data-testid="stSidebar"] {
-        right: 0 !important;
-        left: auto !important;
-        background: rgba(15, 23, 42, 0.96) !important;
-        backdrop-filter: blur(25px) !important;
-        -webkit-backdrop-filter: blur(25px) !important;
-        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: -10px 0px 30px rgba(0, 0, 0, 0.7) !important;
+    /* إخفاء القائمة الجانبية تماماً */
+    [data-testid="stSidebar"], [data-testid="collapsedControl"] {
+        display: none !important;
     }
 
-    /* تكييف مساحة المحتوى الرئيسي لكي لا ينكمش بشكل خاطئ */
+    /* تحسين الحاوية الرئيسية لاستغلال كامل المساحة */
     [data-testid="stAppViewBlockContainer"] {
-        padding: 1rem 1rem 3rem 1rem !important;
+        padding: 1.5rem 1.5rem 3rem 1.5rem !important;
         max-width: 100% !important;
     }
 
@@ -77,7 +71,7 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 900;
-        font-size: 2.5rem;
+        font-size: 2.6rem;
         text-align: center;
         margin-bottom: 4px;
         letter-spacing: -0.5px;
@@ -96,20 +90,20 @@ st.markdown("""
     .metric-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 14px;
         justify-content: center;
         margin-bottom: 25px;
     }
 
     .cyber-card {
-        flex: 1 1 calc(25% - 12px);
-        min-width: 140px;
+        flex: 1 1 calc(25% - 14px);
+        min-width: 150px;
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.07);
         border-radius: 18px;
-        padding: 14px 10px;
+        padding: 16px 12px;
         text-align: center;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         transition: all 0.3s ease;
@@ -150,7 +144,7 @@ st.markdown("""
 
     .cyber-card h4 {
         margin: 0;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         color: #cbd5e1;
         font-weight: 700;
         display: flex;
@@ -160,7 +154,7 @@ st.markdown("""
     
     .cyber-card p {
         margin: 6px 0 0 0;
-        font-size: 1.25rem;
+        font-size: 1.3rem;
         font-weight: 900;
         background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
         -webkit-background-clip: text;
@@ -185,9 +179,9 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         flex: 0 0 auto;
         border-radius: 30px;
-        padding: 8px 18px;
+        padding: 8px 20px;
         font-weight: 700;
-        font-size: 0.88rem;
+        font-size: 0.9rem;
         background: rgba(255, 255, 255, 0.03);
         color: #94a3b8;
         border: 1px solid rgba(255, 255, 255, 0.06);
@@ -230,23 +224,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. الشريط الجانبي (Sidebar)
-# ---------------------------------------------------------
-st.sidebar.title("⚙️ لوحة التحكّم")
-st.sidebar.subheader("📥 استيراد المتن (Excel)")
-
-uploaded_file = st.sidebar.file_uploader("قم برفع ملف Excel (.xlsx)", type=["xlsx", "xls"])
-
-corpus_df = None
-if uploaded_file is not None:
-    try:
-        corpus_df = pd.read_excel(uploaded_file)
-        st.sidebar.success("تم رفع الملف بنجاح! 🚀")
-    except Exception as e:
-        st.sidebar.error(f"خطأ أثناء قراءة الملف: {e}")
-
-# ---------------------------------------------------------
-# 4. الهيدر والمؤشرات الرئيسية
+# 3. الهيدر والمؤشرات الرئيسية
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
@@ -274,7 +252,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 5. قواعد البيانات الإقليمية
+# 4. قواعد البيانات الإقليمية
 # ---------------------------------------------------------
 communes_data = {
     "بولمان": {"lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط"},
@@ -293,7 +271,7 @@ def geo_distance(c1, c2):
     return math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
 
 # ---------------------------------------------------------
-# 6. شريط التبويبات التفاعلي الانسيابي
+# 5. شريط التبويبات التفاعلي الانسيابي
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", 
@@ -371,11 +349,18 @@ with tabs[1]:
 # --- Tab 2: المعجم ---
 with tabs[2]:
     st.subheader("📖 المعجم اللساني المقارن")
-    if corpus_df is not None:
-        st.success("📊 عرض البيانات المرفوعة من ملف Excel:")
-        st.dataframe(corpus_df, use_container_width=True)
+    
+    uploaded_file = st.file_uploader("📥 استيراد بيانات المعجم من ملف Excel (.xlsx):", type=["xlsx", "xls"])
+
+    if uploaded_file is not None:
+        try:
+            corpus_df = pd.read_excel(uploaded_file)
+            st.success("📊 تم تحميل الملف بنجاح:")
+            st.dataframe(corpus_df, use_container_width=True)
+        except Exception as e:
+            st.error(f"خطأ أثناء قراءة الملف: {e}")
     else:
-        st.info("💡 يمكن رفع ملف Excel عبر القائمة الجانبية. إليك النموذج الافتراضي:")
+        st.info("💡 يمكنك رفع ملف Excel أعلاه لمعالجة بياناتك الخاصة. إليك النموذج الافتراضي:")
         dict_data = pd.DataFrame([
             {"الكلمة": "أغروم", "المعنى": "خبز", "التصنيف": "أمازيغي مشترك", "الجماعات": "كيكو، مرموشة، بولمان"},
             {"الكلمة": "أمان", "المعنى": "ماء", "التصنيف": "أمازيغي مشترك", "الجماعات": "جميع جماعات الإقليم"},
