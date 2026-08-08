@@ -31,7 +31,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. تصميم المظهر المتقدم (Advanced UI/UX CSS)
+# 2. تصميم المظهر المتقدم والمتجاوب كلياً مع الهاتف والتابلت
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -45,13 +45,13 @@ st.markdown("""
         background-color: #f8fafc;
     }
 
-    /* تحسين الهيدر والعنوان الرئيسي */
+    /* العناوين الرئيسية */
     .main-title {
         background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 900;
-        font-size: 2.3rem;
+        font-size: 2.2rem;
         text-align: center;
         margin-bottom: 5px;
     }
@@ -59,84 +59,107 @@ st.markdown("""
     .sub-title {
         text-align: center;
         color: #475569;
-        font-size: 1.05rem;
+        font-size: 1rem;
         font-weight: 600;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
-    /* تحسين تصميم بطاقات المؤشرات (Metric Cards) */
+    /* شبكة بطاقات المؤشرات المتجاوبة للمحمول والتابلت */
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
     .metric-card {
         background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         color: #ffffff;
-        padding: 20px 15px;
-        border-radius: 16px;
-        box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.2);
+        padding: 16px 10px;
+        border-radius: 14px;
+        box-shadow: 0 6px 12px -2px rgba(30, 58, 138, 0.2);
         text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.2s ease;
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .metric-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 15px 25px -5px rgba(30, 58, 138, 0.3);
+        transform: translateY(-3px);
     }
 
     .metric-card h4 {
         margin: 0;
-        font-size: 0.95rem;
-        color: #e2e8f0;
+        font-size: 0.85rem;
+        color: #cbd5e1;
         font-weight: 600;
     }
     
     .metric-card p {
-        margin: 8px 0 0 0;
-        font-size: 1.5rem;
+        margin: 6px 0 0 0;
+        font-size: 1.25rem;
         font-weight: 800;
     }
 
-    /* تجاوب أزرار التبويب مع الهواتف الذكية */
+    /* شريط التبويبات المخصص لللمس والتمرير السلس */
     .stTabs [data-baseweb="tab-list"] {
+        display: flex;
         gap: 8px;
-        overflow-x: auto;
-        white-space: nowrap;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
         padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
     }
     
     .stTabs [data-baseweb="tab"] {
-        border-radius: 12px 12px 0px 0px;
-        padding: 10px 20px;
+        flex: 0 0 auto;
+        border-radius: 10px 10px 0px 0px;
+        padding: 8px 16px;
         font-weight: 700;
+        font-size: 0.9rem;
         background-color: #ffffff;
         color: #475569;
         border: 1px solid #e2e8f0;
-        transition: all 0.2s ease;
     }
     
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
     }
 
-    /* تحسين جداول البيانات (Dataframes) */
+    /* تحسين إطار الجداول والخرائط والشاشات الصغيرة */
     [data-testid="stDataFrame"] {
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
-    /* إخفاء العناصر غير الضرورية */
+    iframe {
+        max-width: 100% !important;
+        border-radius: 12px;
+    }
+
+    /* إخفاء الهيدر الافتراضي للتطبيق */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* ضبط الحاويات المخصصة للخرائط */
-    iframe {
-        max-width: 100% !important;
-        border-radius: 14px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    /* 📱 قواعد خاصة بشاشات الهاتف والتابلت (Media Queries) */
+    @media (max-width: 768px) {
+        .main-title {
+            font-size: 1.6rem !important;
+        }
+        .sub-title {
+            font-size: 0.85rem !important;
+        }
+        .metric-card p {
+            font-size: 1.1rem !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 7px 12px !important;
+            font-size: 0.8rem !important;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -163,19 +186,15 @@ if uploaded_file is not None:
 st.markdown("<h1 class='main-title'>🧬 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# توزيع البطاقات في 4 أعمدة بتنسيق عصري
-m_col1, m_col2, m_col3, m_col4 = st.columns([1, 1, 1, 1])
-
-with m_col1:
-    st.markdown('<div class="metric-card"><h4>الجماعات الترابية</h4><p>6 مراكز</p></div>', unsafe_allow_html=True)
-with m_col2:
-    st.markdown('<div class="metric-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>', unsafe_allow_html=True)
-with m_col3:
-    st.markdown('<div class="metric-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>', unsafe_allow_html=True)
-with m_col4:
-    st.markdown('<div class="metric-card"><h4>الاعتشاش اللساني</h4><p>Entropy H</p></div>', unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
+# بطاقات مؤشرات متجاوبة أوتوماتيكياً مع الهاتف والتابلت والحاسوب
+st.markdown("""
+    <div class="metric-grid">
+        <div class="metric-card"><h4>الجماعات الترابية</h4><p>6 مراكز</p></div>
+        <div class="metric-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
+        <div class="metric-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
+        <div class="metric-card"><h4>الاعتشاش اللساني</h4><p>Entropy H</p></div>
+    </div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # 5. قواعد البيانات الإقليمية
@@ -197,7 +216,7 @@ def geo_distance(c1, c2):
     return math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
 
 # ---------------------------------------------------------
-# 6. شريط التبويبات التفاعلي
+# 6. شريط التبويبات التفاعلي المتجاوب
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", 
@@ -253,7 +272,7 @@ with tabs[1]:
                 icon=folium.Icon(color="red" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
             ).add_to(m)
             
-        st_folium(m, use_container_width=True, height=480)
+        st_folium(m, use_container_width=True, height=400)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
@@ -333,7 +352,7 @@ with tabs[7]:
     if HAS_PLOTLY:
         X = np.array([[1, 2], [1, 3], [2, 2], [7, 8], [8, 8], [6, 7]])
         fig = ff.create_dendrogram(X, labels=communes_list)
-        fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+        fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
         st.plotly_chart(fig, use_container_width=True)
 
 # --- Tab 8: تحليل MDS ---
@@ -347,7 +366,7 @@ with tabs[8]:
         })
         fig_mds = px.scatter(df_mds, x='المحور الأول', y='المحور الثاني', text='الجماعة', color='الجماعة')
         fig_mds.update_traces(textposition='top center', marker=dict(size=12))
-        fig_mds.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+        fig_mds.update_layout(margin=dict(l=10, r=10, t=10, b=10))
         st.plotly_chart(fig_mds, use_container_width=True)
 
 # --- Tab 9: مصفوفات المسافة ---
