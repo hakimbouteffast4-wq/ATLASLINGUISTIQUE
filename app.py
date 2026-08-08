@@ -31,69 +31,112 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. حقن نمط CSS احترافي للتجاوب مع الهاتف واللوحات الرقمية
+# 2. تصميم المظهر المتقدم (Advanced UI/UX CSS)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* تحسين الخطوط والتنسيق العام */
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
+    /* ضبط الخط والاتجاه العام */
     html, body, [class*="css"] {
-        font-family: 'Cairo', sans-serif;
+        font-family: 'Cairo', sans-serif !important;
+        direction: rtl;
+        text-align: right;
+        background-color: #f8fafc;
     }
 
-    /* جعل التبويبات متجاوبة ومريحة لللمس في الهاتف */
+    /* تحسين الهيدر والعنوان الرئيسي */
+    .main-title {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+        font-size: 2.3rem;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    
+    .sub-title {
+        text-align: center;
+        color: #475569;
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
+
+    /* تحسين تصميم بطاقات المؤشرات (Metric Cards) */
+    .metric-card {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: #ffffff;
+        padding: 20px 15px;
+        border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.2);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 25px -5px rgba(30, 58, 138, 0.3);
+    }
+
+    .metric-card h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #e2e8f0;
+        font-weight: 600;
+    }
+    
+    .metric-card p {
+        margin: 8px 0 0 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+
+    /* تجاوب أزرار التبويب مع الهواتف الذكية */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 6px;
+        gap: 8px;
         overflow-x: auto;
         white-space: nowrap;
-        padding-bottom: 5px;
+        padding-bottom: 8px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        border-radius: 8px 8px 0px 0px;
-        padding: 8px 16px;
-        font-weight: 600;
-        background-color: #f1f5f9;
-        color: #334155;
+        border-radius: 12px 12px 0px 0px;
+        padding: 10px 20px;
+        font-weight: 700;
+        background-color: #ffffff;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #1e3a8a !important;
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
         color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
 
-    /* بطاقات المقياس المخصصة (Custom Metrics Container) */
-    .metric-card {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
-        padding: 16px;
+    /* تحسين جداول البيانات (Dataframes) */
+    [data-testid="stDataFrame"] {
         border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        margin-bottom: 10px;
-    }
-    .metric-card h4 {
-        margin: 0;
-        font-size: 0.9rem;
-        opacity: 0.9;
-        color: #e2e8f0;
-    }
-    .metric-card p {
-        margin: 5px 0 0 0;
-        font-size: 1.4rem;
-        font-weight: 700;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
-    /* إخفاء الهيدر الافتراضي والتزييل لزيادة المساحة */
+    /* إخفاء العناصر غير الضرورية */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* جعل الخرائط والجداول متكيفة تماماً مع العرض */
+    /* ضبط الحاويات المخصصة للخرائط */
     iframe {
         max-width: 100% !important;
-        border-radius: 10px;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -117,10 +160,10 @@ if uploaded_file is not None:
 # ---------------------------------------------------------
 # 4. الهيدر والمؤشرات الرئيسية (Responsive Grid)
 # ---------------------------------------------------------
-st.markdown("<h2 style='text-align: center; color: #1e3a8a; font-weight: 800;'>🧬 AtlasLinguistique Pro</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #64748b; font-size: 1rem;'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>🧬 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
+st.markdown("<p class='sub-title'>المنصة الرقمية للقياس اللهجي والتحليل الإحصائي المتقدم - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# توزيع البطاقات في 4 أعمدة تتعدل تلقائياً في الشاشات الصغيرة
+# توزيع البطاقات في 4 أعمدة بتنسيق عصري
 m_col1, m_col2, m_col3, m_col4 = st.columns([1, 1, 1, 1])
 
 with m_col1:
@@ -154,7 +197,7 @@ def geo_distance(c1, c2):
     return math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
 
 # ---------------------------------------------------------
-# 6. شريط التبويبات التفاعلي (10 تبويبات)
+# 6. شريط التبويبات التفاعلي
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", 
@@ -210,7 +253,7 @@ with tabs[1]:
                 icon=folium.Icon(color="red" if "أمازيغية" in info["dialect"] else "blue", icon="info-sign")
             ).add_to(m)
             
-        st_folium(m, use_container_width=True, height=450)
+        st_folium(m, use_container_width=True, height=480)
     else:
         df_map = pd.DataFrame([{"lat": v["lat"], "lon": v["lon"], "name": k} for k, v in communes_data.items()])
         st.map(df_map)
