@@ -4,29 +4,17 @@ import numpy as np
 import math
 
 # ---------------------------------------------------------
-# 1. إدارة حالة الشريط الجانبي (مفتوح / مطوي)
-# ---------------------------------------------------------
-if "sidebar_state" not in st.session_state:
-    st.session_state.sidebar_state = "expanded"
-
-def toggle_sidebar():
-    if st.session_state.sidebar_state == "expanded":
-        st.session_state.sidebar_state = "collapsed"
-    else:
-        st.session_state.sidebar_state = "expanded"
-
-# ---------------------------------------------------------
-# 2. إعدادات الصفحة
+# 1. إعدادات الصفحة وإغلاق الشريط الجانبي نهائياً
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state=st.session_state.sidebar_state
+    initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
-# 3. استدعاء آمن للمكتبات
+# 2. استدعاء آمن للمكتبات الخارجية
 # ---------------------------------------------------------
 try:
     import folium
@@ -43,10 +31,11 @@ except Exception:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 4. تنسيق CSS الشامل والخط الأسود
+# 3. CSS مخصص لإخفاء الشريط الجانبي نهائياً وتوسيع الصفحة
 # ---------------------------------------------------------
 st.markdown("""
     <style>
+    /* إجبار النص والمدخلات والجداول على اللون الأسود الكامل */
     * {
         font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
         color: #000000 !important;
@@ -57,34 +46,15 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
 
-    #MainMenu, footer { display: none !important; }
-
-    /* إظهار وتنسيق أزرار التحكم الافتراضية للطي والفتح */
-    [data-testid="stSidebarCollapseButton"], 
-    [data-testid="collapsedControl"],
-    button[aria-label="Close sidebar"],
-    button[aria-label="Open sidebar"] {
-        display: flex !important;
-        visibility: visible !important;
-        color: #000000 !important;
-        background-color: transparent !important;
+    /* إخفاء القوائم والشرائط الجانبية نهائياً */
+    #MainMenu, footer, header, [data-testid="stSidebar"], [data-testid="collapsedControl"] { 
+        display: none !important; 
     }
 
-    [data-testid="stSidebarCollapseButton"] svg, 
-    [data-testid="collapsedControl"] svg {
-        fill: #000000 !important;
-        color: #000000 !important;
-        stroke: #000000 !important;
+    [data-testid="stAppViewBlockContainer"] {
+        padding: 1rem 2rem !important;
+        max-width: 100% !important;
     }
-
-    /* الواجهة الجانبية */
-    [data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-left: 1px solid #cbd5e1;
-        padding: 0.5rem !important;
-    }
-    
-    [data-testid="stSidebar"] * { color: #000000 !important; }
 
     /* الجداول */
     table, div[data-testid="stTable"], div[data-testid="stDataFrame"] {
@@ -102,10 +72,11 @@ st.markdown("""
 
     td { font-weight: 600 !important; color: #000000 !important; }
 
+    /* العناوين والبطاقات */
     .main-title {
         color: #0284c7 !important;
         font-weight: 900;
-        font-size: 2rem;
+        font-size: 2.2rem;
         text-align: center;
         margin: 0;
     }
@@ -113,35 +84,57 @@ st.markdown("""
     .sub-title {
         text-align: center;
         color: #334155 !important;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         font-weight: 700;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
 
     .metric-grid {
         display: flex;
-        gap: 8px;
+        gap: 12px;
         justify-content: center;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
         flex-wrap: wrap;
     }
 
     .cyber-card {
-        flex: 1 1 130px;
+        flex: 1 1 150px;
         background: #ffffff !important;
         border: 1px solid #cbd5e1;
         border-radius: 12px;
-        padding: 8px;
+        padding: 10px;
         text-align: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }
 
-    .cyber-card h4 { margin: 0; font-size: 0.75rem; font-weight: 800; color: #000000 !important; }
-    .cyber-card p { margin: 2px 0 0 0; font-size: 1.1rem; font-weight: 900; color: #0284c7 !important; }
+    .cyber-card h4 { margin: 0; font-size: 0.8rem; font-weight: 800; color: #000000 !important; }
+    .cyber-card p { margin: 4px 0 0 0; font-size: 1.2rem; font-weight: 900; color: #0284c7 !important; }
+
+    /* التبويبات */
+    .stTabs [data-baseweb="tab-list"] { gap: 6px; }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000000 !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+    }
+    
+    .stTabs [aria-selected="true"] * {
+        color: #ffffff !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 5. قاعدة البيانات
+# 4. قاعدة البيانات
 # ---------------------------------------------------------
 @st.cache_data
 def load_communes():
@@ -154,71 +147,27 @@ def load_communes():
         "سرغينة": {"lat": 33.2833, "lon": -4.5000, "dialect": "أمازيغية/عربية", "group": "منطقة تماس", "phon": 7, "lex": 6, "morph": 6}
     }
 
-all_communes_data = load_communes()
-
-# ---------------------------------------------------------
-# 6. زر سهم التحكم في أعلى الشاشة الرئيسية
-# ---------------------------------------------------------
-col_btn, col_blank = st.columns([1, 15])
-with col_btn:
-    # زر السهم لإظهار/طي القائمة
-    st.button("◀▶ القائمة", on_click=toggle_sidebar, help="اضغط لإخفاء أو إظهار القائمة الجانبية")
-
-# ---------------------------------------------------------
-# 7. محتوى الواجهة الجانبية (Sidebar)
-# ---------------------------------------------------------
-with st.sidebar:
-    st.markdown("## ⚙️ إعدادات التحليل")
-    st.divider()
-    
-    st.markdown("### 🗺️ تصفية المجموعات")
-    all_groups = list(set([v["group"] for v in all_communes_data.values()]))
-    selected_groups = st.multiselect(
-        "اختر المناطق:",
-        options=all_groups,
-        default=all_groups
-    )
-    
-    st.divider()
-    
-    st.markdown("### ⚖️ أوزان التحليل")
-    weight_phon = st.slider("الصوتيات (Phonology):", 0.0, 1.0, 0.4, 0.1)
-    weight_lex = st.slider("المعجم (Lexicon):", 0.0, 1.0, 0.4, 0.1)
-    weight_morph = st.slider("الصرف (Morphology):", 0.0, 1.0, 0.2, 0.1)
-    
-    st.divider()
-    
-    st.markdown("### 👁️ خيارات العرض")
-    show_metrics_cards = st.checkbox("إظهار المؤشرات السريعة", value=True)
-    show_coords_table = st.checkbox("إظهار مصفوفة الإحداثيات", value=False)
-
-# ---------------------------------------------------------
-# 8. تطبيق الفلترة وواجهة التطبيق الرئيسية
-# ---------------------------------------------------------
-communes_data = {k: v for k, v in all_communes_data.items() if v["group"] in selected_groups}
-
-if not communes_data:
-    st.warning("⚠️ يرجى اختيار مجموعة لسانية واحدة على الأقل.")
-    st.stop()
-
+communes_data = load_communes()
 communes_list = list(communes_data.keys())
 
+# ---------------------------------------------------------
+# 5. الواجهة الأساسية (بدون قائمة جانبية)
+# ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>منصة القياس اللهجي والتحليل الإحصائي السريع - إقليم بولمان</p>", unsafe_allow_html=True)
 
-if show_metrics_cards:
-    st.markdown(f"""
-        <div class="metric-grid">
-            <div class="cyber-card"><h4>المراكز النشطة</h4><p>{len(communes_list)} / 6</p></div>
-            <div class="cyber-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
-            <div class="cyber-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
-            <div class="cyber-card"><h4>الاعتشاش</h4><p>Entropy H</p></div>
-            <div class="cyber-card"><h4>الدقة</h4><p>99.2%</p></div>
-        </div>
-    """, unsafe_allow_html=True)
+st.markdown("""
+    <div class="metric-grid">
+        <div class="cyber-card"><h4>المراكز</h4><p>6 مراكز</p></div>
+        <div class="cyber-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
+        <div class="cyber-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
+        <div class="cyber-card"><h4>الاعتشاش</h4><p>Entropy H</p></div>
+        <div class="cyber-card"><h4>الدقة</h4><p>99.2%</p></div>
+    </div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 9. التبويبات
+# 6. التبويبات
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", "🗺️ الخريطة", "🕸️ الشبكة", "📖 المعجم", 
@@ -237,17 +186,14 @@ with tabs[0]:
 
 # --- 2. الخريطة ---
 with tabs[1]:
-    st.subheader("🗺️ التوزيع الجغرافي للمناطق المحددة")
+    st.subheader("🗺️ التوزيع الجغرافي للمراكز اللسانية")
     if HAS_FOLIUM:
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
         for name, info in communes_data.items():
             folium.Marker([info["lat"], info["lon"]], popup=name, tooltip=name).add_to(m)
-        st_folium(m, use_container_width=True, height=400)
+        st_folium(m, use_container_width=True, height=450)
     else:
         st.map(pd.DataFrame([{"lat": v["lat"], "lon": v["lon"]} for v in communes_data.values()]))
-
-    if show_coords_table:
-        st.table(pd.DataFrame([{"الجماعة": k, "خط العرض": v["lat"], "خط الطول": v["lon"]} for k, v in communes_data.items()]))
 
 # --- 3. الشبكة ---
 with tabs[2]:
@@ -281,13 +227,12 @@ with tabs[3]:
 # --- 5. RIV ---
 with tabs[4]:
     st.subheader("📐 حساب التماثل النسبي (RIV)")
-    if len(communes_list) >= 2:
-        ca, cb = st.columns(2)
-        c1 = ca.selectbox("الجماعة A:", communes_list, index=0)
-        c2 = cb.selectbox("الجماعة B:", communes_list, index=1 if len(communes_list) > 1 else 0)
-        dist = math.sqrt((communes_data[c1]["lat"]-communes_data[c2]["lat"])**2 + (communes_data[c1]["lon"]-communes_data[c2]["lon"])**2) * 111
-        riv = max(min(100 - dist*0.5, 100), 10)
-        st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
+    ca, cb = st.columns(2)
+    c1 = ca.selectbox("الجماعة A:", communes_list, index=0)
+    c2 = cb.selectbox("الجماعة B:", communes_list, index=1)
+    dist = math.sqrt((communes_data[c1]["lat"]-communes_data[c2]["lat"])**2 + (communes_data[c1]["lon"]-communes_data[c2]["lon"])**2) * 111
+    riv = max(min(100 - dist*0.5, 100), 10)
+    st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
 
 # --- 6. المحاكي ---
 with tabs[5]:
@@ -301,14 +246,11 @@ with tabs[5]:
 with tabs[6]:
     st.subheader("🎯 البصمة اللسانية")
     if HAS_PLOTLY:
-        sel = st.multiselect("اختر المقارنة:", communes_list, default=communes_list[:2])
+        sel = st.multiselect("اختر المناطق للمقارنة:", communes_list, default=communes_list[:2])
         fig = go.Figure()
         for c in sel:
-            score_phon = communes_data[c]["phon"] * weight_phon
-            score_lex = communes_data[c]["lex"] * weight_lex
-            score_morph = communes_data[c]["morph"] * weight_morph
             fig.add_trace(go.Scatterpolar(
-                r=[score_phon, score_lex, score_morph], 
+                r=[communes_data[c]["phon"], communes_data[c]["lex"], communes_data[c]["morph"]], 
                 theta=['الصوتيات', 'المعجم', 'الصرف'], fill='toself', name=c
             ))
         fig.update_layout(template="plotly_white", margin=dict(l=10, r=10, t=10, b=10))
@@ -326,7 +268,7 @@ with tabs[7]:
 # --- 9. الشجرة ---
 with tabs[8]:
     st.subheader("🌲 الشجرة اللهجية")
-    if HAS_PLOTLY and len(communes_list) >= 2:
+    if HAS_PLOTLY:
         X = np.random.rand(len(communes_list), 2) * 10
         fig = ff.create_dendrogram(X, labels=communes_list)
         fig.update_layout(template="plotly_white")
