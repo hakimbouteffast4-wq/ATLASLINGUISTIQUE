@@ -2,9 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import math
+import io
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة وإغلاق الشريط الجانبي نهائياً
+# 1. إعدادات الصفحة وإغلاق الشريط الجانبي
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro",
@@ -31,7 +32,7 @@ except Exception:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 3. CSS مخصص لإخفاء الشريط الجانبي وتوسيع الصفحة
+# 3. CSS مخصص للخط الأسود وتوسيع الشاشة
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -129,74 +130,79 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. البيانات الافتراضية
+# 4. إدارة البيانات والـ Excel
 # ---------------------------------------------------------
-def get_default_data():
-    return {
-        "بولمان": {"lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط", "phon": 8, "lex": 7, "morph": 6},
-        "كيكو": {"lat": 33.2089, "lon": -4.8483, "dialect": "أمازيغية آيت سغروشن", "group": "الأطلس المتوسط", "phon": 9, "lex": 9, "morph": 8},
-        "إموزار مرموشة": {"lat": 33.4833, "lon": -4.2833, "dialect": "أمازيغية آيت وراين", "group": "الأطلس المتوسط", "phon": 9, "lex": 8, "morph": 9},
-        "ميسور": {"lat": 33.0486, "lon": -3.9961, "dialect": "عربية دارجة محليّة", "group": "السهوب الشرقية", "phon": 4, "lex": 3, "morph": 4},
-        "أوطاط الحاج": {"lat": 33.3483, "lon": -3.7022, "dialect": "عربية دارجة شرقية", "group": "ملوية العليا", "phon": 3, "lex": 3, "morph": 3},
-        "سرغينة": {"lat": 33.2833, "lon": -4.5000, "dialect": "أمازيغية/عربية", "group": "منطقة تماس", "phon": 7, "lex": 6, "morph": 6}
-    }
+def get_default_df():
+    return pd.DataFrame([
+        {"الجماعة": "بولمان", "lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط", "phon": 8.0, "lex": 7.0, "morph": 6.0},
+        {"الجماعة": "كيكو", "lat": 33.2089, "lon": -4.8483, "dialect": "أمازيغية آيت سغروشن", "group": "الأطلس المتوسط", "phon": 9.0, "lex": 9.0, "morph": 8.0},
+        {"الجماعة": "إموزار مرموشة", "lat": 33.4833, "lon": -4.2833, "dialect": "أمازيغية آيت وراين", "group": "الأطلس المتوسط", "phon": 9.0, "lex": 8.0, "morph": 9.0},
+        {"الجماعة": "ميسور", "lat": 33.0486, "lon": -3.9961, "dialect": "عربية دارجة محليّة", "group": "السهوب الشرقية", "phon": 4.0, "lex": 3.0, "morph": 4.0},
+        {"الجماعة": "أوطاط الحاج", "lat": 33.3483, "lon": -3.7022, "dialect": "عربية دارجة شرقية", "group": "ملوية العليا", "phon": 3.0, "lex": 3.0, "morph": 3.0},
+        {"الجماعة": "سرغينة", "lat": 33.2833, "lon": -4.5000, "dialect": "أمازيغية/عربية", "group": "منطقة تماس", "phon": 7.0, "lex": 6.0, "morph": 6.0}
+    ])
+
+def to_excel_bytes(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Linguistic_Data')
+    return output.getvalue()
 
 # ---------------------------------------------------------
-# 5. الواجهة الأساسية وقسم استيراد الملفات
+# 5. الواجهة الرئيسية
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>منصة القياس اللهجي والتحليل الإحصائي السريع - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# قسم رفع الملفات
-with st.expander("📥 استيراد بيانات جديدة من ملف Excel", expanded=False):
-    uploaded_file = st.file_uploader("قم برفع ملف Excel (.xlsx أو .xls)", type=["xlsx", "xls"])
+# وحدة استيراد وتصدير Excel
+with st.expander("📁 إدارة وتوليد بيانات Excel", expanded=False):
+    col_up, col_down = st.columns([2, 1])
     
-    col_dl1, col_dl2 = st.columns([2, 1])
-    with col_dl1:
-        st.caption("⚠️ يجب أن يحتوي الملف على الأعمدة التالية: `الجماعة` (أو `commune`), `lat`, `lon`, `dialect`, `group`, `phon`, `lex`, `morph`")
+    with col_up:
+        uploaded_file = st.file_uploader("استيراد ملف Excel (.xlsx / .xls)", type=["xlsx", "xls"])
     
-    # خيار تحميل نموذج جاهز
-    sample_df = pd.DataFrame([
-        {"الجماعة": k, "lat": v["lat"], "lon": v["lon"], "dialect": v["dialect"], "group": v["group"], "phon": v["phon"], "lex": v["lex"], "morph": v["morph"]}
-        for k, v in get_default_data().items()
-    ])
+    with col_down:
+        st.write("##### 📥 تحميل النموذج")
+        sample_bytes = to_excel_bytes(get_default_df())
+        st.download_button(
+            label="تحميل نموذج Excel فارغ/معد",
+            data=sample_bytes,
+            file_name="Atlas_Linguistic_Sample.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
-communes_data = {}
-
+# معالجة الملف المرفوع أو استخدام الافتراضي
 if uploaded_file is not None:
     try:
-        df_uploaded = pd.read_excel(uploaded_file)
-        
-        # توحيد أسماء الأعمدة لتجنب الأخطاء
-        col_map = {
-            'الجماعة': 'commune', 'المنطقة': 'group', 'اللهجة': 'dialect',
-            'خط العرض': 'lat', 'خط الطول': 'lon',
-            'صوتيات': 'phon', 'معجم': 'lex', 'صرف': 'morph'
-        }
-        df_uploaded.rename(columns=col_map, inplace=True)
-        
-        # تحويل البيانات إلى قاموس المنصة
-        for _, row in df_uploaded.iterrows():
-            c_name = str(row.get('commune', row.get('الجماعة', f"مركز_{_}")))
-            communes_data[c_name] = {
-                "lat": float(row.get('lat', 33.0)),
-                "lon": float(row.get('lon', -4.0)),
-                "dialect": str(row.get('dialect', 'غير محدد')),
-                "group": str(row.get('group', 'عام')),
-                "phon": float(row.get('phon', 5)),
-                "lex": float(row.get('lex', 5)),
-                "morph": float(row.get('morph', 5))
-            }
-        st.success(f"✅ تم استيراد {len(communes_data)} مركزاً بنجاح من ملف Excel!")
+        raw_df = pd.read_excel(uploaded_file)
+        st.success("✅ تم استيراد البيانات بنجاح من الملف المرفوع!")
     except Exception as e:
-        st.error(f"❌ حدث خطأ أثناء قراءة الملف: {e}")
-        communes_data = get_default_data()
+        st.error(f"❌ تعذر قراءة الملف: {e}")
+        raw_df = get_default_df()
 else:
-    communes_data = get_default_data()
+    raw_df = get_default_df()
+
+# محرر البيانات التفاعلي المباشر
+with st.expander("✏️ محرر البيانات المباشر (يمكنك التعديل أو الإضافة هنا)", expanded=False):
+    edited_df = st.data_editor(raw_df, num_rows="dynamic", use_container_width=True)
+
+# بناء قاموس البيانات النشط
+communes_data = {}
+for _, row in edited_df.iterrows():
+    c_name = str(row.get('الجماعة', row.get('commune', f"مركز_{_}")))
+    communes_data[c_name] = {
+        "lat": float(row.get('lat', 33.0)),
+        "lon": float(row.get('lon', -4.0)),
+        "dialect": str(row.get('dialect', 'غير محدد')),
+        "group": str(row.get('group', 'عام')),
+        "phon": float(row.get('phon', 5)),
+        "lex": float(row.get('lex', 5)),
+        "morph": float(row.get('morph', 5))
+    }
 
 communes_list = list(communes_data.keys())
 
-# بطاقات المؤشرات السريعة
+# بطاقات المؤشرات
 st.markdown(f"""
     <div class="metric-grid">
         <div class="cyber-card"><h4>المراكز النشطة</h4><p>{len(communes_list)} مراكز</p></div>
@@ -228,7 +234,7 @@ with tabs[0]:
 # --- 2. الخريطة ---
 with tabs[1]:
     st.subheader("🗺️ التوزيع الجغرافي للمراكز اللسانية")
-    if HAS_FOLIUM:
+    if HAS_FOLIUM and len(communes_data) > 0:
         avg_lat = sum([v["lat"] for v in communes_data.values()]) / len(communes_data)
         avg_lon = sum([v["lon"] for v in communes_data.values()]) / len(communes_data)
         m = folium.Map(location=[avg_lat, avg_lon], zoom_start=9, tiles="OpenStreetMap")
@@ -291,7 +297,7 @@ with tabs[5]:
 # --- 7. الرادار ---
 with tabs[6]:
     st.subheader("🎯 البصمة اللسانية")
-    if HAS_PLOTLY:
+    if HAS_PLOTLY and len(communes_list) > 0:
         sel = st.multiselect("اختر المناطق للمقارنة:", communes_list, default=communes_list[:min(2, len(communes_list))])
         fig = go.Figure()
         for c in sel:
@@ -320,13 +326,24 @@ with tabs[8]:
         fig.update_layout(template="plotly_white")
         st.plotly_chart(fig, use_container_width=True)
 
-# --- 10. المصفوفات ---
+# --- 10. المصفوفات والتصدير ---
 with tabs[9]:
     st.subheader("🔢 مصفوفة المسافات اللسانية")
     n = len(communes_list)
-    mat = np.zeros((n, n))
-    for i, ci in enumerate(communes_list):
-        for j, cj in enumerate(communes_list):
-            d = math.sqrt((communes_data[ci]["lat"]-communes_data[cj]["lat"])**2 + (communes_data[ci]["lon"]-communes_data[cj]["lon"])**2) * 111
-            mat[i][j] = round(d * 0.3 if communes_data[ci]["group"] == communes_data[cj]["group"] else 40 + d * 0.2, 1)
-    st.table(pd.DataFrame(mat, index=communes_list, columns=communes_list))
+    if n > 0:
+        mat = np.zeros((n, n))
+        for i, ci in enumerate(communes_list):
+            for j, cj in enumerate(communes_list):
+                d = math.sqrt((communes_data[ci]["lat"]-communes_data[cj]["lat"])**2 + (communes_data[ci]["lon"]-communes_data[cj]["lon"])**2) * 111
+                mat[i][j] = round(d * 0.3 if communes_data[ci]["group"] == communes_data[cj]["group"] else 40 + d * 0.2, 1)
+        
+        matrix_df = pd.DataFrame(mat, index=communes_list, columns=communes_list)
+        st.table(matrix_df)
+        
+        # زر تصدير المصفوفة إلى Excel
+        st.download_button(
+            label="📥 تصدير مصفوفة المسافات إلى Excel",
+            data=to_excel_bytes(matrix_df.reset_index().rename(columns={'index': 'الجماعة'})),
+            file_name="Linguistic_Distance_Matrix.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
