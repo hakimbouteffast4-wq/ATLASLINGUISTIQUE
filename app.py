@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import math
-import io
 
 # ---------------------------------------------------------
 # 1. إعدادات الصفحة وإغلاق الشريط الجانبي
@@ -130,7 +129,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. إدارة البيانات والـ Excel
+# 4. إدارة البيانات والملفات
 # ---------------------------------------------------------
 def get_default_df():
     return pd.DataFrame([
@@ -142,11 +141,8 @@ def get_default_df():
         {"الجماعة": "سرغينة", "lat": 33.2833, "lon": -4.5000, "dialect": "أمازيغية/عربية", "group": "منطقة تماس", "phon": 7.0, "lex": 6.0, "morph": 6.0}
     ])
 
-def to_excel_bytes(df):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Linguistic_Data')
-    return output.getvalue()
+def convert_df_to_csv(df):
+    return df.to_csv(index=False).encode('utf-8-sig')
 
 # ---------------------------------------------------------
 # 5. الواجهة الرئيسية
@@ -154,28 +150,31 @@ def to_excel_bytes(df):
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>منصة القياس اللهجي والتحليل الإحصائي السريع - إقليم بولمان</p>", unsafe_allow_html=True)
 
-# وحدة استيراد وتصدير Excel
-with st.expander("📁 إدارة وتوليد بيانات Excel", expanded=False):
+# وحدة استيراد وتصدير البيانات
+with st.expander("📁 إدارة وتوليد البيانات (Excel / CSV)", expanded=False):
     col_up, col_down = st.columns([2, 1])
     
     with col_up:
-        uploaded_file = st.file_uploader("استيراد ملف Excel (.xlsx / .xls)", type=["xlsx", "xls"])
+        uploaded_file = st.file_uploader("استيراد ملف (Excel أو CSV)", type=["xlsx", "xls", "csv"])
     
     with col_down:
         st.write("##### 📥 تحميل النموذج")
-        sample_bytes = to_excel_bytes(get_default_df())
+        sample_csv = convert_df_to_csv(get_default_df())
         st.download_button(
-            label="تحميل نموذج Excel فارغ/معد",
-            data=sample_bytes,
-            file_name="Atlas_Linguistic_Sample.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            label="تحميل نموذج البيانات (CSV / Excel)",
+            data=sample_csv,
+            file_name="Atlas_Linguistic_Sample.csv",
+            mime="text/csv"
         )
 
-# معالجة الملف المرفوع أو استخدام الافتراضي
+# معالجة الملف المرفوع
 if uploaded_file is not None:
     try:
-        raw_df = pd.read_excel(uploaded_file)
-        st.success("✅ تم استيراد البيانات بنجاح من الملف المرفوع!")
+        if uploaded_file.name.endswith('.csv'):
+            raw_df = pd.read_csv(uploaded_file)
+        else:
+            raw_df = pd.read_excel(uploaded_file)
+        st.success("✅ تم استيراد البيانات بنجاح!")
     except Exception as e:
         st.error(f"❌ تعذر قراءة الملف: {e}")
         raw_df = get_default_df()
@@ -183,7 +182,7 @@ else:
     raw_df = get_default_df()
 
 # محرر البيانات التفاعلي المباشر
-with st.expander("✏️ محرر البيانات المباشر (يمكنك التعديل أو الإضافة هنا)", expanded=False):
+with st.expander("✏️ محرر البيانات المباشر", expanded=False):
     edited_df = st.data_editor(raw_df, num_rows="dynamic", use_container_width=True)
 
 # بناء قاموس البيانات النشط
@@ -340,10 +339,10 @@ with tabs[9]:
         matrix_df = pd.DataFrame(mat, index=communes_list, columns=communes_list)
         st.table(matrix_df)
         
-        # زر تصدير المصفوفة إلى Excel
+        # زر تصدير المصفوفة
         st.download_button(
-            label="📥 تصدير مصفوفة المسافات إلى Excel",
-            data=to_excel_bytes(matrix_df.reset_index().rename(columns={'index': 'الجماعة'})),
-            file_name="Linguistic_Distance_Matrix.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            label="📥 تصدير مصفوفة المسافات (CSV / Excel)",
+            data=convert_df_to_csv(matrix_df.reset_index().rename(columns={'index': 'الجماعة'})),
+            file_name="Linguistic_Distance_Matrix.csv",
+            mime="text/csv"
         )
