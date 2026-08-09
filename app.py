@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. استدعاء آمن للمكتبات الخارجية
+# 2. استدعاء آمن للمكتبات الخارجية تجنباً للتعليق
 # ---------------------------------------------------------
 try:
     import folium
@@ -31,11 +31,11 @@ except Exception:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 3. تنسيق CSS شامل للواجهة والواجهة الجانبية والمدخلات
+# 3. تنسيق CSS الشامل (خط أسود 100% + إظهار زر التحكم بـ Sidebar)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* إجبار كافة النصوص والمدخلات على اللون الأسود الداكن */
+    /* إجبار النص والمدخلات والجداول على اللون الأسود الكامل */
     * {
         font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
         color: #000000 !important;
@@ -46,11 +46,12 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
 
+    /* إخفاء قوائم Streamlit الافتراضية مع الإبقاء على أزرار التحكم */
     #MainMenu, footer { 
         display: none !important; 
     }
 
-    /* إظهار وتنسيق زر طي/فتح الواجهة الجانبية */
+    /* إظهار وتنسيق زر التحكم في الواجهة الجانبية (طي/إظهار) */
     [data-testid="stSidebarCollapseButton"], 
     [data-testid="collapsedControl"],
     button[aria-label="Close sidebar"],
@@ -71,18 +72,18 @@ st.markdown("""
     /* تنسيق الواجهة الجانبية */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
-        border-left: 1px solid #e2e8f0;
-        padding: 1rem 0.5rem !important;
+        border-left: 1px solid #cbd5e1;
+        padding: 1rem 0.8rem !important;
     }
     
     [data-testid="stSidebar"] * {
         color: #000000 !important;
     }
 
-    /* تنسيق القوائم المنسدلة وخانات الاختيار داخل الشريط الجانبي */
+    /* عناصر الإدخال داخل القائمة الجانبية */
     div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
         background-color: #f1f5f9 !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #94a3b8 !important;
         border-radius: 8px !important;
     }
 
@@ -100,7 +101,7 @@ st.markdown("""
     }
 
     th {
-        background-color: #f1f5f9 !important;
+        background-color: #e2e8f0 !important;
         font-weight: 800 !important;
         color: #000000 !important;
     }
@@ -136,7 +137,7 @@ st.markdown("""
     }
 
     .cyber-card {
-        flex: 1 1 140px;
+        flex: 1 1 130px;
         background: #ffffff !important;
         border: 1px solid #cbd5e1;
         border-radius: 12px;
@@ -172,7 +173,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. تحميل البيانات الأساسية
+# 4. قاعدة البيانات
 # ---------------------------------------------------------
 @st.cache_data
 def load_communes():
@@ -188,47 +189,52 @@ def load_communes():
 all_communes_data = load_communes()
 
 # ---------------------------------------------------------
-# 5. الواجهة الجانبية التفاعلية (Sidebar)
+# 5. الواجهة الجانبية الشاملة والتفاعلية (Sidebar)
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("## ⚙️ لوحة التحكم والتصفية")
+    st.markdown("## ⚙️ إعدادات التحليل")
     st.divider()
     
-    st.markdown("### 🔍 تصفية المجموعات اللسانية")
+    # 1. تصفية المراكز حسب المنطقة
+    st.markdown("### 🗺️ تصفية المجموعات")
     all_groups = list(set([v["group"] for v in all_communes_data.values()]))
     selected_groups = st.multiselect(
-        "اختر المناطق المطلوب عرضها:",
+        "اختر المناطق:",
         options=all_groups,
         default=all_groups
     )
     
     st.divider()
-    st.markdown("### 📐 أوزان الحساب اللساني")
-    weight_phon = st.slider("وزن المستوى الصوتيات:", 0.0, 1.0, 0.4, 0.1)
-    weight_lex = st.slider("وزن المستوى المعجمي:", 0.0, 1.0, 0.4, 0.1)
-    weight_morph = st.slider("وزن المستوى الصرفي:", 0.0, 1.0, 0.2, 0.1)
+    
+    # 2. تعديل أوزان المستويات اللسانية
+    st.markdown("### ⚖️ أوزان التحليل")
+    weight_phon = st.slider("الصوتيات (Phonology):", 0.0, 1.0, 0.4, 0.1)
+    weight_lex = st.slider("المعجم (Lexicon):", 0.0, 1.0, 0.4, 0.1)
+    weight_morph = st.slider("الصرف (Morphology):", 0.0, 1.0, 0.2, 0.1)
     
     st.divider()
+    
+    # 3. خيارات العرض
     st.markdown("### 👁️ خيارات العرض")
-    show_metrics_cards = st.checkbox("إظهار بطاقات الإحصاءات السريعة", value=True)
-    show_raw_coords = st.checkbox("عرض الإحداثيات الجغرافية", value=False)
+    show_metrics_cards = st.checkbox("إظهار المؤشرات السريعة", value=True)
+    show_coords_table = st.checkbox("إظهار مصفوفة الإحداثيات", value=False)
     
     st.divider()
-    st.caption("AtlasLinguistique Pro v3.0 🚀")
+    st.caption("💡 يمكن طي هذه القائمة أو إظهارها في أي وقت عبر السهم بالزاوية.")
 
 # ---------------------------------------------------------
-# 6. تصفية البيانات ديناميكياً بناءً على إعدادات الشريط الجانبي
+# 6. ربط مدخلات الواجهة الجانبية ببيانات التطبيق
 # ---------------------------------------------------------
 communes_data = {k: v for k, v in all_communes_data.items() if v["group"] in selected_groups}
 
 if not communes_data:
-    st.warning("⚠️ يرجى اختيار مجموعة لسانية واحدة على الأقل من الواجهة الجانبية.")
+    st.warning("⚠️ يرجى اختيار مجموعة لسانية واحدة على الأقل من القائمة الجانبية.")
     st.stop()
 
 communes_list = list(communes_data.keys())
 
 # ---------------------------------------------------------
-# 7. الواجهة الأساسية
+# 7. واجهة التطبيق الرئيسية
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>منصة القياس اللهجي والتحليل الإحصائي السريع - إقليم بولمان</p>", unsafe_allow_html=True)
@@ -236,7 +242,7 @@ st.markdown("<p class='sub-title'>منصة القياس اللهجي والتح�
 if show_metrics_cards:
     st.markdown(f"""
         <div class="metric-grid">
-            <div class="cyber-card"><h4>المراكز المعروضة</h4><p>{len(communes_list)} / 6</p></div>
+            <div class="cyber-card"><h4>المراكز النشطة</h4><p>{len(communes_list)} / 6</p></div>
             <div class="cyber-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
             <div class="cyber-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
             <div class="cyber-card"><h4>الاعتشاش</h4><p>Entropy H</p></div>
@@ -245,7 +251,7 @@ if show_metrics_cards:
     """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 8. التبويبات
+# 8. التبويبات التفاعلية
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", "🗺️ الخريطة", "🕸️ الشبكة", "📖 المعجم", 
@@ -264,7 +270,7 @@ with tabs[0]:
 
 # --- 2. الخريطة ---
 with tabs[1]:
-    st.subheader("🗺️ التوزيع الجغرافي للمناطق المختارة")
+    st.subheader("🗺️ التوزيع الجغرافي للمناطق المحددة")
     if HAS_FOLIUM:
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
         for name, info in communes_data.items():
@@ -273,8 +279,8 @@ with tabs[1]:
     else:
         st.map(pd.DataFrame([{"lat": v["lat"], "lon": v["lon"]} for v in communes_data.values()]))
 
-    if show_raw_coords:
-        st.markdown("#### 📍 الإحداثيات الجغرافية:")
+    if show_coords_table:
+        st.markdown("#### 📍 جدول الإحداثيات:")
         st.table(pd.DataFrame([{"الجماعة": k, "خط العرض": v["lat"], "خط الطول": v["lon"]} for k, v in communes_data.items()]))
 
 # --- 3. الشبكة ---
@@ -317,7 +323,7 @@ with tabs[4]:
         riv = max(min(100 - dist*0.5, 100), 10)
         st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
     else:
-        st.info("قم باختيار جماعات أكثر من الشريط الجانبي للمقارنة.")
+        st.info("اختر منطقتين على الأقل من القائمة الجانبية لحساب التماثل.")
 
 # --- 6. المحاكي ---
 with tabs[5]:
@@ -329,12 +335,12 @@ with tabs[5]:
 
 # --- 7. الرادار ---
 with tabs[6]:
-    st.subheader("🎯 البصمة اللسانية وفق أوزان لوحة التحكم")
+    st.subheader("🎯 البصمة اللسانية وفق الأوزان المحددة")
     if HAS_PLOTLY:
-        sel = st.multiselect("اختر الجماعات للمقارنة:", communes_list, default=communes_list[:2])
+        sel = st.multiselect("اختر المقارنة:", communes_list, default=communes_list[:2])
         fig = go.Figure()
         for c in sel:
-            # تطبيق الأوزان المختارة من الشريط الجانبي
+            # تطبيق أوزان الواجهة الجانبية
             score_phon = communes_data[c]["phon"] * weight_phon
             score_lex = communes_data[c]["lex"] * weight_lex
             score_morph = communes_data[c]["morph"] * weight_morph
@@ -365,7 +371,7 @@ with tabs[8]:
 
 # --- 10. المصفوفات ---
 with tabs[9]:
-    st.subheader("🔢 مصفوفة المسافات اللسانية للجماعات المختارة")
+    st.subheader("🔢 مصفوفة المسافات اللسانية للمناطق المحددة")
     n = len(communes_list)
     mat = np.zeros((n, n))
     for i, ci in enumerate(communes_list):
