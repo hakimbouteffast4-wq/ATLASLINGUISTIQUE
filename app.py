@@ -10,11 +10,11 @@ st.set_page_config(
     page_title="AtlasLinguistique Pro",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state="expanded"  # تظهر مفتوحة ويمكن طيها وإعادتها بأي وقت
+    initial_sidebar_state="expanded"
 )
 
 # ---------------------------------------------------------
-# 2. استدعاء آمن ومباشر للمكتبات الخارجية
+# 2. استدعاء آمن للمكتبات الخارجية
 # ---------------------------------------------------------
 try:
     import folium
@@ -31,11 +31,11 @@ except Exception:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 3. CSS معدّل لإظهار زر التحكم بالواجهة الجانبية والخط الأسود
+# 3. تنسيق CSS شامل للواجهة والواجهة الجانبية والمدخلات
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* إجبار كل النصوص على اللون الأسود الكامل */
+    /* إجبار كافة النصوص والمدخلات على اللون الأسود الداكن */
     * {
         font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
         color: #000000 !important;
@@ -46,12 +46,11 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
 
-    /* إخفاء القائمة الرئيسية والتذييل فقط، مع الإبقاء على زر الفتح والطي */
     #MainMenu, footer { 
         display: none !important; 
     }
 
-    /* إظهار وتنسيق زر التحكم في الواجهة الجانبية (فتح/طي) */
+    /* إظهار وتنسيق زر طي/فتح الواجهة الجانبية */
     [data-testid="stSidebarCollapseButton"], 
     [data-testid="collapsedControl"],
     button[aria-label="Close sidebar"],
@@ -62,7 +61,6 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    /* توضيح أيقونة السهم باللون الأسود */
     [data-testid="stSidebarCollapseButton"] svg, 
     [data-testid="collapsedControl"] svg {
         fill: #000000 !important;
@@ -74,10 +72,18 @@ st.markdown("""
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-left: 1px solid #e2e8f0;
+        padding: 1rem 0.5rem !important;
     }
     
     [data-testid="stSidebar"] * {
         color: #000000 !important;
+    }
+
+    /* تنسيق القوائم المنسدلة وخانات الاختيار داخل الشريط الجانبي */
+    div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
+        background-color: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
     }
 
     [data-testid="stAppViewBlockContainer"] {
@@ -85,7 +91,7 @@ st.markdown("""
         max-width: 100% !important;
     }
 
-    /* الجداول والجداول التفاعلية */
+    /* الجداول */
     table, div[data-testid="stTable"], div[data-testid="stDataFrame"] {
         background-color: #ffffff !important;
         border-radius: 8px !important;
@@ -166,7 +172,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. تحميل البيانات
+# 4. تحميل البيانات الأساسية
 # ---------------------------------------------------------
 @st.cache_data
 def load_communes():
@@ -179,42 +185,67 @@ def load_communes():
         "سرغينة": {"lat": 33.2833, "lon": -4.5000, "dialect": "أمازيغية/عربية", "group": "منطقة تماس", "phon": 7, "lex": 6, "morph": 6}
     }
 
-communes_data = load_communes()
+all_communes_data = load_communes()
+
+# ---------------------------------------------------------
+# 5. الواجهة الجانبية التفاعلية (Sidebar)
+# ---------------------------------------------------------
+with st.sidebar:
+    st.markdown("## ⚙️ لوحة التحكم والتصفية")
+    st.divider()
+    
+    st.markdown("### 🔍 تصفية المجموعات اللسانية")
+    all_groups = list(set([v["group"] for v in all_communes_data.values()]))
+    selected_groups = st.multiselect(
+        "اختر المناطق المطلوب عرضها:",
+        options=all_groups,
+        default=all_groups
+    )
+    
+    st.divider()
+    st.markdown("### 📐 أوزان الحساب اللساني")
+    weight_phon = st.slider("وزن المستوى الصوتيات:", 0.0, 1.0, 0.4, 0.1)
+    weight_lex = st.slider("وزن المستوى المعجمي:", 0.0, 1.0, 0.4, 0.1)
+    weight_morph = st.slider("وزن المستوى الصرفي:", 0.0, 1.0, 0.2, 0.1)
+    
+    st.divider()
+    st.markdown("### 👁️ خيارات العرض")
+    show_metrics_cards = st.checkbox("إظهار بطاقات الإحصاءات السريعة", value=True)
+    show_raw_coords = st.checkbox("عرض الإحداثيات الجغرافية", value=False)
+    
+    st.divider()
+    st.caption("AtlasLinguistique Pro v3.0 🚀")
+
+# ---------------------------------------------------------
+# 6. تصفية البيانات ديناميكياً بناءً على إعدادات الشريط الجانبي
+# ---------------------------------------------------------
+communes_data = {k: v for k, v in all_communes_data.items() if v["group"] in selected_groups}
+
+if not communes_data:
+    st.warning("⚠️ يرجى اختيار مجموعة لسانية واحدة على الأقل من الواجهة الجانبية.")
+    st.stop()
+
 communes_list = list(communes_data.keys())
 
 # ---------------------------------------------------------
-# 5. القائمة الجانبية (Sidebar)
-# ---------------------------------------------------------
-with st.sidebar:
-    st.markdown("## ⚙️ لوحة التحكم")
-    st.divider()
-    st.info("💡 يمكنك طي وإرجاع هذه القائمة في أي وقت بالضغط على زر السهم أعلى الزاوية.")
-    
-    st.markdown("### 📌 معلومات سريعة")
-    st.markdown("* **المنطقة:** إقليم بولمان")
-    st.markdown("* **عدد الجماعات:** 6 مراكز")
-    st.markdown("* **النظام:** AtlasLinguistique Pro")
-    st.divider()
-    st.caption("الإصدار 2.6 - تحكم كامل بالطَّي والظهور 🎛️")
-
-# ---------------------------------------------------------
-# 6. الواجهة الأساسية
+# 7. الواجهة الأساسية
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>منصة القياس اللهجي والتحليل الإحصائي السريع - إقليم بولمان</p>", unsafe_allow_html=True)
 
-st.markdown("""
-    <div class="metric-grid">
-        <div class="cyber-card"><h4>الجماعات</h4><p>6 مراكز</p></div>
-        <div class="cyber-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
-        <div class="cyber-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
-        <div class="cyber-card"><h4>الاعتشاش</h4><p>Entropy H</p></div>
-        <div class="cyber-card"><h4>الدقة</h4><p>99.2%</p></div>
-    </div>
-""", unsafe_allow_html=True)
+if show_metrics_cards:
+    st.markdown(f"""
+        <div class="metric-grid">
+            <div class="cyber-card"><h4>المراكز المعروضة</h4><p>{len(communes_list)} / 6</p></div>
+            <div class="cyber-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
+            <div class="cyber-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
+            <div class="cyber-card"><h4>الاعتشاش</h4><p>Entropy H</p></div>
+            <div class="cyber-card"><h4>الدقة</h4><p>99.2%</p></div>
+        </div>
+    """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 7. التبويبات
+# 8. التبويبات
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", "🗺️ الخريطة", "🕸️ الشبكة", "📖 المعجم", 
@@ -233,7 +264,7 @@ with tabs[0]:
 
 # --- 2. الخريطة ---
 with tabs[1]:
-    st.subheader("🗺️ التوزيع الجغرافي")
+    st.subheader("🗺️ التوزيع الجغرافي للمناطق المختارة")
     if HAS_FOLIUM:
         m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
         for name, info in communes_data.items():
@@ -241,6 +272,10 @@ with tabs[1]:
         st_folium(m, use_container_width=True, height=400)
     else:
         st.map(pd.DataFrame([{"lat": v["lat"], "lon": v["lon"]} for v in communes_data.values()]))
+
+    if show_raw_coords:
+        st.markdown("#### 📍 الإحداثيات الجغرافية:")
+        st.table(pd.DataFrame([{"الجماعة": k, "خط العرض": v["lat"], "خط الطول": v["lon"]} for k, v in communes_data.items()]))
 
 # --- 3. الشبكة ---
 with tabs[2]:
@@ -274,12 +309,15 @@ with tabs[3]:
 # --- 5. RIV ---
 with tabs[4]:
     st.subheader("📐 حساب التماثل النسبي (RIV)")
-    ca, cb = st.columns(2)
-    c1 = ca.selectbox("الجماعة A:", communes_list, index=0)
-    c2 = cb.selectbox("الجماعة B:", communes_list, index=1)
-    dist = math.sqrt((communes_data[c1]["lat"]-communes_data[c2]["lat"])**2 + (communes_data[c1]["lon"]-communes_data[c2]["lon"])**2) * 111
-    riv = max(min(100 - dist*0.5, 100), 10)
-    st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
+    if len(communes_list) >= 2:
+        ca, cb = st.columns(2)
+        c1 = ca.selectbox("الجماعة A:", communes_list, index=0)
+        c2 = cb.selectbox("الجماعة B:", communes_list, index=1 if len(communes_list) > 1 else 0)
+        dist = math.sqrt((communes_data[c1]["lat"]-communes_data[c2]["lat"])**2 + (communes_data[c1]["lon"]-communes_data[c2]["lon"])**2) * 111
+        riv = max(min(100 - dist*0.5, 100), 10)
+        st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
+    else:
+        st.info("قم باختيار جماعات أكثر من الشريط الجانبي للمقارنة.")
 
 # --- 6. المحاكي ---
 with tabs[5]:
@@ -291,13 +329,17 @@ with tabs[5]:
 
 # --- 7. الرادار ---
 with tabs[6]:
-    st.subheader("🎯 البصمة اللسانية")
+    st.subheader("🎯 البصمة اللسانية وفق أوزان لوحة التحكم")
     if HAS_PLOTLY:
-        sel = st.multiselect("اختر:", communes_list, default=["كيكو", "ميسور"])
+        sel = st.multiselect("اختر الجماعات للمقارنة:", communes_list, default=communes_list[:2])
         fig = go.Figure()
         for c in sel:
+            # تطبيق الأوزان المختارة من الشريط الجانبي
+            score_phon = communes_data[c]["phon"] * weight_phon
+            score_lex = communes_data[c]["lex"] * weight_lex
+            score_morph = communes_data[c]["morph"] * weight_morph
             fig.add_trace(go.Scatterpolar(
-                r=[communes_data[c]["phon"], communes_data[c]["lex"], communes_data[c]["morph"]], 
+                r=[score_phon, score_lex, score_morph], 
                 theta=['الصوتيات', 'المعجم', 'الصرف'], fill='toself', name=c
             ))
         fig.update_layout(template="plotly_white", margin=dict(l=10, r=10, t=10, b=10))
@@ -315,15 +357,15 @@ with tabs[7]:
 # --- 9. الشجرة ---
 with tabs[8]:
     st.subheader("🌲 الشجرة اللهجية")
-    if HAS_PLOTLY:
-        X = np.array([[1, 2], [1, 3], [2, 2], [7, 8], [8, 8], [6, 7]])
+    if HAS_PLOTLY and len(communes_list) >= 2:
+        X = np.random.rand(len(communes_list), 2) * 10
         fig = ff.create_dendrogram(X, labels=communes_list)
         fig.update_layout(template="plotly_white")
         st.plotly_chart(fig, use_container_width=True)
 
 # --- 10. المصفوفات ---
 with tabs[9]:
-    st.subheader("🔢 مصفوفة المسافات اللسانية")
+    st.subheader("🔢 مصفوفة المسافات اللسانية للجماعات المختارة")
     n = len(communes_list)
     mat = np.zeros((n, n))
     for i, ci in enumerate(communes_list):
