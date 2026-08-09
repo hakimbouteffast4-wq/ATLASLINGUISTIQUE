@@ -4,43 +4,151 @@ import numpy as np
 import math
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة والتخزين المباشر (تفعيل الواجهة الجانبية)
+# 1. إعدادات الصفحة (يجب أن تكون أول أمر Streamlit دائماً)
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state="expanded" # تم توسيع الواجهة الجانبية افتراضياً
+    initial_sidebar_state="expanded"
 )
 
 # ---------------------------------------------------------
-# 2. تحسين استدعاء المكتبات الثقيلة لتعمل عند الحاجة فقط
+# 2. استدعاء آمن ومباشر للمكتبات الخارجية تجنباً لتجميد السيرفر
 # ---------------------------------------------------------
-@st.cache_resource
-def load_heavy_libraries():
-    try:
-        import folium
-        from streamlit_folium import st_folium
-        has_folium = True
-    except ImportError:
-        folium, st_folium, has_folium = None, None, False
+try:
+    import folium
+    from streamlit_folium import st_folium
+    HAS_FOLIUM = True
+except Exception:
+    HAS_FOLIUM = False
 
-    try:
-        import plotly.graph_objects as go
-        import plotly.figure_factory as ff
-        has_plotly = True
-    except ImportError:
-        go, ff, has_plotly = None, None, False
-
-    return folium, st_folium, has_folium, go, ff, has_plotly
-
-folium, st_folium, HAS_FOLIUM, go, ff, HAS_PLOTLY = load_heavy_libraries()
+try:
+    import plotly.graph_objects as go
+    import plotly.figure_factory as ff
+    HAS_PLOTLY = True
+except Exception:
+    HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 3. تخزين البيانات الثابتة في الذاكرة (Caching) لسرعة التحميل
+# 3. تنسيق CSS سريع وبدون جلب خطوط خارجية معطلة
+# ---------------------------------------------------------
+st.markdown("""
+    <style>
+    /* إجبار النص باللون الأسود الكامل */
+    * {
+        font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
+        color: #000000 !important;
+    }
+    
+    html, body, .stApp {
+        direction: rtl;
+        background-color: #f8fafc !important;
+    }
+
+    /* القائمة الجانبية */
+    [data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-left: 1px solid #e2e8f0;
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: #000000 !important;
+    }
+
+    /* إخفاء القوائم غير الضرورية */
+    #MainMenu, footer, header { display: none !important; }
+    
+    [data-testid="stAppViewBlockContainer"] {
+        padding: 1rem !important;
+        max-width: 100% !important;
+    }
+
+    /* الجداول والجداول التفاعلية */
+    table, div[data-testid="stTable"], div[data-testid="stDataFrame"] {
+        background-color: #ffffff !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        width: 100% !important;
+    }
+
+    th {
+        background-color: #f1f5f9 !important;
+        font-weight: 800 !important;
+        color: #000000 !important;
+    }
+
+    td {
+        font-weight: 600 !important;
+        color: #000000 !important;
+    }
+
+    /* العناوين والبطاقات */
+    .main-title {
+        color: #0284c7 !important;
+        font-weight: 900;
+        font-size: 2rem;
+        text-align: center;
+        margin: 0;
+    }
+
+    .sub-title {
+        text-align: center;
+        color: #334155 !important;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .metric-grid {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .cyber-card {
+        flex: 1 1 140px;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 8px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .cyber-card h4 { margin: 0; font-size: 0.75rem; font-weight: 800; color: #000000 !important; }
+    .cyber-card p { margin: 2px 0 0 0; font-size: 1.1rem; font-weight: 900; color: #0284c7 !important; }
+
+    /* التبويبات */
+    .stTabs [data-baseweb="tab-list"] { gap: 4px; }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000000 !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+    }
+    
+    .stTabs [aria-selected="true"] * {
+        color: #ffffff !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# 4. تحميل البيانات (تخزين بسيط للبيانات فقط)
 # ---------------------------------------------------------
 @st.cache_data
-def get_communes_data():
+def load_communes():
     return {
         "بولمان": {"lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط", "phon": 8, "lex": 7, "morph": 6},
         "كيكو": {"lat": 33.2089, "lon": -4.8483, "dialect": "أمازيغية آيت سغروشن", "group": "الأطلس المتوسط", "phon": 9, "lex": 9, "morph": 8},
@@ -50,105 +158,22 @@ def get_communes_data():
         "سرغينة": {"lat": 33.2833, "lon": -4.5000, "dialect": "أمازيغية/عربية", "group": "منطقة تماس", "phon": 7, "lex": 6, "morph": 6}
     }
 
-@st.cache_data
-def get_calculated_matrices(communes_data):
-    communes_list = list(communes_data.keys())
-    n = len(communes_list)
-    matrix = np.zeros((n, n))
-    
-    for i, c1 in enumerate(communes_list):
-        for j, c2 in enumerate(communes_list):
-            p1, p2 = communes_data[c1], communes_data[c2]
-            dist = math.sqrt((p1["lat"] - p2["lat"])**2 + (p1["lon"] - p2["lon"])**2) * 111.0
-            is_same = p1["group"] == p2["group"]
-            matrix[i][j] = round(dist * 0.3 if is_same else 40 + dist * 0.2, 1)
-            
-    return pd.DataFrame(matrix, index=communes_list, columns=communes_list)
-
-communes_data = get_communes_data()
+communes_data = load_communes()
 communes_list = list(communes_data.keys())
 
 # ---------------------------------------------------------
-# 4. CSS خفيف وشديد السرعة (تم إزالة إخفاء الواجهة الجانبية)
-# ---------------------------------------------------------
-st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&display=swap');
-    
-    * { font-family: 'Cairo', sans-serif !important; color: #000000 !important; }
-    
-    html, body, .stApp {
-        direction: rtl;
-        background-color: #f8fafc !important;
-    }
-
-    /* إخفاء القوائم العلوية والسفلية فقط */
-    #MainMenu, footer, header { display: none !important; }
-    
-    [data-testid="stAppViewBlockContainer"] {
-        padding: 1rem !important;
-        max-width: 100% !important;
-    }
-    
-    /* تنسيق الواجهة الجانبية لتتناسب مع التصميم */
-    [data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-left: 1px solid #cbd5e1;
-    }
-    [data-testid="stSidebar"] * {
-        color: #000000 !important;
-    }
-
-    /* تحسين سرعة الجداول والخط الأسود */
-    table, div[data-testid="stTable"] {
-        background-color: #ffffff !important;
-        border-radius: 8px !important;
-        border: 1px solid #cbd5e1 !important;
-        width: 100% !important;
-    }
-
-    th { background-color: #f1f5f9 !important; font-weight: 800 !important; color: #000000 !important; }
-    td { font-weight: 600 !important; color: #000000 !important; }
-
-    /* العناوين والبطاقات */
-    .main-title { color: #0284c7 !important; font-weight: 900; font-size: 2rem; text-align: center; margin: 0; }
-    .sub-title { text-align: center; color: #334155 !important; font-size: 0.85rem; font-weight: 700; margin-bottom: 15px; }
-
-    .metric-grid { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
-    .cyber-card {
-        flex: 1 1 150px; background: #ffffff !important; border: 1px solid #cbd5e1;
-        border-radius: 12px; padding: 8px; text-align: center;
-    }
-    .cyber-card h4 { margin: 0; font-size: 0.75rem; font-weight: 800; }
-    .cyber-card p { margin: 2px 0 0 0; font-size: 1.1rem; font-weight: 900; color: #0284c7 !important; }
-
-    /* التبويبات السريعة */
-    .stTabs [data-baseweb="tab-list"] { gap: 4px; overflow-x: auto !important; }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 20px; padding: 6px 14px; font-weight: 700; font-size: 0.8rem;
-        background: #ffffff !important; border: 1px solid #cbd5e1 !important;
-    }
-    .stTabs [aria-selected="true"] { background: #0284c7 !important; color: #ffffff !important; }
-    .stTabs [aria-selected="true"] * { color: #ffffff !important; }
-    </style>
-""", unsafe_allow_html=True)
-
-# ---------------------------------------------------------
-# 5. الواجهة الجانبية (Sidebar)
+# 5. القائمة الجانبية (Sidebar)
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("## ⚙️ لوحة التحكم")
-    st.markdown("---")
-    st.info("مرحباً بك في منصة التحليل اللساني لإقليم بولمان. يمكنك استخدام هذه المساحة لإضافة فلاتر أو إعدادات متقدمة مستقبلاً.")
-    
+    st.divider()
+    st.info("منصة التحليل اللساني لإقليم بولمان.")
     st.markdown("### 📌 معلومات سريعة")
-    st.markdown("""
-    * **المنطقة:** إقليم بولمان
-    * **عدد الجماعات المدروسة:** 6
-    * **النظام:** AtlasLinguistique Pro
-    """)
-    st.markdown("---")
-    st.caption("الإصدار 2.0 - محسّن للسرعة الفائقة ⚡")
+    st.markdown("* **المنطقة:** إقليم بولمان")
+    st.markdown("* **عدد الجماعات:** 6 مراكز")
+    st.markdown("* **النظام:** AtlasLinguistique Pro")
+    st.divider()
+    st.caption("الإصدار 2.5 - خفيف وسريع 🚀")
 
 # ---------------------------------------------------------
 # 6. الواجهة الأساسية
@@ -167,7 +192,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 7. التبويبات الفائقة السرعة
+# 7. التبويبات
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", "🗺️ الخريطة", "🕸️ الشبكة", "📖 المعجم", 
@@ -228,10 +253,10 @@ with tabs[3]:
 with tabs[4]:
     st.subheader("📐 حساب التماثل النسبي (RIV)")
     ca, cb = st.columns(2)
-    c1, c2 = ca.selectbox("الجماعة A:", communes_list, index=0), cb.selectbox("الجماعة B:", communes_list, index=1)
+    c1 = ca.selectbox("الجماعة A:", communes_list, index=0)
+    c2 = cb.selectbox("الجماعة B:", communes_list, index=1)
     dist = math.sqrt((communes_data[c1]["lat"]-communes_data[c2]["lat"])**2 + (communes_data[c1]["lon"]-communes_data[c2]["lon"])**2) * 111
     riv = max(min(100 - dist*0.5, 100), 10)
-    
     st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
 
 # --- 6. المحاكي ---
@@ -249,8 +274,10 @@ with tabs[6]:
         sel = st.multiselect("اختر:", communes_list, default=["كيكو", "ميسور"])
         fig = go.Figure()
         for c in sel:
-            fig.add_trace(go.Scatterpolar(r=[communes_data[c]["phon"], communes_data[c]["lex"], communes_data[c]["morph"]], 
-                                         theta=['الصوتيات', 'المعجم', 'الصرف'], fill='toself', name=c))
+            fig.add_trace(go.Scatterpolar(
+                r=[communes_data[c]["phon"], communes_data[c]["lex"], communes_data[c]["morph"]], 
+                theta=['الصوتيات', 'المعجم', 'الصرف'], fill='toself', name=c
+            ))
         fig.update_layout(template="plotly_white", margin=dict(l=10, r=10, t=10, b=10))
         st.plotly_chart(fig, use_container_width=True)
 
@@ -258,7 +285,10 @@ with tabs[6]:
 with tabs[7]:
     st.subheader("🌐 اختبار مانتل والاعتشاش")
     st.info("معامل ارتباط مانتل Mantel r = 0.843")
-    st.table(pd.DataFrame([{"الجماعة": c, "مؤشر Entropy": round(-0.5*math.log2(0.5)*2 if communes_data[c]["dialect"]=="أمازيغية/عربية" else 0.6, 2)} for c in communes_list]))
+    st.table(pd.DataFrame([
+        {"الجماعة": c, "مؤشر Entropy": round(-0.5*math.log2(0.5)*2 if communes_data[c]["dialect"]=="أمازيغية/عربية" else 0.6, 2)} 
+        for c in communes_list
+    ]))
 
 # --- 9. الشجرة ---
 with tabs[8]:
@@ -272,6 +302,10 @@ with tabs[8]:
 # --- 10. المصفوفات ---
 with tabs[9]:
     st.subheader("🔢 مصفوفة المسافات اللسانية")
-    # استدعاء المصفوفة المحسوبة مسبقاً
-    matrix_df = get_calculated_matrices(communes_data)
-    st.table(matrix_df)
+    n = len(communes_list)
+    mat = np.zeros((n, n))
+    for i, ci in enumerate(communes_list):
+        for j, cj in enumerate(communes_list):
+            d = math.sqrt((communes_data[ci]["lat"]-communes_data[cj]["lat"])**2 + (communes_data[ci]["lon"]-communes_data[cj]["lon"])**2) * 111
+            mat[i][j] = round(d * 0.3 if communes_data[ci]["group"] == communes_data[cj]["group"] else 40 + d * 0.2, 1)
+    st.table(pd.DataFrame(mat, index=communes_list, columns=communes_list))
