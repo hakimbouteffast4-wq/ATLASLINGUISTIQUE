@@ -4,13 +4,13 @@ import numpy as np
 import math
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة والتخزين المباشر
+# 1. إعدادات الصفحة والتخزين المباشر (تفعيل الواجهة الجانبية)
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded" # تم توسيع الواجهة الجانبية افتراضياً
 )
 
 # ---------------------------------------------------------
@@ -69,7 +69,7 @@ communes_data = get_communes_data()
 communes_list = list(communes_data.keys())
 
 # ---------------------------------------------------------
-# 4. CSS خفيف وشديد السرعة لتثبيت اللون الأسود الداكن
+# 4. CSS خفيف وشديد السرعة (تم إزالة إخفاء الواجهة الجانبية)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -82,12 +82,21 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
 
-    /* إخفاء القوائم غير الضرورية لزيادة سرعة الرندر */
-    #MainMenu, footer, header, [data-testid="stSidebar"] { display: none !important; }
+    /* إخفاء القوائم العلوية والسفلية فقط */
+    #MainMenu, footer, header { display: none !important; }
     
     [data-testid="stAppViewBlockContainer"] {
         padding: 1rem !important;
         max-width: 100% !important;
+    }
+    
+    /* تنسيق الواجهة الجانبية لتتناسب مع التصميم */
+    [data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-left: 1px solid #cbd5e1;
+    }
+    [data-testid="stSidebar"] * {
+        color: #000000 !important;
     }
 
     /* تحسين سرعة الجداول والخط الأسود */
@@ -125,7 +134,24 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 5. الواجهة الأساسية
+# 5. الواجهة الجانبية (Sidebar)
+# ---------------------------------------------------------
+with st.sidebar:
+    st.markdown("## ⚙️ لوحة التحكم")
+    st.markdown("---")
+    st.info("مرحباً بك في منصة التحليل اللساني لإقليم بولمان. يمكنك استخدام هذه المساحة لإضافة فلاتر أو إعدادات متقدمة مستقبلاً.")
+    
+    st.markdown("### 📌 معلومات سريعة")
+    st.markdown("""
+    * **المنطقة:** إقليم بولمان
+    * **عدد الجماعات المدروسة:** 6
+    * **النظام:** AtlasLinguistique Pro
+    """)
+    st.markdown("---")
+    st.caption("الإصدار 2.0 - محسّن للسرعة الفائقة ⚡")
+
+# ---------------------------------------------------------
+# 6. الواجهة الأساسية
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>منصة القياس اللهجي والتحليل الإحصائي السريع - إقليم بولمان</p>", unsafe_allow_html=True)
@@ -141,7 +167,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 6. التبويبات الفائقة السرعة
+# 7. التبويبات الفائقة السرعة
 # ---------------------------------------------------------
 tabs = st.tabs([
     "🏠 الرئيسية", "🗺️ الخريطة", "🕸️ الشبكة", "📖 المعجم", 
@@ -246,6 +272,6 @@ with tabs[8]:
 # --- 10. المصفوفات ---
 with tabs[9]:
     st.subheader("🔢 مصفوفة المسافات اللسانية")
-    # استدعاء المصفوفة المحسوبة مسبقاً وبسرعة فائقة
+    # استدعاء المصفوفة المحسوبة مسبقاً
     matrix_df = get_calculated_matrices(communes_data)
     st.table(matrix_df)
