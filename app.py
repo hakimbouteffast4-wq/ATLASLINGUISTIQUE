@@ -4,17 +4,17 @@ import numpy as np
 import math
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة (يجب أن تكون أول أمر Streamlit دائماً)
+# 1. إعدادات الصفحة
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AtlasLinguistique Pro",
     page_icon="🧬",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"  # تظهر مفتوحة ويمكن طيها وإعادتها بأي وقت
 )
 
 # ---------------------------------------------------------
-# 2. استدعاء آمن ومباشر للمكتبات الخارجية تجنباً لتجميد السيرفر
+# 2. استدعاء آمن ومباشر للمكتبات الخارجية
 # ---------------------------------------------------------
 try:
     import folium
@@ -31,11 +31,11 @@ except Exception:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 3. تنسيق CSS سريع وبدون جلب خطوط خارجية معطلة
+# 3. CSS معدّل لإظهار زر التحكم بالواجهة الجانبية والخط الأسود
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* إجبار النص باللون الأسود الكامل */
+    /* إجبار كل النصوص على اللون الأسود الكامل */
     * {
         font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
         color: #000000 !important;
@@ -46,7 +46,31 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
 
-    /* القائمة الجانبية */
+    /* إخفاء القائمة الرئيسية والتذييل فقط، مع الإبقاء على زر الفتح والطي */
+    #MainMenu, footer { 
+        display: none !important; 
+    }
+
+    /* إظهار وتنسيق زر التحكم في الواجهة الجانبية (فتح/طي) */
+    [data-testid="stSidebarCollapseButton"], 
+    [data-testid="collapsedControl"],
+    button[aria-label="Close sidebar"],
+    button[aria-label="Open sidebar"] {
+        display: flex !important;
+        visibility: visible !important;
+        color: #000000 !important;
+        background-color: transparent !important;
+    }
+
+    /* توضيح أيقونة السهم باللون الأسود */
+    [data-testid="stSidebarCollapseButton"] svg, 
+    [data-testid="collapsedControl"] svg {
+        fill: #000000 !important;
+        color: #000000 !important;
+        stroke: #000000 !important;
+    }
+
+    /* تنسيق الواجهة الجانبية */
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-left: 1px solid #e2e8f0;
@@ -56,9 +80,6 @@ st.markdown("""
         color: #000000 !important;
     }
 
-    /* إخفاء القوائم غير الضرورية */
-    #MainMenu, footer, header { display: none !important; }
-    
     [data-testid="stAppViewBlockContainer"] {
         padding: 1rem !important;
         max-width: 100% !important;
@@ -145,7 +166,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. تحميل البيانات (تخزين بسيط للبيانات فقط)
+# 4. تحميل البيانات
 # ---------------------------------------------------------
 @st.cache_data
 def load_communes():
@@ -167,13 +188,14 @@ communes_list = list(communes_data.keys())
 with st.sidebar:
     st.markdown("## ⚙️ لوحة التحكم")
     st.divider()
-    st.info("منصة التحليل اللساني لإقليم بولمان.")
+    st.info("💡 يمكنك طي وإرجاع هذه القائمة في أي وقت بالضغط على زر السهم أعلى الزاوية.")
+    
     st.markdown("### 📌 معلومات سريعة")
     st.markdown("* **المنطقة:** إقليم بولمان")
     st.markdown("* **عدد الجماعات:** 6 مراكز")
     st.markdown("* **النظام:** AtlasLinguistique Pro")
     st.divider()
-    st.caption("الإصدار 2.5 - خفيف وسريع 🚀")
+    st.caption("الإصدار 2.6 - تحكم كامل بالطَّي والظهور 🎛️")
 
 # ---------------------------------------------------------
 # 6. الواجهة الأساسية
