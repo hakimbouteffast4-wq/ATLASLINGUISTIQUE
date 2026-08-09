@@ -31,11 +31,10 @@ except Exception:
     HAS_PLOTLY = False
 
 # ---------------------------------------------------------
-# 3. CSS مخصص لإخفاء الشريط الجانبي نهائياً وتوسيع الصفحة
+# 3. CSS مخصص لإخفاء الشريط الجانبي وتوسيع الصفحة
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* إجبار النص والمدخلات والجداول على اللون الأسود الكامل */
     * {
         font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
         color: #000000 !important;
@@ -46,7 +45,6 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
 
-    /* إخفاء القوائم والشرائط الجانبية نهائياً */
     #MainMenu, footer, header, [data-testid="stSidebar"], [data-testid="collapsedControl"] { 
         display: none !important; 
     }
@@ -56,7 +54,6 @@ st.markdown("""
         max-width: 100% !important;
     }
 
-    /* الجداول */
     table, div[data-testid="stTable"], div[data-testid="stDataFrame"] {
         background-color: #ffffff !important;
         border-radius: 8px !important;
@@ -72,7 +69,6 @@ st.markdown("""
 
     td { font-weight: 600 !important; color: #000000 !important; }
 
-    /* العناوين والبطاقات */
     .main-title {
         color: #0284c7 !important;
         font-weight: 900;
@@ -110,7 +106,6 @@ st.markdown("""
     .cyber-card h4 { margin: 0; font-size: 0.8rem; font-weight: 800; color: #000000 !important; }
     .cyber-card p { margin: 4px 0 0 0; font-size: 1.2rem; font-weight: 900; color: #0284c7 !important; }
 
-    /* التبويبات */
     .stTabs [data-baseweb="tab-list"] { gap: 6px; }
     .stTabs [data-baseweb="tab"] {
         border-radius: 20px;
@@ -134,10 +129,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. قاعدة البيانات
+# 4. البيانات الافتراضية
 # ---------------------------------------------------------
-@st.cache_data
-def load_communes():
+def get_default_data():
     return {
         "بولمان": {"lat": 33.3617, "lon": -4.7314, "dialect": "أمازيغية/عربية", "group": "الأطلس المتوسط", "phon": 8, "lex": 7, "morph": 6},
         "كيكو": {"lat": 33.2089, "lon": -4.8483, "dialect": "أمازيغية آيت سغروشن", "group": "الأطلس المتوسط", "phon": 9, "lex": 9, "morph": 8},
@@ -147,18 +141,65 @@ def load_communes():
         "سرغينة": {"lat": 33.2833, "lon": -4.5000, "dialect": "أمازيغية/عربية", "group": "منطقة تماس", "phon": 7, "lex": 6, "morph": 6}
     }
 
-communes_data = load_communes()
-communes_list = list(communes_data.keys())
-
 # ---------------------------------------------------------
-# 5. الواجهة الأساسية (بدون قائمة جانبية)
+# 5. الواجهة الأساسية وقسم استيراد الملفات
 # ---------------------------------------------------------
 st.markdown("<h1 class='main-title'>💎 AtlasLinguistique Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>منصة القياس اللهجي والتحليل الإحصائي السريع - إقليم بولمان</p>", unsafe_allow_html=True)
 
-st.markdown("""
+# قسم رفع الملفات
+with st.expander("📥 استيراد بيانات جديدة من ملف Excel", expanded=False):
+    uploaded_file = st.file_uploader("قم برفع ملف Excel (.xlsx أو .xls)", type=["xlsx", "xls"])
+    
+    col_dl1, col_dl2 = st.columns([2, 1])
+    with col_dl1:
+        st.caption("⚠️ يجب أن يحتوي الملف على الأعمدة التالية: `الجماعة` (أو `commune`), `lat`, `lon`, `dialect`, `group`, `phon`, `lex`, `morph`")
+    
+    # خيار تحميل نموذج جاهز
+    sample_df = pd.DataFrame([
+        {"الجماعة": k, "lat": v["lat"], "lon": v["lon"], "dialect": v["dialect"], "group": v["group"], "phon": v["phon"], "lex": v["lex"], "morph": v["morph"]}
+        for k, v in get_default_data().items()
+    ])
+
+communes_data = {}
+
+if uploaded_file is not None:
+    try:
+        df_uploaded = pd.read_excel(uploaded_file)
+        
+        # توحيد أسماء الأعمدة لتجنب الأخطاء
+        col_map = {
+            'الجماعة': 'commune', 'المنطقة': 'group', 'اللهجة': 'dialect',
+            'خط العرض': 'lat', 'خط الطول': 'lon',
+            'صوتيات': 'phon', 'معجم': 'lex', 'صرف': 'morph'
+        }
+        df_uploaded.rename(columns=col_map, inplace=True)
+        
+        # تحويل البيانات إلى قاموس المنصة
+        for _, row in df_uploaded.iterrows():
+            c_name = str(row.get('commune', row.get('الجماعة', f"مركز_{_}")))
+            communes_data[c_name] = {
+                "lat": float(row.get('lat', 33.0)),
+                "lon": float(row.get('lon', -4.0)),
+                "dialect": str(row.get('dialect', 'غير محدد')),
+                "group": str(row.get('group', 'عام')),
+                "phon": float(row.get('phon', 5)),
+                "lex": float(row.get('lex', 5)),
+                "morph": float(row.get('morph', 5))
+            }
+        st.success(f"✅ تم استيراد {len(communes_data)} مركزاً بنجاح من ملف Excel!")
+    except Exception as e:
+        st.error(f"❌ حدث خطأ أثناء قراءة الملف: {e}")
+        communes_data = get_default_data()
+else:
+    communes_data = get_default_data()
+
+communes_list = list(communes_data.keys())
+
+# بطاقات المؤشرات السريعة
+st.markdown(f"""
     <div class="metric-grid">
-        <div class="cyber-card"><h4>المراكز</h4><p>6 مراكز</p></div>
+        <div class="cyber-card"><h4>المراكز النشطة</h4><p>{len(communes_list)} مراكز</p></div>
         <div class="cyber-card"><h4>أدوات القياس</h4><p>Dialectometry</p></div>
         <div class="cyber-card"><h4>ارتباط مانتل</h4><p>r = 0.84</p></div>
         <div class="cyber-card"><h4>الاعتشاش</h4><p>Entropy H</p></div>
@@ -188,7 +229,9 @@ with tabs[0]:
 with tabs[1]:
     st.subheader("🗺️ التوزيع الجغرافي للمراكز اللسانية")
     if HAS_FOLIUM:
-        m = folium.Map(location=[33.25, -4.35], zoom_start=9, tiles="OpenStreetMap")
+        avg_lat = sum([v["lat"] for v in communes_data.values()]) / len(communes_data)
+        avg_lon = sum([v["lon"] for v in communes_data.values()]) / len(communes_data)
+        m = folium.Map(location=[avg_lat, avg_lon], zoom_start=9, tiles="OpenStreetMap")
         for name, info in communes_data.items():
             folium.Marker([info["lat"], info["lon"]], popup=name, tooltip=name).add_to(m)
         st_folium(m, use_container_width=True, height=450)
@@ -198,7 +241,7 @@ with tabs[1]:
 # --- 3. الشبكة ---
 with tabs[2]:
     st.subheader("🕸️ شبكة العلاقات اللسانية")
-    if HAS_PLOTLY:
+    if HAS_PLOTLY and len(communes_list) > 1:
         edge_x, edge_y = [], []
         for i, c1 in enumerate(communes_list):
             for j, c2 in enumerate(communes_list):
@@ -227,12 +270,15 @@ with tabs[3]:
 # --- 5. RIV ---
 with tabs[4]:
     st.subheader("📐 حساب التماثل النسبي (RIV)")
-    ca, cb = st.columns(2)
-    c1 = ca.selectbox("الجماعة A:", communes_list, index=0)
-    c2 = cb.selectbox("الجماعة B:", communes_list, index=1)
-    dist = math.sqrt((communes_data[c1]["lat"]-communes_data[c2]["lat"])**2 + (communes_data[c1]["lon"]-communes_data[c2]["lon"])**2) * 111
-    riv = max(min(100 - dist*0.5, 100), 10)
-    st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
+    if len(communes_list) >= 2:
+        ca, cb = st.columns(2)
+        c1 = ca.selectbox("الجماعة A:", communes_list, index=0)
+        c2 = cb.selectbox("الجماعة B:", communes_list, index=1)
+        dist = math.sqrt((communes_data[c1]["lat"]-communes_data[c2]["lat"])**2 + (communes_data[c1]["lon"]-communes_data[c2]["lon"])**2) * 111
+        riv = max(min(100 - dist*0.5, 100), 10)
+        st.metric("نسبة التماثل RIV", f"{riv:.1f} %")
+    else:
+        st.info("يتطلب حساب التماثل توفر منطقتين على الأقل.")
 
 # --- 6. المحاكي ---
 with tabs[5]:
@@ -246,7 +292,7 @@ with tabs[5]:
 with tabs[6]:
     st.subheader("🎯 البصمة اللسانية")
     if HAS_PLOTLY:
-        sel = st.multiselect("اختر المناطق للمقارنة:", communes_list, default=communes_list[:2])
+        sel = st.multiselect("اختر المناطق للمقارنة:", communes_list, default=communes_list[:min(2, len(communes_list))])
         fig = go.Figure()
         for c in sel:
             fig.add_trace(go.Scatterpolar(
@@ -268,7 +314,7 @@ with tabs[7]:
 # --- 9. الشجرة ---
 with tabs[8]:
     st.subheader("🌲 الشجرة اللهجية")
-    if HAS_PLOTLY:
+    if HAS_PLOTLY and len(communes_list) >= 2:
         X = np.random.rand(len(communes_list), 2) * 10
         fig = ff.create_dendrogram(X, labels=communes_list)
         fig.update_layout(template="plotly_white")
