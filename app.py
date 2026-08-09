@@ -1,157 +1,106 @@
 import streamlit as st
 import pandas as pd
+import folium
+from streamlit_folium import st_folium
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import linkage, dendrogram
 import matplotlib.pyplot as plt
-import plotly.express as px
 
-# 1. إعدادات الصفحة الرئيسية
-st.set_page_config(
-    page_title="AtlasLinguistique", 
-    layout="wide", 
-    page_icon="🗺️"
-)
+# إعدادات الصفحة
+st.set_page_config(page_title="AtlasLinguistique", layout="wide", page_icon="🗺️")
 
+# عنوان المنصة الرئيسي
 st.title("🗺️ منصة AtlasLinguistique للجغرافيا والقياس اللساني")
-st.caption("إقليم بولمان - دراسة ميدانية وقياسية تفاعلية (Gabmap Style)")
+st.caption("إقليم بولمان - دراسة ميدانية وقياسية تفاعلية")
 
-# 2. القائمة الجانبية (Sidebar)
-st.sidebar.header("⚙️ إعدادات المشروع والبيانات")
-project_name = st.sidebar.text_input("اسم المشروع/المنطقة", "أطلس إقليم بولمان")
-st.sidebar.info("المنظومة مجهزة لجمع البيانات الميدانية والتحليل اللساني والتجميع الشجري.")
+# القائمة الجانبية
+st.sidebar.header("⚙️ إعدادات المشروع")
+st.sidebar.text_input("اسم المشروع/المنطقة", "أطلس إقليم بولمان")
+st.sidebar.info("المنظومة مجهزة لجمع البيانات الميدانية والتحليل التلقائي.")
 
-# رفع ملف البيانات للتحليل الجغرافي اللساني
-uploaded_file = st.sidebar.file_uploader("📂 رفع ملف البيانات (CSV أو TSV)", type=['csv', 'tsv'])
-
-# 3. تبويبات المنصة الرئيسية
-tab1, tab2, tab3 = st.tabs([
-    "📝 1. إدخال وتجميع البيانات", 
-    "🌳 2. الشجرة اللهجية (Dendrogram)", 
-    "🗺️ 3. الخريطة الفضائية التفاعلية"
+# تبويبات المنصة الشاملة
+tab1, tab2, tab3, tab4 = st.tabs([
+    "📱 1. إدخال وتجميع البيانات", 
+    "📊 2. محرك القياس اللساني", 
+    "🗺️ 3. الخريطة الفضائية التفاعلية", 
+    "📄 4. التقارير والتصدير"
 ])
 
-# ---------------------------------------------------------
-# التبويب الأول: تجميع البيانات الميدانية
-# ---------------------------------------------------------
+# ----------------------------------------------------
+# 1. تبويب إدخال وتجميع البيانات
+# ----------------------------------------------------
 with tab1:
     st.header("تجميع البيانات والمتون اللسانية الميدانية")
     col1, col2 = st.columns(2)
-    
     with col1:
-        tribe = st.text_input("الجماعة الترابية / القبيلة", "كيكو")
-        tifinagh = st.text_input("اللفظة بالتيفيناغ", "ⵜⴰⴳⴰⵏⵜ")
-        ipa = st.text_input("(IPA) الرمز الصوتي الدولي", "tagant")
-    
+        commune = st.text_input("الجماعة الترابية / القبيلة", "كيكو")
+        word_tifinagh = st.text_input("اللفظة بالتيفيناغ", "ⵜⴰⴳⴰⵏⵜ")
+        word_ipa = st.text_input("الرمز الصوتي الدولي (IPA)", "tagant")
     with col2:
-        lat = st.number_input("(Latitude) خط العرض", value=33.2000, format="%.4f")
-        lon = st.number_input("(Longitude) خط الطول", value=-4.7000, format="%.4f")
-        audio = st.file_uploader("(WAV/MP3) رفع تسجيل صوتي", type=['wav', 'mp3'])
-        
+        lat = st.number_input("خط العرض (Latitude)", value=33.2000, format="%.4f")
+        lon = st.number_input("خط الطول (Longitude)", value=-4.7000, format="%.4f")
+        audio_file = st.file_uploader("رفع تسجيل صوتي (WAV/MP3)", type=["wav", "mp3"])
+    
     if st.button("حفظ المفردة الميدانية"):
-        st.success(f"تم حفظ المفردة [{tifinagh}] المنسوبة لمنطقة [{tribe}] بنجاح!")
+        st.success(f"تم حفظ اللفظة [{word_tifinagh}] الخاصة بجماعة [{commune}] بنجاح!")
 
-# ---------------------------------------------------------
-# معالجة الملف المرفوع (إن وجد)
-# ---------------------------------------------------------
-df = None
-if uploaded_file is not None:
-    try:
-        if uploaded_file.name.endswith('.tsv'):
-            df = pd.read_csv(uploaded_file, sep='\t')
-        else:
-            df = pd.read_csv(uploaded_file)
-    except Exception as e:
-        st.sidebar.error(f"خطأ في قراءة الملف: {e}")
-
-# ---------------------------------------------------------
-# التبويب الثاني: الشجرة اللهجية (Dendrogram)
-# ---------------------------------------------------------
+# ----------------------------------------------------
+# 2. تبويب محرك القياس اللساني
+# ----------------------------------------------------
 with tab2:
-    st.header("🌳 الشجرة اللهجية (Dendrogram)")
+    st.header("التحليل الإحصائي والشجرة اللهجية (Dendrogram)")
     
-    if df is not None:
-        st.sidebar.subheader("إعدادات الأعمدة")
-        cols = list(df.columns)
-        
-        place_col = st.sidebar.selectbox("عمود أسماء القرى/المناطق:", cols, index=0)
-        
-        # خوارزمية مبسطة لحساب الشجرة اللهجية بناء على البيانات
-        st.subheader("التجميع الشجري للهجات (Hierarchical Clustering)")
-        
-        try:
-            # استخراج أسماء المناطق
-            places = df[place_col].astype(str).unique()
-            n_places = len(places)
-            
-            if n_places > 1:
-                # مصفوفة مسافات افتراضية/حسابية لغرض العرض والتحليل
-                np.random.seed(42)
-                dist_matrix = pdist(np.random.rand(n_places, 5), metric='euclidean')
-                Z = linkage(dist_matrix, method='ward')
-                
-                fig, ax = plt.subplots(figsize=(10, 5))
-                dendrogram(Z, labels=places, ax=ax, leaf_rotation=90)
-                plt.title("الشجرة اللهجية التقسيمية (Dendrogram)")
-                plt.ylabel("المسافة اللسانية (Distance)")
-                
-                st.pyplot(fig)
-            else:
-                st.warning("الملف يحتوي على منطقة واحدة فقط. يلزم منطقتان أو أكثر لرسم الشجرة.")
-        except Exception as e:
-            st.error(f"حدث خطأ أثناء حساب الشجرة اللهجية: {e}")
-    else:
-        st.info("👈 يرجى رفع ملف البيانات (CSV/TSV) من القائمة الجانبية لعرض الشجرة اللهجية.")
+    # بيانات عينة وهمية لإقليم بولمان للتجربة
+    sample_data = {
+        'الجماعة': ['كيكو', 'تيمحضيت', 'أنجيل', 'أوطاط الحاج'],
+        'سمة_صوتية_1': [1, 1, 1, 0],
+        'سمة_صوتية_2': [1, 1, 0, 0],
+        'سمة_معجمية_1': [1, 0, 1, 0],
+        'سمة_معجمية_2': [0, 1, 1, 0]
+    }
+    df = pd.DataFrame(sample_data)
+    st.write("📊 **بيانات العينة اللسانية للجماعات:**", df)
+    
+    # حساب مصفوفة المسافات والشجرة اللهجية
+    features = df.iloc[:, 1:].values
+    dist_matrix = pdist(features, metric='jaccard')
+    Z = linkage(dist_matrix, method='ward')
+    
+    # رسم الشجرة
+    fig, ax = plt.subplots(figsize=(8, 4))
+    dendrogram(Z, labels=df['الجماعة'].values, ax=ax)
+    plt.title("الشجرة اللهجية لتكتلات إقليم بولمان (Ward's Method)")
+    st.pyplot(fig)
 
-# ---------------------------------------------------------
-# التبويب الثالث: الخريطة الفضائية والتجميع الجغرافي (آمن من الأخطاء)
-# ---------------------------------------------------------
+# ----------------------------------------------------
+# 3. تبويب الخريطة الفضائية التفاعلية
+# ----------------------------------------------------
 with tab3:
-    st.header("🗺️ خريطة التقسيم اللهجي (Cluster Map)")
+    st.header("الخريطة الفضائية التفاعلية")
     
-    if df is not None:
-        cols = list(df.columns)
-        
-        # اختيار الأعمدة مع تحذيرات صحيحة
-        lat_col = st.sidebar.selectbox("عمود خط العرض (Latitude):", cols, index=min(1, len(cols)-1))
-        lon_col = st.sidebar.selectbox("عمود خط الطول (Longitude):", cols, index=min(2, len(cols)-1))
-        
-        n_clusters = st.slider("اختر عدد المجموعات اللهجية (Clusters):", min_value=2, max_value=10, value=4)
-        
-        # التحقق الأمني: هل العمود المختار للإحداثيات هو نفسه عمود الأسماء؟
-        if lat_col != place_col and lon_col != place_col:
-            try:
-                # تحويل الإحداثيات إلى أرقام وتجاهل النصوص لتجنب TypeError
-                df_map = df.copy()
-                df_map[lat_col] = pd.to_numeric(df_map[lat_col], errors='coerce')
-                df_map[lon_col] = pd.to_numeric(df_map[lon_col], errors='coerce')
-                
-                # حذف الصفوف التي لا تحتوي على إحداثيات رقمية صحيحة
-                df_map = df_map.dropna(subset=[lat_col, lon_col])
-                
-                if not df_map.empty:
-                    # إضافة تقسيم افتراضي للمجموعات
-                    df_map['Cluster'] = (np.arange(len(df_map)) % n_clusters) + 1
-                    df_map['Cluster'] = df_map['Cluster'].astype(str)
-                    
-                    fig_cluster = px.scatter_mapbox(
-                        df_map, 
-                        lat=lat_col, 
-                        lon=lon_col, 
-                        hover_name=place_col,
-                        color='Cluster', 
-                        zoom=7, 
-                        height=600, 
-                        size_max=15,
-                        title="توزيع اللهجات على الخريطة حسب التجميع الشجري"
-                    )
-                    fig_cluster.update_layout(mapbox_style="open-street-map")
-                    st.plotly_chart(fig_cluster, use_container_style=True)
-                else:
-                    st.error("❌ الأعمدة المختارة لخطوط الطول والعرض لا تحتوي على أرقام إحداثيات صالحة.")
-            except Exception as e:
-                st.error(f"تعذر رسم الخريطة: {e}")
-        else:
-            st.warning("⚠️ يرجى اختيار أعمدة (Latitude) و (Longitude) الصحيحة التي تحتوي على أرقام الإحداثيات من القائمة الجانبية.")
-    else:
-        st.info("👈 يرجى رفع ملف البيانات (CSV/TSV) من القائمة الجانبية لرسم الخريطة الجغرافية.")
+    m = folium.Map(location=[33.1500, -4.5000], zoom_start=9, tiles='OpenStreetMap')
+    
+    points = [
+        {"name": "كيكو", "lat": 33.2100, "lon": -4.7000, "word": "ⵜⴰⴳⴰⵏⵜ (tagant)"},
+        {"name": "تيمحضيت", "lat": 33.1500, "lon": -5.0500, "word": "ⵜⴰⴳⴰⵏⵜ (tagant)"},
+        {"name": "أنجيل", "lat": 33.0800, "lon": -4.6000, "word": "ⵜⴰⵙⴰⵔⵓⵜ (tasarut)"},
+        {"name": "أوطاط الحاج", "lat": 33.3500, "lon": -3.7000, "word": "ⵍⵖⴰⴱⴰ (lghaba)"}
+    ]
+    
+    for p in points:
+        folium.Marker(
+            [p["lat"], p["lon"]],
+            popup=f"<b>{p['name']}</b><br>المفردة: {p['word']}",
+            tooltip=p["name"]
+        ).add_to(m)
+    
+    st_folium(m, width=900, height=500)
+
+# ----------------------------------------------------
+# 4. تبويب التقارير والتصدير
+# ----------------------------------------------------
+with tab4:
+    st.header("تصدير النتائج للأطروحة")
+    st.download_button("تنزيل مصفوفة المسافات (CSV)", df.to_csv(index=False), "dialect_matrix.csv", "text/csv")
+    st.info("💡 يمكنك استخدام الرسوم والمصفوفات مباشرة في فصول أطروحتك.")
