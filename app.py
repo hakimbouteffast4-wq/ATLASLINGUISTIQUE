@@ -113,33 +113,48 @@ direction = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
 
 # ---------------------------------------------------------
-# 2. CSS الاحترافي لإصلاح حركة القائمة الجانبية في العربية (RTL)
+# 2. CSS لإصلاح القائمة الجانبية عند التحويل للغة العربية
 # ---------------------------------------------------------
+rtl_css = """
+    /* إصلاح نقل القائمة الجانبية كلياً إلى جهة اليمين في وضع العربية */
+    [data-testid="stSidebar"] {
+        left: auto !important;
+        right: 0 !important;
+        border-left: 1px solid #e2e8f0 !important;
+        border-right: none !important;
+    }
+    
+    /* ضبط محاذاة الصفحة الرئيسية بالنسبة للقائمة اليمنى */
+    [data-testid="stAppViewContainer"] > section:first-child {
+        margin-right: 0 !important;
+    }
+
+    /* إصلاح وضعية زر التوسيع والطي الخاص بالقائمة الجانبية */
+    [data-testid="stSidebarCollapseButton"], 
+    [data-testid="stSidebarToggle"],
+    [data-testid="stSidebarHeader"] {
+        direction: rtl !important;
+        float: left !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button svg,
+    [data-testid="stSidebarToggle"] button svg {
+        transform: scaleX(-1) !important;
+    }
+""" if is_rtl else ""
+
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
     
-    /* ضبط الاتجاه العام للتطبيق */
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+    html, body, [data-testid="stAppViewContainer"] {{
         direction: {direction} !important;
         text-align: {text_align} !important;
         font-family: 'Cairo', 'Inter', sans-serif;
         background-color: #f8fafc;
     }}
 
-    /* إصلاح محاذاة القائمة الجانبية للتجاوب التام في وضع RTL */
-    [data-testid="stSidebar"] {{
-        direction: {direction} !important;
-        text-align: {text_align} !important;
-        border-left: {"1px solid #e2e8f0" if is_rtl else "none"} !important;
-        border-right: {"none" if is_rtl else "1px solid #e2e8f0"} !important;
-    }}
-
-    /* تعديل موقع ومواصفات أزرار فتح وغلق القائمة */
-    [data-testid="stSidebarCollapseButton"], 
-    [data-testid="stSidebarHeader"] button {{
-        float: {"left" if is_rtl else "right"} !important;
-    }}
+    {rtl_css}
 
     /* الترويسة الرئيسية */
     .hero-header {{
