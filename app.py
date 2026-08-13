@@ -5,13 +5,13 @@ from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة (إخفاء القائمة افتراضياً)
+# 1. إعدادات الصفحة
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Linguistic Atlas & Amazigh Dictionary | الأطلس اللغوي",
     page_icon="🌍",
     layout="wide",
-    initial_sidebar_state="collapsed"  # تختفي القائمة تلقائياً عند الفتح
+    initial_sidebar_state="expanded"
 )
 
 # قاموس اللغات للواجهة العالمية
@@ -113,30 +113,32 @@ direction = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
 
 # ---------------------------------------------------------
-# 2. CSS المخصص لضبط الاتجاه وعكس السهم وإخفاء الحدود
+# 2. CSS الاحترافي لإصلاح حركة القائمة الجانبية في العربية (RTL)
 # ---------------------------------------------------------
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
     
-    html, body, [data-testid="stAppViewContainer"] {{
+    /* ضبط الاتجاه العام للتطبيق */
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
         direction: {direction} !important;
         text-align: {text_align} !important;
         font-family: 'Cairo', 'Inter', sans-serif;
         background-color: #f8fafc;
     }}
 
-    /* إخفاء حدود القائمة الجانبية لمنع ظهور أي خطوط عمودية */
-    section[data-testid="stSidebar"] {{
-        border: none !important;
-        box-shadow: -2px 0 10px rgba(0,0,0,0.05) !important;
+    /* إصلاح محاذاة القائمة الجانبية للتجاوب التام في وضع RTL */
+    [data-testid="stSidebar"] {{
+        direction: {direction} !important;
+        text-align: {text_align} !important;
+        border-left: {"1px solid #e2e8f0" if is_rtl else "none"} !important;
+        border-right: {"none" if is_rtl else "1px solid #e2e8f0"} !important;
     }}
 
-    /* 📌 عكس اتجاه سهم القائمة الجانبية ليشير لليمين */
-    [data-testid="stSidebarCollapseButton"] button svg,
-    [data-testid="stSidebarToggle"] button svg,
-    [data-testid="stSidebarHeader"] button svg {{
-        transform: scaleX(-1) !important;
+    /* تعديل موقع ومواصفات أزرار فتح وغلق القائمة */
+    [data-testid="stSidebarCollapseButton"], 
+    [data-testid="stSidebarHeader"] button {{
+        float: {"left" if is_rtl else "right"} !important;
     }}
 
     /* الترويسة الرئيسية */
@@ -234,7 +236,7 @@ def load_data():
 df = load_data()
 
 # ---------------------------------------------------------
-# 4. الهيدر والترويسة
+# 4. الترويسة
 # ---------------------------------------------------------
 st.markdown(f"""
     <div class="hero-header">
@@ -245,7 +247,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 5. محتويات القائمة الجانبية (Sidebar)
+# 5. أدوات التحكم في القائمة الجانبية
 # ---------------------------------------------------------
 st.sidebar.markdown(f"### {L['filter_title']}")
 st.sidebar.markdown("---")
@@ -276,7 +278,7 @@ if not df.empty:
     )
 
 # ---------------------------------------------------------
-# 6. البحث والإحصائيات
+# 6. محرك البحث والمؤشرات
 # ---------------------------------------------------------
 if not df.empty:
     col_s, col_r = st.columns([4, 1])
