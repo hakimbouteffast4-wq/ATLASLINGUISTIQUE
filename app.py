@@ -5,7 +5,7 @@ from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة والتصميم العالي الاحترافية
+# 1. إعدادات الصفحة والتصميم المتجاوب مع الهاتف (Mobile-First CSS)
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Linguistic Atlas & Amazigh Dictionary | الأطلس اللغوي",
@@ -19,55 +19,55 @@ LANG_DICT = {
         'title': "🌾 الأطلس اللغوي وقاموس الفلاحة والرعي الأمازيغي",
         'subtitle': "منصة رقمية استكشافية وتوثيقية لمعجم عتاد الفلاحة وتقنيات السقي والرعي - إقليم بولمان",
         'badge': "🎓 مشروع أطروحة الدكتوراه في اللسانيات الأمازيغية والرقمية",
-        'filter_title': "🏛️ أدوات التصفية والتحكم الأطلسي",
+        'filter_title': "🏛️ أدوات التصفية والتحكم",
         'cat_label': "🎯 الحقل المعجمي:",
         'loc_label': "📍 الموقع الجغرافي / القبيلة:",
         'all_cats': "جميع الحقول المعجمية",
         'all_locs': "جميع القبائل والمواقع",
-        'search_ph': "🔍 ابحث بالتيفيناغ، اللاتينية، المعنى العربي، أو الشواهد...",
+        'search_ph': "🔍 ابحث بالتيفيناغ، اللاتينية، المعنى العربي...",
         'reset': "🔄 إعادة ضبط",
         'stat_items': "المواد المعروضة",
         'stat_cats': "الحقول المعجمية",
         'stat_locs': "المواقع الميدانية",
         'stat_cov': "نسبة التغطية",
-        'tab1': "📚 المدونة المعجمية والبطاقات",
-        'tab2': "🗺️ الأطلس الجغرافي والخرائط الحرارية",
-        'tab3': "📊 القياس اللهجي والتحليل اللساني",
-        'tab4': "✍️ المساهمة والجمع الميداني",
-        'export': "📄 تصدير البيانات (CSV/Excel)",
+        'tab1': "📚 المدونة المعجمية",
+        'tab2': "🗺️ الأطلس والخرائط",
+        'tab3': "📊 التحليل اللساني",
+        'tab4': "✍️ الجمع الميداني",
+        'export': "📄 تصدير البيانات (CSV)",
         'meaning': "المعنى بالعربية",
-        'ipa': "الترميز الصوتي الدولي (IPA)",
-        'desc': "الوصف الميداني واللساني",
-        'proverb': "الشاهد النصي / المثل",
+        'ipa': "الترميز الصوتي (IPA)",
+        'desc': "الوصف الميداني",
+        'proverb': "الشاهد النصي",
         'audio': "🎧 التسجيل الصوتي الميداني:",
-        'cite': "📖 التوثيق والاستشهاد الأكاديمي العالمي (APA 7th):",
+        'cite': "📖 التوثيق الأكاديمي (APA 7th):",
         'rights': "جميع الحقوق محفوظة للباحث © 2026 | أطروحة الدكتوراه في اللسانيات الرقمية والأمازيغية"
     },
     'FR': {
         'title': "🌾 Atlas Linguistique et Dictionnaire Amazigh",
         'subtitle': "Plateforme numérique exploratoire du lexique de l'agriculture et de l'élevage - Boulemane",
         'badge': "🎓 Projet de Thèse de Doctorat en Linguistique Amazighe",
-        'filter_title': "🏛️ Outils de filtrage et contrôle",
+        'filter_title': "🏛️ Outils de filtrage",
         'cat_label': "🎯 Champ lexical :",
         'loc_label': "📍 Localité / Tribu :",
         'all_cats': "Tous les champs lexicaux",
         'all_locs': "Toutes les localités",
-        'search_ph': "🔍 Rechercher en Tifinagh, Latin, sens, ou proverbes...",
+        'search_ph': "🔍 Rechercher en Tifinagh, Latin, sens...",
         'reset': "🔄 Réinitialiser",
         'stat_items': "Entrées affichées",
         'stat_cats': "Champs lexicaux",
         'stat_locs': "Sites de collecte",
         'stat_cov': "Couverture",
-        'tab1': "📚 Corpus & Fiches Lexicales",
-        'tab2': "🗺️ Atlas Cartographique & Heatmap",
-        'tab3': "📊 Analyse Dialectométrique",
-        'tab4': "✍️ Contribution du Terrain",
-        'export': "📄 Exporter les données (CSV)",
+        'tab1': "📚 Corpus & Fiches",
+        'tab2': "🗺️ Atlas & Cartes",
+        'tab3': "📊 Dialectométrie",
+        'tab4': "✍️ Fieldwork",
+        'export': "📄 Exporter (CSV)",
         'meaning': "Signification",
-        'ipa': "Transcription Phonétique (API)",
-        'desc': "Description linguistique",
-        'proverb': "Proverbe / Attestation",
-        'audio': "🎧 Enregistrement Audio du Terrain :",
+        'ipa': "Transcription (API)",
+        'desc': "Description",
+        'proverb': "Proverbe",
+        'audio': "🎧 Audio du Terrain :",
         'cite': "📖 Citation académique (APA 7th) :",
         'rights': "Tous droits réservés © 2026 | Thèse de Doctorat en Linguistique Numérique"
     },
@@ -75,27 +75,27 @@ LANG_DICT = {
         'title': "🌾 Linguistic Atlas & Amazigh Lexicon",
         'subtitle': "Digital Exploratory Platform for Agricultural & Pastoral Lexicon - Boulemane Province",
         'badge': "🎓 Ph.D. Research Project in Amazigh Linguistics",
-        'filter_title': "🏛️ Control & Filter Tools",
+        'filter_title': "🏛️ Filter Tools",
         'cat_label': "🎯 Lexical Field:",
         'loc_label': "📍 Location / Tribe:",
         'all_cats': "All Lexical Fields",
         'all_locs': "All Locations",
-        'search_ph': "🔍 Search by Tifinagh, Latin, Arabic meaning, or proverb...",
+        'search_ph': "🔍 Search by Tifinagh, Latin, Meaning...",
         'reset': "🔄 Reset",
         'stat_items': "Entries Shown",
         'stat_cats': "Lexical Fields",
         'stat_locs': "Field Sites",
         'stat_cov': "Coverage Rate",
-        'tab1': "📚 Lexical Entries & Corpus",
-        'tab2': "🗺️ Linguistic Atlas & Heatmap",
-        'tab3': "📊 Dialectometry & Analytics",
-        'tab4': "✍️ Fieldwork Contribution",
+        'tab1': "📚 Lexical Entries",
+        'tab2': "🗺️ Atlas & Maps",
+        'tab3': "📊 Analytics",
+        'tab4': "✍️ Contribution",
         'export': "📄 Export Data (CSV)",
-        'meaning': "Meaning / Translation",
-        'ipa': "International Phonetic Alphabet (IPA)",
-        'desc': "Field Description",
-        'proverb': "Textual Evidence / Proverb",
-        'audio': "🎧 Fieldwork Audio Recording:",
+        'meaning': "Meaning",
+        'ipa': "Phonetics (IPA)",
+        'desc': "Description",
+        'proverb': "Proverb",
+        'audio': "🎧 Audio Recording:",
         'cite': "📖 Academic Citation (APA 7th):",
         'rights': "All Rights Reserved © 2026 | Ph.D. Dissertation in Digital Dialectology"
     }
@@ -107,7 +107,7 @@ lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)",
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
 
-# CSS عالمي متطور
+# CSS متجاوب مع الهواتف الذكية (Media Queries)
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
@@ -124,14 +124,15 @@ st.markdown(f"""
         border-{"left" if lang_code == "AR" else "right"}: 1px solid #e2e8f0;
     }}
 
+    /* الترويسة متجاوبة للهاتف */
     .hero-header {{
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: #ffffff;
-        padding: 3rem 2rem;
+        padding: 2.5rem 1.2rem;
         border-radius: 16px;
         box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
         border-bottom: 5px solid #d97706;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
         display: flex;
         flex-direction: column;
@@ -140,60 +141,82 @@ st.markdown(f"""
     }}
     .hero-header h1 {{
         color: #ffffff;
-        font-size: 2.2rem;
+        font-size: 2rem;
         font-weight: 700;
         margin: 0.8rem 0;
+        line-height: 1.3;
     }}
     .hero-header p {{
         color: #cbd5e1;
-        font-size: 1.1rem;
+        font-size: 1rem;
         margin: 0;
     }}
     .academic-badge {{
         background-color: rgba(217, 119, 6, 0.2);
         color: #fef3c7;
         border: 1px solid #d97706;
-        padding: 6px 18px;
+        padding: 5px 14px;
         border-radius: 20px;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 600;
     }}
 
     .stat-card {{
         background-color: #ffffff;
         border-radius: 12px;
-        padding: 1.2rem;
+        padding: 1rem;
         text-align: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         border: 1px solid #e2e8f0;
         border-top: 4px solid #0f172a;
+        margin-bottom: 10px;
     }}
-    .stat-number {{ font-size: 2rem; font-weight: 700; color: #0f172a; }}
-    .stat-label {{ font-size: 0.85rem; color: #64748b; font-weight: 600; }}
+    .stat-number {{ font-size: 1.8rem; font-weight: 700; color: #0f172a; }}
+    .stat-label {{ font-size: 0.8rem; color: #64748b; font-weight: 600; }}
 
     .lexical-card {{
         background: #ffffff;
         border-radius: 14px;
         border: 1px solid #e2e8f0;
-        padding: 1.6rem;
-        margin-bottom: 1.5rem;
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-        transition: all 0.3s ease;
     }}
-    .lexical-card:hover {{
-        border-color: #d97706;
-        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+    .word-tifinagh {{ font-size: 1.8rem; font-weight: 700; color: #0f172a; line-height: 1.2; }}
+    .word-latin {{ font-size: 1.1rem; color: #64748b; font-style: italic; }}
+    .ref-tag {{ font-family: monospace; background-color: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; }}
+
+    .badge-cat {{ background-color: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: 15px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-bottom: 4px; }}
+    .badge-loc {{ background-color: #fef3c7; color: #b45309; padding: 3px 10px; border-radius: 15px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-bottom: 4px; }}
+    .ipa-box {{ font-family: monospace; background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 2px 6px; border-radius: 6px; }}
+
+    .proverb-container {{ background-color: #f8fafc; border-{"right" if lang_code == "AR" else "left"}: 4px solid #0f172a; padding: 0.7rem; margin-top: 0.6rem; font-style: italic; font-size: 0.95rem; }}
+    .citation-box {{ background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px 10px; font-size: 0.8rem; color: #475569; margin-top: 10px; border-radius: 6px; word-break: break-word; }}
+
+    /* تعديلات استجابة الشاشة للهواتف (Responsive CSS) */
+    @media only screen and (max-width: 768px) {{
+        .hero-header {{
+            padding: 1.8rem 0.8rem;
+        }}
+        .hero-header h1 {{
+            font-size: 1.4rem;
+        }}
+        .hero-header p {{
+            font-size: 0.9rem;
+        }}
+        .academic-badge {{
+            font-size: 0.75rem;
+        }}
+        .word-tifinagh {{
+            font-size: 1.5rem;
+        }}
+        .word-latin {{
+            font-size: 0.95rem;
+        }}
+        .stat-number {{
+            font-size: 1.4rem;
+        }}
     }}
-    .word-tifinagh {{ font-size: 2.2rem; font-weight: 700; color: #0f172a; }}
-    .word-latin {{ font-size: 1.2rem; color: #64748b; font-style: italic; }}
-    .ref-tag {{ font-family: monospace; background-color: #f1f5f9; color: #475569; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; }}
-
-    .badge-cat {{ background-color: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }}
-    .badge-loc {{ background-color: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }}
-    .ipa-box {{ font-family: monospace; background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 6px; }}
-
-    .proverb-container {{ background-color: #f8fafc; border-{"right" if lang_code == "AR" else "left"}: 4px solid #0f172a; padding: 0.8rem 1rem; margin-top: 0.8rem; font-style: italic; }}
-    .citation-box {{ background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px 12px; font-size: 0.85rem; color: #475569; margin-top: 12px; border-radius: 6px; }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -215,7 +238,7 @@ def load_data():
 df = load_data()
 
 # ---------------------------------------------------------
-# 3. الترويسة العالمية
+# 3. الترويسة الرئيسية
 # ---------------------------------------------------------
 st.markdown(f"""
     <div class="hero-header">
@@ -260,7 +283,7 @@ if not df.empty:
 # 5. محرك البحث والمؤشرات
 # ---------------------------------------------------------
 if not df.empty:
-    col_s, col_r = st.columns([5, 1])
+    col_s, col_r = st.columns([4, 1])
     with col_s:
         search_query = st.text_input("Search:", placeholder=L['search_ph'], label_visibility="collapsed")
     with col_r:
@@ -292,11 +315,11 @@ if not df.empty:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 6. التبويبات الرئيسية المتقدمة
+    # 6. التبويبات الرئيسية
     # ---------------------------------------------------------
     tab1, tab2, tab3, tab4 = st.tabs([L['tab1'], L['tab2'], L['tab3'], L['tab4']])
 
-    # --- التبويب 1: البطاقات المعجمية والصوتيات ---
+    # --- التبويب 1: البطاقات المعجمية ---
     with tab1:
         if filtered_df.empty:
             st.info("⚠️ No results found.")
@@ -315,7 +338,7 @@ if not df.empty:
 
                 st.markdown(f"""
                 <div class="lexical-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap;">
                         <div>
                             <span class="word-tifinagh">{tifinagh}</span>
                             <span class="word-latin">({latin})</span>
@@ -326,13 +349,12 @@ if not df.empty:
                         {f'<span class="badge-cat">{category}</span> ' if category else ''}
                         {f'<span class="badge-loc">📍 {location}</span>' if location else ''}
                     </div>
-                    <p style="font-size: 1.1rem; margin-bottom: 0.4rem; color: #0f172a;"><b>{L['meaning']}:</b> {meaning}</p>
-                    {f'<p style="margin-bottom: 0.4rem;"><b>{L["ipa"]}:</b> <span class="ipa-box">[{ipa}]</span></p>' if ipa else ''}
-                    {f'<p style="color: #475569; margin-bottom: 0.4rem;"><b>{L["desc"]}:</b> {description}</p>' if description else ''}
+                    <p style="font-size: 1rem; margin-bottom: 0.4rem; color: #0f172a;"><b>{L['meaning']}:</b> {meaning}</p>
+                    {f'<p style="margin-bottom: 0.4rem; font-size: 0.95rem;"><b>{L["ipa"]}:</b> <span class="ipa-box">[{ipa}]</span></p>' if ipa else ''}
+                    {f'<p style="color: #475569; margin-bottom: 0.4rem; font-size: 0.95rem;"><b>{L["desc"]}:</b> {description}</p>' if description else ''}
                     {f'<div class="proverb-container"><b>{L["proverb"]}:</b> "{proverb}"</div>' if proverb else ''}
                 """, unsafe_allow_html=True)
 
-                # مشغل الصوتيات الميدانية
                 if audio_url and audio_url.startswith("http"):
                     st.caption(L['audio'])
                     st.audio(audio_url)
@@ -345,12 +367,12 @@ if not df.empty:
                 </div>
                 """, unsafe_allow_html=True)
 
-    # --- التبويب 2: الخريطة والخريطة الحرارية ---
+    # --- التبويب 2: الخريطة ---
     with tab2:
         st.subheader(L['tab2'])
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
         
-        map_type = st.radio("اختر نوع العرض الخرائطي:", ["نقاط التوزيع الجغرافي (Marker Clusters)", "الخريطة الحرارية لكثافة المصطلحات (Heatmap)"], horizontal=True)
+        map_type = st.radio("نوع العرض:", ["نقاط التوزيع (Clusters)", "الخريطة الحرارية (Heatmap)"], horizontal=True)
 
         m = folium.Map(location=[33.25, -4.50], zoom_start=9)
         folium.TileLayer('OpenStreetMap', name='Street Map').add_to(m)
@@ -364,15 +386,15 @@ if not df.empty:
             for _, row in map_df.iterrows():
                 try:
                     popup_html = f"""
-                    <div style="font-family: sans-serif; text-align: right; width: 180px;">
-                        <h4 style="color: #0f172a; margin: 0;">{str(row['word_tifinagh'])} ({str(row['word_latin'])})</h4>
+                    <div style="font-family: sans-serif; text-align: right; width: 160px;">
+                        <h4 style="color: #0f172a; margin: 0; font-size: 1rem;">{str(row['word_tifinagh'])}</h4>
                         <b>{L['meaning']}:</b> {str(row['arabic_meaning'])}<br>
                         <b>Location:</b> {str(row['location'])}
                     </div>
                     """
                     folium.Marker(
                         location=[float(row['lat']), float(row['lon'])],
-                        popup=folium.Popup(popup_html, max_width=250),
+                        popup=folium.Popup(popup_html, max_width=220),
                         tooltip=f"{str(row['word_tifinagh'])} - {str(row['arabic_meaning'])}",
                         icon=folium.Icon(color="darkblue", icon="info-sign")
                     ).add_to(marker_cluster)
@@ -380,55 +402,37 @@ if not df.empty:
                     continue
 
         folium.LayerControl().add_to(m)
-        st_folium(m, width="100%", height=550)
+        st_folium(m, width="100%", height=450)
 
-    # --- التبويب 3: القياس اللهجي والتحليل اللساني المتقدم ---
+    # --- التبويب 3: الإحصائيات ---
     with tab3:
-        st.subheader("📊 التحليل الإحصائي والقياس اللهجي (Dialectometry)")
-        
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            st.markdown("#### كثافة المفردات حسب الحقول المعجمية")
-            st.bar_chart(filtered_df['category'].value_counts())
-            
-        with col_c2:
-            st.markdown("#### التوزيع الميداني حسب القبائل والمواقع")
-            st.bar_chart(filtered_df['location'].value_counts())
+        st.subheader("📊 التحليل اللساني")
+        st.markdown("#### كثافة المفردات حسب الحقول المعجمية")
+        st.bar_chart(filtered_df['category'].value_counts())
+        st.markdown("#### التوزيع الميداني حسب القبائل والمواقع")
+        st.bar_chart(filtered_df['location'].value_counts())
 
-        st.markdown("---")
-        st.markdown("#### 📐 جدول التداخل والتماثل المعجمي بين المواقع الجغرافية")
-        if len(filtered_df['location'].unique()) > 1:
-            ct = pd.crosstab(filtered_df['location'], filtered_df['category'])
-            st.dataframe(ct, use_container_width=True)
-
-    # --- التبويب 4: استمارة الجمع الميداني ---
+    # --- التبويب 4: الجمع الميداني ---
     with tab4:
-        st.subheader("✍️ استمارة التوثيق والجمع الميداني التفاعلي")
-        st.caption("تتيح هذه الاستمارة للباحثين والمخبرين اقتراح مواد معجمية جديدة أو تصحيح معطى ميداني.")
-        
+        st.subheader("✍️ استمارة التوثيق والجمع الميداني")
         with st.form("crowdsourcing_form"):
-            col_f1, col_f2 = st.columns(2)
-            with col_f1:
-                word_tif = st.text_input("الكلمة بتيفيناغ (Word in Tifinagh):")
-                word_lat = st.text_input("الكلمة باللاتينية (Word in Latin):")
-                arabic_m = st.text_input("المعنى بالعربية (Arabic Meaning):")
-            with col_f2:
-                field_loc = st.text_input("موقع الجمع / القبيلة (Location / Tribe):")
-                field_cat = st.selectbox("الحقل المعجمي (Category):", [x for x in df['category'].unique() if str(x).strip() != ''])
-                informant = st.text_input("اسم الإخباري / الراوي (Optional Informant Name):")
-            
-            field_desc = st.text_area("الوصف الميداني والشواهد (Description & Proverb):")
-            submit_btn = st.form_submit_button("📤 إرسال المادة للمراجعة الأكاديمية")
+            word_tif = st.text_input("الكلمة بتيفيناغ:")
+            word_lat = st.text_input("الكلمة باللاتينية:")
+            arabic_m = st.text_input("المعنى بالعربية:")
+            field_loc = st.text_input("موقع الجمع / القبيلة:")
+            field_cat = st.selectbox("الحقل المعجمي:", [x for x in df['category'].unique() if str(x).strip() != ''])
+            field_desc = st.text_area("الوصف الميداني:")
+            submit_btn = st.form_submit_button("📤 إرسال المادة")
 
             if submit_btn:
-                st.success("✅ تم استلام المادة المعجمية بنجاح! ستخضع للمراجعة والتدقيق قبل إدراجها في الأطلس.")
+                st.success("✅ تم استلام المادة المعجمية بنجاح!")
 
 # ---------------------------------------------------------
 # 7. التذييل
 # ---------------------------------------------------------
 st.markdown("---")
 st.markdown(f"""
-    <div style="text-align: center; color: #64748b; font-size: 0.88rem; padding: 1rem 0;">
+    <div style="text-align: center; color: #64748b; font-size: 0.8rem; padding: 1rem 0;">
         {L['rights']}
     </div>
 """, unsafe_allow_html=True)
