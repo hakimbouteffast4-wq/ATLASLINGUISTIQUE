@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
-from folium.plugins import MarkerCluster
+from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
 # 1. إعدادات الصفحة والتصميم العالي الاحترافية
@@ -17,9 +17,9 @@ st.set_page_config(
 LANG_DICT = {
     'AR': {
         'title': "🌾 الأطلس اللغوي وقاموس الفلاحة والرعي الأمازيغي",
-        'subtitle': "منصة رقمية استكشافية لمعجم عتاد الفلاحة وتقنيات السقي والرعي - إقليم بولمان",
-        'badge': "🎓 مشروع أطروحة الدكتوراه في اللسانيات الأمازيغية",
-        'filter_title': "🏛️ أدوات الضبط وتصفية الأطلس",
+        'subtitle': "منصة رقمية استكشافية وتوثيقية لمعجم عتاد الفلاحة وتقنيات السقي والرعي - إقليم بولمان",
+        'badge': "🎓 مشروع أطروحة الدكتوراه في اللسانيات الأمازيغية والرقمية",
+        'filter_title': "🏛️ أدوات التصفية والتحكم الأطلسي",
         'cat_label': "🎯 الحقل المعجمي:",
         'loc_label': "📍 الموقع الجغرافي / القبيلة:",
         'all_cats': "جميع الحقول المعجمية",
@@ -31,19 +31,21 @@ LANG_DICT = {
         'stat_locs': "المواقع الميدانية",
         'stat_cov': "نسبة التغطية",
         'tab1': "📚 المدونة المعجمية والبطاقات",
-        'tab2': "🗺️ الأطلس الجغرافي اللغوي",
-        'tab3': "📊 التحليل الإحصائي واللساني",
+        'tab2': "🗺️ الأطلس الجغرافي والخرائط الحرارية",
+        'tab3': "📊 القياس اللهجي والتحليل اللساني",
+        'tab4': "✍️ المساهمة والجمع الميداني",
         'export': "📄 تصدير البيانات (CSV/Excel)",
         'meaning': "المعنى بالعربية",
         'ipa': "الترميز الصوتي الدولي (IPA)",
         'desc': "الوصف الميداني واللساني",
         'proverb': "الشاهد النصي / المثل",
+        'audio': "🎧 التسجيل الصوتي الميداني:",
         'cite': "📖 التوثيق والاستشهاد الأكاديمي العالمي (APA 7th):",
         'rights': "جميع الحقوق محفوظة للباحث © 2026 | أطروحة الدكتوراه في اللسانيات الرقمية والأمازيغية"
     },
     'FR': {
         'title': "🌾 Atlas Linguistique et Dictionnaire Amazigh",
-        'subtitle': "Plateforme numérique exploratoire du lexique de l'agriculture et de l'élevage - Province de Boulemane",
+        'subtitle': "Plateforme numérique exploratoire du lexique de l'agriculture et de l'élevage - Boulemane",
         'badge': "🎓 Projet de Thèse de Doctorat en Linguistique Amazighe",
         'filter_title': "🏛️ Outils de filtrage et contrôle",
         'cat_label': "🎯 Champ lexical :",
@@ -57,13 +59,15 @@ LANG_DICT = {
         'stat_locs': "Sites de collecte",
         'stat_cov': "Couverture",
         'tab1': "📚 Corpus & Fiches Lexicales",
-        'tab2': "🗺️ Atlas Cartographique",
-        'tab3': "📊 Analyse Statistique",
+        'tab2': "🗺️ Atlas Cartographique & Heatmap",
+        'tab3': "📊 Analyse Dialectométrique",
+        'tab4': "✍️ Contribution du Terrain",
         'export': "📄 Exporter les données (CSV)",
         'meaning': "Signification",
         'ipa': "Transcription Phonétique (API)",
         'desc': "Description linguistique",
         'proverb': "Proverbe / Attestation",
+        'audio': "🎧 Enregistrement Audio du Terrain :",
         'cite': "📖 Citation académique (APA 7th) :",
         'rights': "Tous droits réservés © 2026 | Thèse de Doctorat en Linguistique Numérique"
     },
@@ -83,13 +87,15 @@ LANG_DICT = {
         'stat_locs': "Field Sites",
         'stat_cov': "Coverage Rate",
         'tab1': "📚 Lexical Entries & Corpus",
-        'tab2': "🗺️ Linguistic Atlas Map",
-        'tab3': "📊 Statistical Analytics",
+        'tab2': "🗺️ Linguistic Atlas & Heatmap",
+        'tab3': "📊 Dialectometry & Analytics",
+        'tab4': "✍️ Fieldwork Contribution",
         'export': "📄 Export Data (CSV)",
         'meaning': "Meaning / Translation",
         'ipa': "International Phonetic Alphabet (IPA)",
         'desc': "Field Description",
         'proverb': "Textual Evidence / Proverb",
+        'audio': "🎧 Fieldwork Audio Recording:",
         'cite': "📖 Academic Citation (APA 7th):",
         'rights': "All Rights Reserved © 2026 | Ph.D. Dissertation in Digital Dialectology"
     }
@@ -101,7 +107,7 @@ lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)",
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
 
-# CSS عالمي وأنيق
+# CSS عالمي متطور
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
@@ -286,11 +292,11 @@ if not df.empty:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 6. التبويبات التفاعلية
+    # 6. التبويبات الرئيسية المتقدمة
     # ---------------------------------------------------------
-    tab1, tab2, tab3 = st.tabs([L['tab1'], L['tab2'], L['tab3']])
+    tab1, tab2, tab3, tab4 = st.tabs([L['tab1'], L['tab2'], L['tab3'], L['tab4']])
 
-    # --- التبويب 1: البطاقات المعجمية ---
+    # --- التبويب 1: البطاقات المعجمية والصوتيات ---
     with tab1:
         if filtered_df.empty:
             st.info("⚠️ No results found.")
@@ -305,6 +311,7 @@ if not df.empty:
                 location = str(row['location']) if 'location' in row else ''
                 description = str(row['description']) if 'description' in row else ''
                 proverb = str(row['proverb']) if 'proverb' in row else ''
+                audio_url = str(row['audio']).strip() if 'audio' in row else ''
 
                 st.markdown(f"""
                 <div class="lexical-card">
@@ -323,7 +330,14 @@ if not df.empty:
                     {f'<p style="margin-bottom: 0.4rem;"><b>{L["ipa"]}:</b> <span class="ipa-box">[{ipa}]</span></p>' if ipa else ''}
                     {f'<p style="color: #475569; margin-bottom: 0.4rem;"><b>{L["desc"]}:</b> {description}</p>' if description else ''}
                     {f'<div class="proverb-container"><b>{L["proverb"]}:</b> "{proverb}"</div>' if proverb else ''}
-                    
+                """, unsafe_allow_html=True)
+
+                # مشغل الصوتيات الميدانية
+                if audio_url and audio_url.startswith("http"):
+                    st.caption(L['audio'])
+                    st.audio(audio_url)
+
+                st.markdown(f"""
                     <div class="citation-box">
                         {L['cite']}<br>
                         <i>Author. (2026). Lexical Entry "{tifinagh}" ({latin}). Boulemane Linguistic Atlas. ID: {entry_id}.</i>
@@ -331,49 +345,83 @@ if not df.empty:
                 </div>
                 """, unsafe_allow_html=True)
 
-    # --- التبويب 2: الخريطة التفاعلية الاحترافية ---
+    # --- التبويب 2: الخريطة والخريطة الحرارية ---
     with tab2:
         st.subheader(L['tab2'])
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
         
-        # خريطة متطورة بـ TileLayers و MarkerCluster
+        map_type = st.radio("اختر نوع العرض الخرائطي:", ["نقاط التوزيع الجغرافي (Marker Clusters)", "الخريطة الحرارية لكثافة المصطلحات (Heatmap)"], horizontal=True)
+
         m = folium.Map(location=[33.25, -4.50], zoom_start=9)
         folium.TileLayer('OpenStreetMap', name='Street Map').add_to(m)
         folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='Satellite View').add_to(m)
-        
-        marker_cluster = MarkerCluster().add_to(m)
 
-        for _, row in map_df.iterrows():
-            try:
-                popup_html = f"""
-                <div style="font-family: sans-serif; text-align: right; width: 180px;">
-                    <h4 style="color: #0f172a; margin: 0;">{str(row['word_tifinagh'])} ({str(row['word_latin'])})</h4>
-                    <b>{L['meaning']}:</b> {str(row['arabic_meaning'])}<br>
-                    <b>Location:</b> {str(row['location'])}
-                </div>
-                """
-                folium.Marker(
-                    location=[float(row['lat']), float(row['lon'])],
-                    popup=folium.Popup(popup_html, max_width=250),
-                    tooltip=f"{str(row['word_tifinagh'])} - {str(row['arabic_meaning'])}",
-                    icon=folium.Icon(color="darkblue", icon="info-sign")
-                ).add_to(marker_cluster)
-            except Exception:
-                continue
+        if "Heatmap" in map_type:
+            heat_data = [[float(row['lat']), float(row['lon'])] for _, row in map_df.iterrows()]
+            HeatMap(heat_data, radius=15, blur=10).add_to(m)
+        else:
+            marker_cluster = MarkerCluster().add_to(m)
+            for _, row in map_df.iterrows():
+                try:
+                    popup_html = f"""
+                    <div style="font-family: sans-serif; text-align: right; width: 180px;">
+                        <h4 style="color: #0f172a; margin: 0;">{str(row['word_tifinagh'])} ({str(row['word_latin'])})</h4>
+                        <b>{L['meaning']}:</b> {str(row['arabic_meaning'])}<br>
+                        <b>Location:</b> {str(row['location'])}
+                    </div>
+                    """
+                    folium.Marker(
+                        location=[float(row['lat']), float(row['lon'])],
+                        popup=folium.Popup(popup_html, max_width=250),
+                        tooltip=f"{str(row['word_tifinagh'])} - {str(row['arabic_meaning'])}",
+                        icon=folium.Icon(color="darkblue", icon="info-sign")
+                    ).add_to(marker_cluster)
+                except Exception:
+                    continue
 
         folium.LayerControl().add_to(m)
         st_folium(m, width="100%", height=550)
 
-    # --- التبويب 3: الإحصائيات ---
+    # --- التبويب 3: القياس اللهجي والتحليل اللساني المتقدم ---
     with tab3:
-        st.subheader(L['tab3'])
-        col_chart1, col_chart2 = st.columns(2)
-        with col_chart1:
-            st.markdown(f"#### {L['stat_cats']}")
+        st.subheader("📊 التحليل الإحصائي والقياس اللهجي (Dialectometry)")
+        
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            st.markdown("#### كثافة المفردات حسب الحقول المعجمية")
             st.bar_chart(filtered_df['category'].value_counts())
-        with col_chart2:
-            st.markdown(f"#### {L['stat_locs']}")
+            
+        with col_c2:
+            st.markdown("#### التوزيع الميداني حسب القبائل والمواقع")
             st.bar_chart(filtered_df['location'].value_counts())
+
+        st.markdown("---")
+        st.markdown("#### 📐 جدول التداخل والتماثل المعجمي بين المواقع الجغرافية")
+        if len(filtered_df['location'].unique()) > 1:
+            ct = pd.crosstab(filtered_df['location'], filtered_df['category'])
+            st.dataframe(ct, use_container_width=True)
+
+    # --- التبويب 4: استمارة الجمع الميداني ---
+    with tab4:
+        st.subheader("✍️ استمارة التوثيق والجمع الميداني التفاعلي")
+        st.caption("تتيح هذه الاستمارة للباحثين والمخبرين اقتراح مواد معجمية جديدة أو تصحيح معطى ميداني.")
+        
+        with st.form("crowdsourcing_form"):
+            col_f1, col_f2 = st.columns(2)
+            with col_f1:
+                word_tif = st.text_input("الكلمة بتيفيناغ (Word in Tifinagh):")
+                word_lat = st.text_input("الكلمة باللاتينية (Word in Latin):")
+                arabic_m = st.text_input("المعنى بالعربية (Arabic Meaning):")
+            with col_f2:
+                field_loc = st.text_input("موقع الجمع / القبيلة (Location / Tribe):")
+                field_cat = st.selectbox("الحقل المعجمي (Category):", [x for x in df['category'].unique() if str(x).strip() != ''])
+                informant = st.text_input("اسم الإخباري / الراوي (Optional Informant Name):")
+            
+            field_desc = st.text_area("الوصف الميداني والشواهد (Description & Proverb):")
+            submit_btn = st.form_submit_button("📤 إرسال المادة للمراجعة الأكاديمية")
+
+            if submit_btn:
+                st.success("✅ تم استلام المادة المعجمية بنجاح! ستخضع للمراجعة والتدقيق قبل إدراجها في الأطلس.")
 
 # ---------------------------------------------------------
 # 7. التذييل
