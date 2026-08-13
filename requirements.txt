@@ -1,10 +1,4 @@
 streamlit
 pandas
-numpy
-scipy
-scikit-learn
-Levenshtein
-plotly
-matplotlib
-Levenshtein
-scikit-learn
+folium
+streamlit-folium
