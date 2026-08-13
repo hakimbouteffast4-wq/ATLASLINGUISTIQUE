@@ -40,16 +40,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. قراءة قاعدة البيانات الخارجية (CSV) بمرونة للآلاف
+# 2. قراءة قاعدة البيانات الخارجية (CSV) بمرونة وآمان
 # ---------------------------------------------------------
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv('data.csv', encoding='utf-8')
-        # تنظيف وتحويل الإحداثيات إلى أرقام
+        # قراءة جميع الأعمدة كنصوص تجنباً لمشاكل أنواع البيانات
+        df = pd.read_csv('data.csv', dtype=str, encoding='utf-8')
+        df.fillna('', inplace=True)
+        
+        # تحويل الإحداثيات مع تحويل الأخطاء إلى قيم فارغة
         df['lat'] = pd.to_numeric(df['lat'], errors='coerce')
         df['lon'] = pd.to_numeric(df['lon'], errors='coerce')
-        df.fillna('', inplace=True)
+        
         return df
     except Exception as e:
         st.error(f"خطأ في قراءة ملف البيانات data.csv: {e}")
@@ -114,11 +117,10 @@ else:
     with tab1:
         st.subheader("الترسيم الجغرافي للمصطلحات الفلاحية")
         
-        # تصفية الخريطة للمواقع التي تملك إحداثيات صحيحة
+        # تصفية الصفوف التي تحتوى على إحداثيات جغرافية صحيحة فقط
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
-        map_df = map_df[(map_df['lat'] != '') & (map_df['lon'] != '')]
 
-        # مركز الخريطة الافتراضي (بولمان)
+        # مركز الخريطة الافتراضي (إقليم بولمان)
         m = folium.Map(location=[33.25, -4.50], zoom_start=9, tiles="OpenStreetMap")
 
         for _, row in map_df.iterrows():
@@ -136,7 +138,7 @@ else:
                     tooltip=f"{row['word_tifinagh']} - {row['arabic_meaning']}",
                     icon=folium.Icon(color="green", icon="leaf")
                 ).add_to(m)
-            except:
+            except Exception:
                 continue
 
         st_folium(m, width="100%", height=500)
@@ -148,7 +150,7 @@ else:
         if filtered_df.empty:
             st.warning("لا توجد نتائج تطابق خيارات البحث.")
         else:
-            # العرض في صفحات للتعامل مع آلاف الكلمات بمرونة
+            # تقسيم العرض إلى صفحات لسرعة استجابة الموقع مع آلاف المفردات
             page_size = 20
             total_items = len(filtered_df)
             
@@ -168,19 +170,19 @@ else:
 
                     with col_text:
                         st.markdown(f"### **{row['word_tifinagh']}** *( {row['word_latin']} )*")
-                        if row['ipa']:
+                        if row.get('ipa'):
                             st.markdown(f"**الرمز الصوتي (IPA):** `{row['ipa']}`")
                         st.markdown(f"**المعنى بالعربية:** {row['arabic_meaning']}")
                         st.markdown(f"**الحقل المعجمي:** `{row['category']}`")
                         st.markdown(f"**القبيلة/المنطقة:** 📍 {row['location']}")
                         st.markdown("---")
-                        if row['description']:
+                        if row.get('description'):
                             st.markdown(f"**الوصف الميداني:** {row['description']}")
-                        if row['proverb']:
+                        if row.get('proverb'):
                             st.markdown(f"**الشاهد النصي / المثل:** *{row['proverb']}*")
 
                     with col_media:
-                        if row['image']:
+                        if row.get('image'):
                             st.image(row['image'], caption=row['arabic_meaning'], use_column_width=True)
 
 # ---------------------------------------------------------
