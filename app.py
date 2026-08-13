@@ -33,11 +33,11 @@ st.markdown("""
         padding: 2rem;
         border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
     .header-box h1 {
         color: #ffffff;
-        font-size: 2.3rem;
+        font-size: 2.2rem;
         margin-bottom: 0.5rem;
         font-weight: 700;
     }
@@ -45,6 +45,16 @@ st.markdown("""
         color: #e8f5e9;
         font-size: 1.1rem;
         margin: 0;
+    }
+
+    /* شريط البحث المطور */
+    .search-container {
+        background-color: #ffffff;
+        padding: 1.2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #e0e0e0;
+        margin-bottom: 1.5rem;
     }
 
     /* بطاقات القاموس المعجمية */
@@ -129,20 +139,46 @@ def load_data():
 df = load_data()
 
 # ---------------------------------------------------------
-# 3. القائمة الجانبية للتصفية المتقدمة
+# 3. القائمة الجانبية للتصفية والتحكم
 # ---------------------------------------------------------
 st.sidebar.markdown("## 🌾 تصفية المعجم")
 st.sidebar.markdown("---")
 
 if not df.empty:
-    search_query = st.sidebar.text_input("🔍 البحث الشامل:", placeholder="ابحث بالتيفيناغ، العربي، اللاتيني...")
-    
     categories = ["الكل"] + sorted([str(x) for x in df['category'].unique() if str(x).strip() != ''])
     selected_category = st.sidebar.selectbox("🎯 الحقل المعجمي:", categories)
 
     locations = ["الكل"] + sorted([str(x) for x in df['location'].unique() if str(x).strip() != ''])
     selected_location = st.sidebar.selectbox("📍 القبيلة / المنطقة:", locations)
 
+# ---------------------------------------------------------
+# 4. الواجهة الرئيسية والتروئيسة
+# ---------------------------------------------------------
+st.markdown("""
+    <div class="header-box">
+        <h1>🌾 الأطلس اللغوي وقاموس الفلاحة والرعي الأمازيغي</h1>
+        <p>دراسة توثيقية لسانياتية ومعجمية لعتاد الفلاحة وتقنيات السقي والرعي بإقليم بولمان</p>
+    </div>
+""", unsafe_allow_html=True)
+
+if df.empty:
+    st.warning("يرجى التأكد من وجود ملف data.csv في المستودع بصيغة صحيحة.")
+else:
+    # ---------------------------------------------------------
+    # 5. محرك البحث الذكي المطور (أعلى الواجهة)
+    # ---------------------------------------------------------
+    col_search, col_reset = st.columns([5, 1])
+    with col_search:
+        search_query = st.text_input(
+            "🔎 محرك البحث المعجمي السريع:", 
+            placeholder="ابحث بأي كلمة بالتيفيناغ (ⵟⵗⵓⵠ)... باللاتيني (Tagurt)... بالعربي (مقابض)... أو بالشواهد والأمثال...",
+            label_visibility="collapsed"
+        )
+    with col_reset:
+        if st.button("🔄 إعادة ضبط", use_container_width=True):
+            st.rerun()
+
+    # تطبيق الفلاتر والبحث
     filtered_df = df.copy()
 
     if selected_category != "الكل":
@@ -157,27 +193,15 @@ if not df.empty:
             filtered_df['arabic_meaning'].astype(str).str.contains(query, case=False) |
             filtered_df['word_tifinagh'].astype(str).str.contains(query, case=False) |
             filtered_df['word_latin'].astype(str).str.contains(query, case=False) |
-            filtered_df['description'].astype(str).str.contains(query, case=False)
+            filtered_df['description'].astype(str).str.contains(query, case=False) |
+            filtered_df['proverb'].astype(str).str.contains(query, case=False)
         ]
 
-# ---------------------------------------------------------
-# 4. الواجهة الرئيسية
-# ---------------------------------------------------------
-st.markdown("""
-    <div class="header-box">
-        <h1>🌾 الأطلس اللغوي وقاموس الفلاحة والرعي الأمازيغي</h1>
-        <p>دراسة توثيقية لسانياتية ومعجمية لعتاد الفلاحة وتقنيات السقي والرعي بإقليم بولمان</p>
-    </div>
-""", unsafe_allow_html=True)
-
-if df.empty:
-    st.warning("يرجى التأكد من وجود ملف data.csv في المستودع بصيغة صحيحة.")
-else:
-    # المؤشرات الإحصائية
+    # المؤشرات الإحصائية الديناميكية
     m1, m2, m3 = st.columns(3)
-    m1.metric("إجمالي المفردات", len(filtered_df))
-    m2.metric("الحقول المعجمية", len([x for x in df['category'].unique() if str(x).strip() != '']))
-    m3.metric("المواقع الجغرافية", len([x for x in df['location'].unique() if str(x).strip() != '']))
+    m1.metric("نتائج البحث / المفردات", len(filtered_df))
+    m2.metric("الحقول المعجمية النشطة", len([x for x in filtered_df['category'].unique() if str(x).strip() != '']))
+    m3.metric("المواقع الممثلة", len([x for x in filtered_df['location'].unique() if str(x).strip() != '']))
 
     st.markdown("---")
 
@@ -185,12 +209,10 @@ else:
 
     # --- التبويب 1: القاموس والواجهة المعجمية ---
     with tab1:
-        st.subheader("سجل المصطلحات والمفردات المعجمية")
-        
         if filtered_df.empty:
-            st.info("لا توجد نتائج تطابق خيارات البحث الحالية.")
+            st.info("⚠️ لم يتم العثور على أي نتائج تطابق كلمة البحث أو خيارات التصفية المختارة.")
         else:
-            # نظام الصفحات
+            # نظام الصفحات المرن للنتائج
             page_size = 10
             total_items = len(filtered_df)
             pages = (total_items // page_size) + (1 if total_items % page_size > 0 else 0)
@@ -202,7 +224,7 @@ else:
                 start_idx = (page_num - 1) * page_size
                 end_idx = start_idx + page_size
                 current_df = filtered_df.iloc[start_idx:end_idx]
-                st.caption(f"عرض {start_idx + 1} - {min(end_idx, total_items)} من أصل {total_items} كلمة")
+                st.caption(f"عرض {start_idx + 1} - {min(end_idx, total_items)} من إجمالي {total_items} كلمة مطابقة")
             else:
                 current_df = filtered_df
 
@@ -218,7 +240,6 @@ else:
                 proverb = str(row['proverb']) if 'proverb' in row else ''
                 image_url = str(row['image']).strip() if 'image' in row else ''
 
-                # تصميم الكارت
                 col_card, col_img = st.columns([3, 1]) if (image_url and image_url.startswith("http")) else (st.container(), None)
                 
                 with col_card:
@@ -251,7 +272,7 @@ else:
 
     # --- التبويب 2: الخريطة اللغوية ---
     with tab2:
-        st.subheader("الترسيم الجغرافي للمصطلحات الفلاحية")
+        st.subheader("الترسيم الجغرافي للمصطلحات المفلترة")
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
 
         m = folium.Map(location=[33.25, -4.50], zoom_start=9, tiles="OpenStreetMap")
@@ -277,7 +298,7 @@ else:
         st_folium(m, width="100%", height=500)
 
 # ---------------------------------------------------------
-# 5. التذييل
+# 6. التذييل
 # ---------------------------------------------------------
 st.markdown("---")
 st.caption("مركز التوثيق الرقمي والأطلس اللغوي | أطروحة الدكتوراه - إقليم بولمان")
