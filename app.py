@@ -2,43 +2,90 @@ import streamlit as st
 import pandas as pd
 
 # --------------------------------------------------
-# 1. إعدادات الصفحة الأساسية
+# 1. إعدادات الصفحة
 # --------------------------------------------------
 st.set_page_config(
     page_title="الأطلس اللغوي وقاموس الفلاحة الأمازيغي",
-    page_icon="🗺️",
+    page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # --------------------------------------------------
-# 2. حقن كود CSS للتنسيق ومعالجة أزرار الهاتف
+# 2. حقن الخطوط والتنسيقات المتقدمة (Advanced CSS)
 # --------------------------------------------------
 st.markdown("""
     <style>
     /* -------------------------------------------------- */
-    /* أ) رفع محتوى الصفحة والأزرار لتجنب أزرار الهاتف    */
+    /* أ) استدعاء خط Cairo الاحترافي                       */
     /* -------------------------------------------------- */
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+
+    html, body, [class*="css"], .stMarkdown, p, h1, h2, h3, h4, h5, h6 {
+        font-family: 'Cairo', sans-serif !important;
+    }
+
+    /* -------------------------------------------------- */
+    /* ب) الخلفية العامة وهامش الأمان للهاتف               */
+    /* -------------------------------------------------- */
+    .stApp {
+        background-color: #F8F9FA;
+    }
+
     .main .block-container {
         direction: rtl !important;
         text-align: right !important;
-        padding-bottom: 90px !important; /* هامش أمان سفلي كبير للأزرار */
-    }
-
-    /* رفع أزرار الإرسال والتفاعل تحديداً */
-    .stButton {
-        margin-bottom: 30px !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 90px !important; /* هامش حماية لأزرار شاشة الهاتف */
+        max-width: 1100px;
     }
 
     /* -------------------------------------------------- */
-    /* ب) تثبيت القائمة الجانبية (Sidebar) في جهة اليسار   */
+    /* ج) تصميم البطاقات الرئيسية (Card Containers)         */
+    /* -------------------------------------------------- */
+    div[data-testid="stForm"], .element-container div.stDataFrame {
+        background-color: #FFFFFF !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid #EAEAEA !important;
+    }
+
+    /* -------------------------------------------------- */
+    /* د) تصميم أزرار الإرسال والتفاعل                     */
+    /* -------------------------------------------------- */
+    .stButton>button, div[data-testid="stForm"] button {
+        width: 100% !important;
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 16px !important;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        border: none !important;
+        box-shadow: 0 4px 10px rgba(46, 125, 50, 0.25) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 15px rgba(46, 125, 50, 0.35) !important;
+    }
+
+    /* -------------------------------------------------- */
+    /* هـ) القائمة الجانبية (Sidebar - جهة اليسار)         */
     /* -------------------------------------------------- */
     [data-testid="stSidebar"] {
         left: 0 !important;
         right: auto !important;
-        border-right: 2px solid #e0e0e0 !important;
+        background-color: #1E2922 !important; /* لون داكن أنيق */
+        border-right: 1px solid #2D3E33 !important;
         border-left: none !important;
         direction: ltr !important;
+    }
+
+    [data-testid="stSidebar"] * {
+        color: #E8F5E9 !important;
     }
 
     [data-testid="stSidebarCollapseButton"] {
@@ -47,22 +94,41 @@ st.markdown("""
     }
 
     /* -------------------------------------------------- */
-    /* ج) ضبط اتجاه المدخلات والجداول جهة اليمين (RTL)   */
+    /* و) خانات الإدخال والتراكيب                         */
     /* -------------------------------------------------- */
-    .stTextInput, .stSelectbox, .stTextArea, .stDataFrame, .stSlider {
+    .stTextInput input, .stSelectbox select, .stTextArea textarea {
+        border-radius: 10px !important;
+        border: 1.5px solid #D1D5DB !important;
+        padding: 10px !important;
         direction: rtl !important;
         text-align: right !important;
+        background-color: #FAFAFA !important;
     }
 
-    /* تحسين شكل الزر */
-    .stButton>button {
-        width: 100%;
-        background-color: #2e7d32;
+    .stTextInput input:focus, .stSelectbox select:focus, .stTextArea textarea:focus {
+        border-color: #2E7D32 !important;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+    }
+
+    /* رأس الصفحة الجميل */
+    .header-box {
+        background: linear-gradient(135deg, #1E4D2B 0%, #2E7D32 100%);
         color: white;
-        font-weight: bold;
-        font-size: 16px;
-        border-radius: 8px;
-        padding: 12px;
+        padding: 24px;
+        border-radius: 18px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(30, 77, 43, 0.2);
+    }
+    .header-box h1 {
+        color: #FFFFFF !important;
+        font-size: 24px !important;
+        font-weight: 800 !important;
+        margin: 0 !important;
+    }
+    .header-box p {
+        color: #E8F5E9 !important;
+        font-size: 14px !important;
+        margin-top: 6px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -71,7 +137,7 @@ st.markdown("""
 # 3. القائمة الجانبية (Sidebar - جهة اليسار)
 # --------------------------------------------------
 with st.sidebar:
-    st.title("📌 Navigation")
+    st.markdown("### 📌 Navigation")
     
     selected_page = st.radio(
         "اختر القسم / Select Section:",
@@ -84,19 +150,27 @@ with st.sidebar:
     )
     
     st.divider()
-    st.info("ℹ️ **Atlas Linguistique & Amazigh Dictionary**\n\nتطبيق الجمع الميداني والتحليل اللساني الجغرافي.")
+    st.markdown("""
+        <div style='background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; font-size: 13px;'>
+            <b>🌿 Atlas Linguistique & Amazigh Dictionary</b><br>
+            منصة التوثيق المعجمي والقياس اللساني الجغرافي.
+        </div>
+    """, unsafe_allow_html=True)
 
 # --------------------------------------------------
-# 4. محتوى الأقسام الكاملة (جهة اليمين)
+# 4. محتوى الأقسام الكاملة
 # --------------------------------------------------
 
 # ==================================================
 # القسم الأول: الجمع الميداني (Fieldwork)
 # ==================================================
 if "✍️ Fieldwork" in selected_page:
-    st.title("📝 استمارة التوثيق والجمع الميداني")
-    st.caption("توثيق المصطلحات الفلاحية والألفاظ الأمازيغية من الميدان")
-    st.divider()
+    st.markdown("""
+        <div class="header-box">
+            <h1>📝 استمارة التوثيق والجمع الميداني</h1>
+            <p>توثيق المصطلحات الفلاحية والألفاظ الأمازيغية مباشرة من الميدان</p>
+        </div>
+    """, unsafe_allow_html=True)
 
     with st.form("fieldwork_form", clear_on_submit=True):
         col1, col2 = st.columns(2)
@@ -121,14 +195,13 @@ if "✍️ Fieldwork" in selected_page:
             ]
         )
 
-        description = st.text_area("ملاحظات ميدانية تفصيلية (النطق المحلي / السياق):")
+        description = st.text_area("ملاحظات ميدانية تفصيلية (النطق المحلي / السياق):", height=100)
 
-        # زر الإرسال (مرفوع بأمان بفضل التنسيق السفلي)
-        submit_btn = st.form_submit_button("📤 إرسال وتوثيق المادة")
+        submit_btn = st.form_submit_button("📤 إرسال وتوثيق المادة الميدانية")
 
         if submit_btn:
             if word_tifinagh or word_latin:
-                st.success("✅ تم حفظ المادة الميدانية بنجاح!")
+                st.success("✅ تم حفظ المادة الميدانية بنجاح في قاعدة البيانات!")
             else:
                 st.warning("⚠️ يرجى إدخال الكلمة بتيفيناغ أو اللاتينية على الأقل.")
 
@@ -136,9 +209,12 @@ if "✍️ Fieldwork" in selected_page:
 # القسم الثاني: القياس اللساني (Dialectométrie)
 # ==================================================
 elif "📊 Dialectométrie" in selected_page:
-    st.title("📊 Dialectométrie - أدوات القياس اللساني")
-    st.caption("حساب المسافات اللغوية والتغيرات المعجمية بين المناطق الفلاحية")
-    st.divider()
+    st.markdown("""
+        <div class="header-box">
+            <h1>📊 Dialectométrie - أدوات القياس اللساني</h1>
+            <p>حساب المسافات اللغوية والتغيرات المعجمية بين المناطق الفلاحية</p>
+        </div>
+    """, unsafe_allow_html=True)
 
     col_a, col_b = st.columns(2)
     with col_a:
@@ -146,17 +222,17 @@ elif "📊 Dialectométrie" in selected_page:
     with col_b:
         region_2 = st.selectbox("المنطقة / التنوع الثاني:", ["سوس", "الريف", "الأطلس المتوسط", "الجنوب الشرقي"])
 
-    st.subheader("⚙️ خيارات التحليل الإحصائي:")
+    st.markdown("##### ⚙️ خيارات التحليل الإحصائي:")
     matrix_type = st.radio("نوع مصفوفة المسافة:", ["المسافة المعجمية (Distance Lexicale)", "المسافة الصوتية (Phonétique)"])
     threshold = st.slider("مستوى التشابه الأدنى (%):", 0, 100, 75)
 
     if st.button("🔍 تشغيل تحليل القياس اللساني"):
-        st.success(f"تم حساب درجة التشابه المعجمي بين {region_1} و {region_2}: **{threshold - 5}%** (بناءً على مصفوفة {matrix_type})")
+        st.success(f"تم حساب درجة التشابه المعجمي بين {region_1} و {region_2}: **{threshold - 5}%**")
         
         demo_data = {
             "المصطلح الفلاحي": ["المحراث", "المنجل", "البئر", "القمح"],
             region_1: ["ⵜⴰⴳⵯⵓⵍⵜ", "ⴰⵎⴳⵔ", "ⴰⵏⵓ", "ⵉⵔⴷⵏ"],
-            region_2: ["ⵜⴰⴳⵯⵓⵍⵜ", "ⴰⵎⵊⵔ", "ⴰⴳⵍⵎⴰⵎ", "ⵉⵔⴷⵏ"],
+            region_2: ["ⵜⴰⴳⵯⵓⵍⵜ", "ⴰⵎ⵵ⵔ", "ⴰⴳⵍⵎⴰⵎ", "ⵉⵔⴷⵏ"],
             "نسبة التوافق": ["100%", "85%", "40%", "100%"]
         }
         st.dataframe(pd.DataFrame(demo_data), use_container_width=True)
@@ -165,13 +241,16 @@ elif "📊 Dialectométrie" in selected_page:
 # القسم الثالث: الخرائط والأطلس (Atlas & Cartes)
 # ==================================================
 elif "🗺️ Atlas & Cartes" in selected_page:
-    st.title("🗺️ Atlas & Cartes - الأطلس والخرائط التفاعلية")
-    st.caption("عرض التوزيع الجغرافي للمصطلحات الفلاحية والأمازيغية")
-    st.divider()
+    st.markdown("""
+        <div class="header-box">
+            <h1>🗺️ Atlas & Cartes - الأطلس والخرائط التفاعلية</h1>
+            <p>عرض التوزيع الجغرافي للمصطلحات الفلاحية والأمازيغية</p>
+        </div>
+    """, unsafe_allow_html=True)
 
     selected_term = st.selectbox("اختر المصطلح الفلاحي لعرض خريطته الجغرافية:", ["المحراث التقليدي (Tagwult)", "المنجل (Amgr)", "نظام السقي (Targa)"])
     
-    st.subheader(f"📍 التوزيع الجغرافي لـ: {selected_term}")
+    st.markdown(f"##### 📍 التوزيع الجغرافي لـ: **{selected_term}**")
     
     map_data = pd.DataFrame({
         'lat': [31.7917, 33.5731, 30.4278, 35.1681],
@@ -183,9 +262,12 @@ elif "🗺️ Atlas & Cartes" in selected_page:
 # القسم الرابع: المدونة والمعاجم (Corpus & Fiches)
 # ==================================================
 else:
-    st.title("📚 Corpus & Fiches - مدونة المعاجم الفلاحية")
-    st.caption("قاعدة البيانات الشاملة والمطابقة للمصطلحات الموثقة")
-    st.divider()
+    st.markdown("""
+        <div class="header-box">
+            <h1>📚 Corpus & Fiches - مدونة المعاجم الفلاحية</h1>
+            <p>قاعدة البيانات الشاملة والمطابقة للمصطلحات الموثقة</p>
+        </div>
+    """, unsafe_allow_html=True)
 
     search_query = st.text_input("🔍 بحث عن مصطلح في قاعدة البيانات:")
 
