@@ -32,7 +32,7 @@ st.markdown("""
         border-left: 1px solid #eaedf1;
     }
 
-    /* الترويسة الرئيسية */
+    /* الترويسة الرئيسية - متوازنة وموصّطة في المنتصف */
     .hero-header {
         background: linear-gradient(135deg, #1b365d 0%, #2e5b88 100%);
         color: #ffffff;
@@ -41,25 +41,33 @@ st.markdown("""
         box-shadow: 0 10px 25px rgba(27, 54, 93, 0.15);
         border-bottom: 5px solid #c5a059;
         margin-bottom: 2rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
     .hero-header h1 {
         color: #ffffff;
-        font-size: 2.4rem;
+        font-size: 2.3rem;
         font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin-top: 0.6rem;
+        margin-bottom: 0.6rem;
+        text-align: center;
     }
     .hero-header p {
         color: #e2e8f0;
         font-size: 1.15rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0;
+        text-align: center;
     }
     .academic-badge {
-        background-color: rgba(197, 160, 89, 0.2);
+        background-color: rgba(197, 160, 89, 0.25);
         color: #f3e5ab;
         border: 1px solid #c5a059;
-        padding: 4px 12px;
+        padding: 5px 16px;
         border-radius: 20px;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         display: inline-block;
     }
 
@@ -162,6 +170,16 @@ st.markdown("""
         color: #334155;
         font-style: italic;
     }
+    
+    .citation-box {
+        background-color: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        color: #475569;
+        margin-top: 12px;
+        border-radius: 6px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -183,7 +201,7 @@ def load_data():
 df = load_data()
 
 # ---------------------------------------------------------
-# 3. الترويسة الرئيسية والجمالية
+# 3. الترويسة الرئيسية والجمالية (موصّطة في منتصف المربع الأزرق)
 # ---------------------------------------------------------
 st.markdown("""
     <div class="hero-header">
@@ -214,6 +232,17 @@ if not df.empty:
     if selected_location != "جميع القبائل والمواقع":
         filtered_df = filtered_df[filtered_df['location'] == selected_location]
 
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 📥 تصدير البيانات الميدانية")
+    csv_data = filtered_df.to_csv(index=False, encoding='utf-8-sig')
+    st.sidebar.download_button(
+        label="📄 تحميل النتائج (CSV/Excel)",
+        data=csv_data,
+        file_name="atlas_data_export.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
 # ---------------------------------------------------------
 # 5. محرك البحث والبطاقات الإحصائية
 # ---------------------------------------------------------
@@ -239,7 +268,7 @@ if not df.empty:
             filtered_df['proverb'].astype(str).str.contains(query, case=False)
         ]
 
-    # بطاقات الإحصاء المحدثة بـ CSS
+    # بطاقات الإحصاء
     st.markdown("<br>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -311,6 +340,10 @@ if not df.empty:
                         {f'<p style="margin-bottom: 0.4rem;"><b>الترميز الصوتي (IPA):</b> <span class="ipa-box">[{ipa}]</span></p>' if ipa else ''}
                         {f'<p style="color: #475569; margin-bottom: 0.4rem;"><b>الوصف الميداني:</b> {description}</p>' if description else ''}
                         {f'<div class="proverb-container"><b>الشاهد النصي / المثل:</b> "{proverb}"</div>' if proverb else ''}
+                        
+                        <div class="citation-box">
+                            📖 <b>الاستشهاد الأكاديمي:</b> الباحث. (2026). المادة المعجمية "{tifinagh}" ({latin}). <i>الأطلس اللغوي لإقليم بولمان</i>. المعرف: {entry_id}.
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -359,7 +392,12 @@ if not df.empty:
             st.bar_chart(filtered_df['location'].value_counts())
 
 # ---------------------------------------------------------
-# 7. التذييل
+# 7. التذييل الأكاديمي
 # ---------------------------------------------------------
 st.markdown("---")
-st.caption("مركز التوثيق الرقمي والأطلس اللغوي | أطروحة الدكتوراه - إقليم بولمان © 2026")
+st.markdown("""
+    <div style="text-align: center; color: #64748b; font-size: 0.9rem; padding: 1rem 0;">
+        <b>منصة الأطلس اللغوي وقاموس الفلاحة والرعي الأمازيغي (إقليم بولمان)</b><br>
+        جميع الحقوق محفوظة للباحث © 2026 | أطروحة الدكتوراه في اللسانيات الأمازيغية
+    </div>
+""", unsafe_allow_html=True)
