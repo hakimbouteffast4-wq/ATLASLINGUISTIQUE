@@ -102,7 +102,9 @@ LANG_DICT = {
     }
 }
 
-# اختيار اللغة من القائمة الجانبية
+# ---------------------------------------------------------
+# 2. القائمة الجانبية لاختيار اللغة
+# ---------------------------------------------------------
 st.sidebar.markdown("### 🌐 Language / اللغة")
 lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)", "English (EN)"], index=0)
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
@@ -113,33 +115,40 @@ direction = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
 
 # ---------------------------------------------------------
-# 2. CSS لإصلاح القائمة الجانبية عند التحويل للغة العربية
+# 3. CSS المطور لحل مشكلة RTL والقائمة الجانبية جذرياً
 # ---------------------------------------------------------
 rtl_css = """
-    /* إصلاح نقل القائمة الجانبية كلياً إلى جهة اليمين في وضع العربية */
-    [data-testid="stSidebar"] {
-        left: auto !important;
-        right: 0 !important;
+    /* نقل القائمة الجانبية لليمين عبر عكس الحاوية الرئيسية دون كسر أنيميشن React */
+    div[data-testid="stAppViewContainer"] {
+        flex-direction: row-reverse !important;
+    }
+
+    /* ضبط اتجاه القائمة الجانبية والمحتوى */
+    div[data-testid="stSidebar"] {
+        direction: rtl !important;
+        text-align: right !important;
         border-left: 1px solid #e2e8f0 !important;
         border-right: none !important;
     }
-    
-    /* ضبط محاذاة الصفحة الرئيسية بالنسبة للقائمة اليمنى */
-    [data-testid="stAppViewContainer"] > section:first-child {
-        margin-right: 0 !important;
-    }
 
-    /* إصلاح وضعية زر التوسيع والطي الخاص بالقائمة الجانبية */
-    [data-testid="stSidebarCollapseButton"], 
-    [data-testid="stSidebarToggle"],
-    [data-testid="stSidebarHeader"] {
+    div[data-testid="stMain"],
+    header[data-testid="stHeader"] {
         direction: rtl !important;
-        float: left !important;
+        text-align: right !important;
     }
 
-    [data-testid="stSidebarCollapseButton"] button svg,
-    [data-testid="stSidebarToggle"] button svg {
-        transform: scaleX(-1) !important;
+    /* محاذاة عناصر الأدوات داخل القائمة */
+    div[data-testid="stSidebar"] .stSelectbox, 
+    div[data-testid="stSidebar"] .stMarkdown,
+    div[data-testid="stSidebar"] .stDownloadButton,
+    div[data-testid="stSidebar"] label {
+        direction: rtl !important;
+        text-align: right !important;
+    }
+
+    /* تعديل وضع أزرار الطي والتوسع */
+    div[data-testid="stSidebarCollapseButton"] {
+        float: left !important;
     }
 """ if is_rtl else ""
 
@@ -147,9 +156,7 @@ st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
     
-    html, body, [data-testid="stAppViewContainer"] {{
-        direction: {direction} !important;
-        text-align: {text_align} !important;
+    html, body {{
         font-family: 'Cairo', 'Inter', sans-serif;
         background-color: #f8fafc;
     }}
@@ -193,6 +200,7 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
+    /* البطاقات الإحصائية */
     .stat-card {{
         background-color: #ffffff;
         border-radius: 12px;
@@ -206,6 +214,7 @@ st.markdown(f"""
     .stat-number {{ font-size: 1.8rem; font-weight: 700; color: #0f172a; }}
     .stat-label {{ font-size: 0.8rem; color: #64748b; font-weight: 600; }}
 
+    /* بطاقة المدونة المعجمية */
     .lexical-card {{
         background: #ffffff;
         border-radius: 14px;
@@ -234,7 +243,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. قراءة البيانات
+# 4. قراءة البيانات
 # ---------------------------------------------------------
 @st.cache_data
 def load_data():
@@ -251,7 +260,7 @@ def load_data():
 df = load_data()
 
 # ---------------------------------------------------------
-# 4. الترويسة
+# 5. الترويسة الرئيسية
 # ---------------------------------------------------------
 st.markdown(f"""
     <div class="hero-header">
@@ -262,7 +271,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 5. أدوات التحكم في القائمة الجانبية
+# 6. التصفية في القائمة الجانبية
 # ---------------------------------------------------------
 st.sidebar.markdown(f"### {L['filter_title']}")
 st.sidebar.markdown("---")
@@ -293,7 +302,7 @@ if not df.empty:
     )
 
 # ---------------------------------------------------------
-# 6. محرك البحث والمؤشرات
+# 7. البحث والمؤشرات
 # ---------------------------------------------------------
 if not df.empty:
     col_s, col_r = st.columns([4, 1])
@@ -328,7 +337,7 @@ if not df.empty:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 7. التبويبات الرئيسية
+    # 8. التبويبات الرئيسية
     # ---------------------------------------------------------
     tab1, tab2, tab3, tab4 = st.tabs([L['tab1'], L['tab2'], L['tab3'], L['tab4']])
 
@@ -380,7 +389,7 @@ if not df.empty:
                 </div>
                 """, unsafe_allow_html=True)
 
-    # --- التبويب 2: الخرائط ---
+    # --- التبويب 2: الأطلس والخرائط ---
     with tab2:
         st.subheader(L['tab2'])
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
@@ -441,7 +450,7 @@ if not df.empty:
                 st.success("✅ تم استلام المادة المعجمية بنجاح!")
 
 # ---------------------------------------------------------
-# 8. التذييل
+# 9. التذييل
 # ---------------------------------------------------------
 st.markdown("---")
 st.markdown(f"""
