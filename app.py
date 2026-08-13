@@ -115,39 +115,32 @@ direction = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
 
 # ---------------------------------------------------------
-# 3. CSS المطور لحل مشكلة RTL والقائمة الجانبية جذرياً
+# 3. CSS الاحترافي المستقر للتحكم في اتجاه RTL
 # ---------------------------------------------------------
 rtl_css = """
-    /* نقل القائمة الجانبية لليمين عبر عكس الحاوية الرئيسية دون كسر أنيميشن React */
-    div[data-testid="stAppViewContainer"] {
-        flex-direction: row-reverse !important;
-    }
-
-    /* ضبط اتجاه القائمة الجانبية والمحتوى */
-    div[data-testid="stSidebar"] {
-        direction: rtl !important;
-        text-align: right !important;
-        border-left: 1px solid #e2e8f0 !important;
-        border-right: none !important;
-    }
-
-    div[data-testid="stMain"],
-    header[data-testid="stHeader"] {
+    /* ضبط اتجاه النصوص للواجهة العربية بالكامل */
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
         direction: rtl !important;
         text-align: right !important;
     }
 
-    /* محاذاة عناصر الأدوات داخل القائمة */
-    div[data-testid="stSidebar"] .stSelectbox, 
-    div[data-testid="stSidebar"] .stMarkdown,
-    div[data-testid="stSidebar"] .stDownloadButton,
-    div[data-testid="stSidebar"] label {
+    /* محاذاة القائمة الجانبية وعناصرها للغة العربية بدون كسر الأنيميشن */
+    [data-testid="stSidebar"] {
         direction: rtl !important;
         text-align: right !important;
     }
 
-    /* تعديل وضع أزرار الطي والتوسع */
-    div[data-testid="stSidebarCollapseButton"] {
+    [data-testid="stSidebar"] * {
+        text-align: right !important;
+    }
+
+    /* ترتيب الأعمدة والبطاقات من اليمين إلى اليسار */
+    [data-testid="stHorizontalBlock"] {
+        direction: rtl !important;
+    }
+
+    /* تعديل موضع زر طي/فتح القائمة الجانبية */
+    [data-testid="stSidebarCollapseButton"] {
         float: left !important;
     }
 """ if is_rtl else ""
@@ -214,7 +207,7 @@ st.markdown(f"""
     .stat-number {{ font-size: 1.8rem; font-weight: 700; color: #0f172a; }}
     .stat-label {{ font-size: 0.8rem; color: #64748b; font-weight: 600; }}
 
-    /* بطاقة المدونة المعجمية */
+    /* بطاقات المدونة المعجمية */
     .lexical-card {{
         background: #ffffff;
         border-radius: 14px;
