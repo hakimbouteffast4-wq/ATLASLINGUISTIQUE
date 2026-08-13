@@ -47,7 +47,7 @@ def load_data():
     try:
         # قراءة جميع الأعمدة كنصوص تجنباً لمشاكل أنواع البيانات
         df = pd.read_csv('data.csv', dtype=str, encoding='utf-8')
-        df.fillna('', inplace=True)
+        df = df.fillna('')
         
         # تحويل الإحداثيات مع تحويل الأخطاء إلى قيم فارغة
         df['lat'] = pd.to_numeric(df['lat'], errors='coerce')
@@ -117,25 +117,23 @@ else:
     with tab1:
         st.subheader("الترسيم الجغرافي للمصطلحات الفلاحية")
         
-        # تصفية الصفوف التي تحتوى على إحداثيات جغرافية صحيحة فقط
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
 
-        # مركز الخريطة الافتراضي (إقليم بولمان)
         m = folium.Map(location=[33.25, -4.50], zoom_start=9, tiles="OpenStreetMap")
 
         for _, row in map_df.iterrows():
             try:
                 popup_html = f"""
                 <div style="font-family: sans-serif; text-align: right; width: 180px;">
-                    <h4 style="color: #2e7d32; margin: 0;">{row['word_tifinagh']} ({row['word_latin']})</h4>
-                    <b>المعنى:</b> {row['arabic_meaning']}<br>
-                    <b>الموقع:</b> {row['location']}
+                    <h4 style="color: #2e7d32; margin: 0;">{str(row['word_tifinagh'])} ({str(row['word_latin'])})</h4>
+                    <b>المعنى:</b> {str(row['arabic_meaning'])}<br>
+                    <b>الموقع:</b> {str(row['location'])}
                 </div>
                 """
                 folium.Marker(
                     location=[float(row['lat']), float(row['lon'])],
                     popup=folium.Popup(popup_html, max_width=250),
-                    tooltip=f"{row['word_tifinagh']} - {row['arabic_meaning']}",
+                    tooltip=f"{str(row['word_tifinagh'])} - {str(row['arabic_meaning'])}",
                     icon=folium.Icon(color="green", icon="leaf")
                 ).add_to(m)
             except Exception:
@@ -150,7 +148,6 @@ else:
         if filtered_df.empty:
             st.warning("لا توجد نتائج تطابق خيارات البحث.")
         else:
-            # تقسيم العرض إلى صفحات لسرعة استجابة الموقع مع آلاف المفردات
             page_size = 20
             total_items = len(filtered_df)
             
@@ -165,25 +162,38 @@ else:
                 current_df = filtered_df
 
             for _, row in current_df.iterrows():
-                with st.expander(f"📌 {row['word_tifinagh']} | {row['word_latin']} — {row['arabic_meaning']}"):
+                tifinagh = str(row['word_tifinagh'])
+                latin = str(row['word_latin'])
+                meaning = str(row['arabic_meaning'])
+                ipa = str(row['ipa']) if 'ipa' in row else ''
+                category = str(row['category']) if 'category' in row else ''
+                location = str(row['location']) if 'location' in row else ''
+                description = str(row['description']) if 'description' in row else ''
+                proverb = str(row['proverb']) if 'proverb' in row else ''
+                image_url = str(row['image']).strip() if 'image' in row else ''
+
+                with st.expander(f"📌 {tifinagh} | {latin} — {meaning}"):
                     col_text, col_media = st.columns([2, 1])
 
                     with col_text:
-                        st.markdown(f"### **{row['word_tifinagh']}** *( {row['word_latin']} )*")
-                        if row.get('ipa'):
-                            st.markdown(f"**الرمز الصوتي (IPA):** `{row['ipa']}`")
-                        st.markdown(f"**المعنى بالعربية:** {row['arabic_meaning']}")
-                        st.markdown(f"**الحقل المعجمي:** `{row['category']}`")
-                        st.markdown(f"**القبيلة/المنطقة:** 📍 {row['location']}")
+                        st.markdown(f"### **{tifinagh}** *( {latin} )*")
+                        if ipa:
+                            st.markdown(f"**الرمز الصوتي (IPA):** `{ipa}`")
+                        st.markdown(f"**المعنى بالعربية:** {meaning}")
+                        st.markdown(f"**الحقل المعجمي:** `{category}`")
+                        st.markdown(f"**القبيلة/المنطقة:** 📍 {location}")
                         st.markdown("---")
-                        if row.get('description'):
-                            st.markdown(f"**الوصف الميداني:** {row['description']}")
-                        if row.get('proverb'):
-                            st.markdown(f"**الشاهد النصي / المثل:** *{row['proverb']}*")
+                        if description:
+                            st.markdown(f"**الوصف الميداني:** {description}")
+                        if proverb:
+                            st.markdown(f"**الشاهد النصي / المثل:** *{proverb}*")
 
                     with col_media:
-                        if row.get('image'):
-                            st.image(row['image'], caption=row['arabic_meaning'], use_column_width=True)
+                        if image_url and image_url.startswith("http"):
+                            try:
+                                st.image(image_url, caption=meaning, use_column_width=True)
+                            except Exception:
+                                st.empty()
 
 # ---------------------------------------------------------
 # 5. التذييل
