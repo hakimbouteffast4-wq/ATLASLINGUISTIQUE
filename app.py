@@ -12,11 +12,27 @@ st.set_page_config(
 )
 
 # --------------------------------------------------
-# 2. حقن كود CSS للتنسيق (القائمة يسار + المحتوى يمين)
+# 2. حقن كود CSS للتنسيق ومعالجة أزرار الهاتف
 # --------------------------------------------------
 st.markdown("""
     <style>
-    /* 1. تثبيت القائمة الجانبية في جهة اليسار */
+    /* -------------------------------------------------- */
+    /* أ) رفع محتوى الصفحة والأزرار لتجنب أزرار الهاتف    */
+    /* -------------------------------------------------- */
+    .main .block-container {
+        direction: rtl !important;
+        text-align: right !important;
+        padding-bottom: 90px !important; /* هامش أمان سفلي كبير للأزرار */
+    }
+
+    /* رفع أزرار الإرسال والتفاعل تحديداً */
+    .stButton {
+        margin-bottom: 30px !important;
+    }
+
+    /* -------------------------------------------------- */
+    /* ب) تثبيت القائمة الجانبية (Sidebar) في جهة اليسار   */
+    /* -------------------------------------------------- */
     [data-testid="stSidebar"] {
         left: 0 !important;
         right: auto !important;
@@ -30,19 +46,15 @@ st.markdown("""
         right: auto !important;
     }
 
-    /* 2. ضبط اتجاه المحتوى الرئيسي جهة اليمين (RTL) */
-    .main .block-container {
+    /* -------------------------------------------------- */
+    /* ج) ضبط اتجاه المدخلات والجداول جهة اليمين (RTL)   */
+    /* -------------------------------------------------- */
+    .stTextInput, .stSelectbox, .stTextArea, .stDataFrame, .stSlider {
         direction: rtl !important;
         text-align: right !important;
     }
 
-    /* ضبط اتجاه النصوص والحقول والجداول */
-    .stTextInput, .stSelectbox, .stTextArea, .stButton, .stDataFrame, .stSlider {
-        direction: rtl !important;
-        text-align: right !important;
-    }
-
-    /* تحسين شكل الأزرار */
+    /* تحسين شكل الزر */
     .stButton>button {
         width: 100%;
         background-color: #2e7d32;
@@ -50,7 +62,7 @@ st.markdown("""
         font-weight: bold;
         font-size: 16px;
         border-radius: 8px;
-        padding: 8px;
+        padding: 12px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -111,6 +123,7 @@ if "✍️ Fieldwork" in selected_page:
 
         description = st.text_area("ملاحظات ميدانية تفصيلية (النطق المحلي / السياق):")
 
+        # زر الإرسال (مرفوع بأمان بفضل التنسيق السفلي)
         submit_btn = st.form_submit_button("📤 إرسال وتوثيق المادة")
 
         if submit_btn:
@@ -140,7 +153,6 @@ elif "📊 Dialectométrie" in selected_page:
     if st.button("🔍 تشغيل تحليل القياس اللساني"):
         st.success(f"تم حساب درجة التشابه المعجمي بين {region_1} و {region_2}: **{threshold - 5}%** (بناءً على مصفوفة {matrix_type})")
         
-        # جدول توضيحي كمثال للتحليل
         demo_data = {
             "المصطلح الفلاحي": ["المحراث", "المنجل", "البئر", "القمح"],
             region_1: ["ⵜⴰⴳⵯⵓⵍⵜ", "ⴰⵎⴳⵔ", "ⴰⵏⵓ", "ⵉⵔⴷⵏ"],
@@ -161,14 +173,11 @@ elif "🗺️ Atlas & Cartes" in selected_page:
     
     st.subheader(f"📍 التوزيع الجغرافي لـ: {selected_term}")
     
-    # خريطة تفاعلية وهمية للعرض (يمكن ربطها بـ Folium لاحقاً)
     map_data = pd.DataFrame({
         'lat': [31.7917, 33.5731, 30.4278, 35.1681],
         'lon': [-7.0926, -7.5898, -9.5981, -3.9321]
     })
     st.map(map_data)
-    
-    st.info("💡 يمكن التكبير والتصغير وتتبع امتداد اللفظ عبر مختلف المناطق.")
 
 # ==================================================
 # القسم الرابع: المدونة والمعاجم (Corpus & Fiches)
@@ -180,7 +189,6 @@ else:
 
     search_query = st.text_input("🔍 بحث عن مصطلح في قاعدة البيانات:")
 
-    # بيانات المعجم الفلاحي
     corpus_data = pd.DataFrame({
         "تيفيناغ": ["ⵜⴰⵢⵔⵣⴰ", "ⵜⴰⵔⴳⴰ", "ⴰⵎⴳⵔ", "ⵜⴰⴳⵯⵓⵍⵜ", "ⵜⴰⵎⵓⵔⵜ"],
         "اللاتينية": ["Tayrza", "Targa", "Amgr", "Tagwult", "Tamurt"],
@@ -190,7 +198,6 @@ else:
     })
 
     if search_query:
-        # تصفية البيانات حسب كلمة البحث
         filtered_df = corpus_data[
             corpus_data['تيفيناغ'].str.contains(search_query) |
             corpus_data['اللاتينية'].str.contains(search_query, case=False) |
