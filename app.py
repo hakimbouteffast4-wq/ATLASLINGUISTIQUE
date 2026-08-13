@@ -4,127 +4,169 @@ import folium
 from streamlit_folium import st_folium
 
 # ---------------------------------------------------------
-# 1. الإعدادات والتصميم الأكاديمي المتقدم
+# 1. الإعدادات والتصميم البصري المتقدم (CSS Custom Styling)
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="الأطلس اللغوي الأمازيغي - إقليم بولمان | المنصة الأكاديمية",
-    page_icon="🎓",
+    page_title="الأطلس اللغوي الأمازيغي - إقليم بولمان",
+    page_icon="🌾",
     layout="wide"
 )
 
 st.markdown("""
     <style>
+    /* الخطوط والخلفية العامة */
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    
     html, body, [class*="css"] {
         direction: rtl;
         text-align: right;
-        font-family: 'Amiri', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #fdfdfd;
+        font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+        background-color: #f4f6f9;
     }
+    
+    /* القائمة الجانبية */
     div[data-testid="stSidebar"] {
         direction: rtl;
         text-align: right;
-        background-color: #f4f6f8;
-    }
-    
-    /* الترويسة الأكاديمية */
-    .academic-header {
-        background: #1b365d; /* أزرق أكاديمي كلاسيكي */
-        color: white;
-        padding: 2rem;
-        border-radius: 8px;
-        border-bottom: 4px solid #c5a059; /* ذهبي أكاديمي */
-        margin-bottom: 1.5rem;
-    }
-    .academic-header h1 {
-        color: #ffffff;
-        font-size: 2.2rem;
-        margin-bottom: 0.4rem;
-        font-weight: bold;
-    }
-    .academic-header h3 {
-        color: #c5a059;
-        font-size: 1.2rem;
-        margin-top: 0;
-        font-weight: normal;
-    }
-    .meta-info {
-        font-size: 0.9rem;
-        color: #d1d5db;
-        border-top: 1px solid rgba(255,255,255,0.2);
-        padding-top: 0.8rem;
-        margin-top: 1rem;
+        background-color: #ffffff;
+        border-left: 1px solid #eaedf1;
     }
 
-    /* بطاقة المادة المعجمية الأكاديمية */
-    .lexical-entry {
-        background-color: #ffffff;
-        border: 1px solid #dcdcdc;
-        border-right: 5px solid #1b365d;
-        border-radius: 6px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    /* الترويسة الرئيسية */
+    .hero-header {
+        background: linear-gradient(135deg, #1b365d 0%, #2e5b88 100%);
+        color: #ffffff;
+        padding: 2.5rem 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(27, 54, 93, 0.15);
+        border-bottom: 5px solid #c5a059;
+        margin-bottom: 2rem;
     }
-    .entry-headword {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #1b365d;
+    .hero-header h1 {
+        color: #ffffff;
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .hero-header p {
+        color: #e2e8f0;
+        font-size: 1.15rem;
+        margin-bottom: 1rem;
+    }
+    .academic-badge {
+        background-color: rgba(197, 160, 89, 0.2);
+        color: #f3e5ab;
+        border: 1px solid #c5a059;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
         display: inline-block;
     }
-    .entry-latin {
-        font-size: 1.2rem;
-        color: #555555;
-        font-style: italic;
-        margin-right: 8px;
+
+    /* بطاقات المؤشرات الإحصائية */
+    .stat-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 1.2rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid #1b365d;
+        transition: transform 0.2s ease;
     }
-    .entry-id {
-        font-family: monospace;
-        background: #eef2f6;
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
         color: #1b365d;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        float: left;
     }
-    .ipa-badge {
-        font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', monospace;
-        background-color: #f0f4f8;
+    .stat-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    /* بطاقات القاموس المعجمية */
+    .lexical-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        padding: 1.6rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .lexical-card:hover {
+        border-color: #c5a059;
+        box-shadow: 0 8px 25px rgba(27, 54, 93, 0.08);
+        transform: translateY(-2px);
+    }
+    .word-tifinagh {
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #1b365d;
+        line-height: 1.2;
+    }
+    .word-latin {
+        font-size: 1.15rem;
+        color: #64748b;
+        font-style: italic;
+    }
+    .ref-tag {
+        font-family: monospace;
+        background-color: #f1f5f9;
+        color: #475569;
         padding: 3px 8px;
-        border-radius: 4px;
-        color: #8b0000;
-        border: 1px solid #d0d7de;
-        font-size: 1rem;
-    }
-    .tag-category {
-        background-color: #e3f2fd;
-        color: #0d47a1;
-        padding: 3px 10px;
-        border-radius: 4px;
-        font-size: 0.85rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
         font-weight: 600;
     }
-    .tag-location {
-        background-color: #fff8e1;
-        color: #b78103;
-        padding: 3px 10px;
-        border-radius: 4px;
-        font-size: 0.85rem;
+
+    /* الشارات الملونة */
+    .badge-cat {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.82rem;
         font-weight: 600;
     }
-    .citation-box {
-        background-color: #f8f9fa;
-        border: 1px dashed #ccc;
-        padding: 8px 12px;
-        font-size: 0.85rem;
-        color: #555;
-        margin-top: 10px;
-        border-radius: 4px;
+    .badge-loc {
+        background-color: #fef3c7;
+        color: #b45309;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+    .ipa-box {
+        font-family: monospace;
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+
+    /* المقتبس والأمثال */
+    .proverb-container {
+        background-color: #f8fafc;
+        border-right: 4px solid #1b365d;
+        padding: 0.8rem 1rem;
+        border-radius: 0 8px 8px 0;
+        margin-top: 0.8rem;
+        color: #334155;
+        font-style: italic;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. تحميل قراءة البيانات بأسلوب آمن
+# 2. قراءة قاعدة البيانات
 # ---------------------------------------------------------
 @st.cache_data
 def load_data():
@@ -135,28 +177,26 @@ def load_data():
         df['lon'] = pd.to_numeric(df['lon'], errors='coerce')
         return df
     except Exception as e:
-        st.error(f"خطأ في قراءة ملف قاعدة البيانات: {e}")
+        st.error(f"خطأ في قراءة ملف البيانات data.csv: {e}")
         return pd.DataFrame()
 
 df = load_data()
 
 # ---------------------------------------------------------
-# 3. الترويسة الأكاديمية ومؤشرات الأطروحة
+# 3. الترويسة الرئيسية والجمالية
 # ---------------------------------------------------------
 st.markdown("""
-    <div class="academic-header">
-        <h1>🎓 الأطلس اللغوي وقاموس الفلاحة والرعي الأمازيغي</h1>
-        <h3>منصة رقمية استكشافية لمعجم عتاد الفلاحة وتقنيات السقي والرعي بإقليم بولمان</h3>
-        <div class="meta-info">
-            <b>مشروع بحث لنيل شهادة الدكتوراه في اللسانيات الأمازيغية</b> | إعداد الطالب الباحث | تحت إشراف لجنة المناقشة الأكاديمية
-        </div>
+    <div class="hero-header">
+        <span class="academic-badge">🎓 مشروع أطروحة الدكتوراه في اللسانيات الأمازيغية</span>
+        <h1>🌾 الأطلس اللغوي وقاموس الفلاحة والرعي الأمازيغي</h1>
+        <p>منصة رقمية استكشافية لمعجم عتاد الفلاحة وتقنيات السقي والرعي - إقليم بولمان</p>
     </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. القائمة الجانبية الضابطة للبحث الميداني
+# 4. القائمة الجانبية
 # ---------------------------------------------------------
-st.sidebar.markdown("### 🏛️ أدوات الضبط الأكاديمي")
+st.sidebar.markdown("### 🏛️ تصفية المعجم والأطلس")
 st.sidebar.markdown("---")
 
 if not df.empty:
@@ -166,10 +206,6 @@ if not df.empty:
     locations = ["جميع القبائل والمواقع"] + sorted([str(x) for x in df['location'].unique() if str(x).strip() != ''])
     selected_location = st.sidebar.selectbox("📍 الموقع الجغرافي / القبيلة:", locations)
 
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📥 تصدير البيانات الميدانية")
-    
-    # فلترة البيانات
     filtered_df = df.copy()
 
     if selected_category != "جميع الحقول المعجمية":
@@ -179,14 +215,14 @@ if not df.empty:
         filtered_df = filtered_df[filtered_df['location'] == selected_location]
 
 # ---------------------------------------------------------
-# 5. محرك البحث المعجمي السريع
+# 5. محرك البحث والبطاقات الإحصائية
 # ---------------------------------------------------------
 if not df.empty:
     col_s, col_r = st.columns([5, 1])
     with col_s:
         search_query = st.text_input(
             "البحث اللساني:",
-            placeholder="ابحث بالمدخل (تيفيناغ)، بالترميز الصوتي، بالمعنى العربي، بالوصف أو بالشواهد الميدانية...",
+            placeholder="🔍 ابحث بالتيفيناغ، اللاتينية، المعنى العربي، أو بالشواهد الميدانية...",
             label_visibility="collapsed"
         )
     with col_r:
@@ -203,34 +239,30 @@ if not df.empty:
             filtered_df['proverb'].astype(str).str.contains(query, case=False)
         ]
 
-    # زر تحميل البيانات للباحثين
-    csv_data = filtered_df.to_csv(index=False, encoding='utf-8-sig')
-    st.sidebar.download_button(
-        label="📄 تحميل النتائج (CSV/Excel)",
-        data=csv_data,
-        file_name="dialectal_data_export.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
+    # بطاقات الإحصاء المحدثة بـ CSS
+    st.markdown("<br>", unsafe_allow_html=True)
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.markdown(f'<div class="stat-card"><div class="stat-number">{len(filtered_df)}</div><div class="stat-label">المواد المعروضة</div></div>', unsafe_allow_html=True)
+    with c2:
+        st.markdown(f'<div class="stat-card"><div class="stat-number">{len([x for x in filtered_df["category"].unique() if str(x).strip() != ""])}</div><div class="stat-label">الحقول المعجمية</div></div>', unsafe_allow_html=True)
+    with c3:
+        st.markdown(f'<div class="stat-card"><div class="stat-number">{len([x for x in filtered_df["location"].unique() if str(x).strip() != ""])}</div><div class="stat-label">المواقع الميدانية</div></div>', unsafe_allow_html=True)
+    with c4:
+        coverage = int((len(filtered_df)/len(df))*100) if len(df)>0 else 0
+        st.markdown(f'<div class="stat-card"><div class="stat-number">{coverage}%</div><div class="stat-label">نسبة التغطية</div></div>', unsafe_allow_html=True)
 
-    # الإحصائيات الأكاديمية
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-    col_m1.metric("عينة المواد المعجمية", len(filtered_df))
-    col_m2.metric("الحقول المعجمية", len([x for x in filtered_df['category'].unique() if str(x).strip() != '']))
-    col_m3.metric("مواقع المسح الميداني", len([x for x in filtered_df['location'].unique() if str(x).strip() != '']))
-    col_m4.metric("نسبة التغطية الميدانية", f"{int((len(filtered_df)/len(df))*100)}%" if len(df)>0 else "0%")
-
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 6. التبويبات الأكاديمية
+    # 6. التبويبات الرئيسية
     # ---------------------------------------------------------
-    tab1, tab2, tab3 = st.tabs(["📚 المدونة المعجمية والبطاقات اللسانية", "🗺️ الأطلس الجغرافي اللغوي", "📊 الإحصاء والتوزيع المعجمي"])
+    tab1, tab2, tab3 = st.tabs(["📚 المدونة المعجمية والبطاقات", "🗺️ الأطلس الجغرافي اللغوي", "📊 التحليل الإحصائي"])
 
-    # --- التبويب 1: المدونة المعجمية ---
+    # --- التبويب 1: البطاقات المعجمية ---
     with tab1:
         if filtered_df.empty:
-            st.warning("لم تُسفر عملية البحث والفلترة عن نتائج تطابق المعايير المحددة.")
+            st.info("⚠️ لم يتم العثور على أي نتائج تطابق عملية البحث.")
         else:
             page_size = 10
             total_items = len(filtered_df)
@@ -243,11 +275,10 @@ if not df.empty:
                 start_idx = (page_num - 1) * page_size
                 end_idx = start_idx + page_size
                 current_df = filtered_df.iloc[start_idx:end_idx]
-                st.caption(f"عرض المواد المعجمية من {start_idx + 1} إلى {min(end_idx, total_items)} (إجمالي العينة: {total_items})")
             else:
                 current_df = filtered_df
 
-            # عرض المدخلات المعجمية
+            # عرض الكروت الجميلة
             for idx, row in current_df.iterrows():
                 entry_id = f"REF-{str(idx+1).zfill(3)}"
                 tifinagh = str(row['word_tifinagh'])
@@ -264,87 +295,71 @@ if not df.empty:
 
                 with col_text:
                     st.markdown(f"""
-                    <div class="lexical-entry">
-                        <span class="entry-id">{entry_id}</span>
-                        <div>
-                            <span class="entry-headword">{tifinagh}</span>
-                            <span class="entry-latin">({latin})</span>
+                    <div class="lexical-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <div>
+                                <span class="word-tifinagh">{tifinagh}</span>
+                                <span class="word-latin">({latin})</span>
+                            </div>
+                            <span class="ref-tag">{entry_id}</span>
                         </div>
-                        <div style="margin-top: 8px;">
-                            {f'<span class="tag-category">الحقل: {category}</span>' if category else ''}
-                            {f'<span class="tag-location">📍 النقطة: {location}</span>' if location else ''}
+                        <div style="margin-bottom: 0.8rem;">
+                            {f'<span class="badge-cat">{category}</span> ' if category else ''}
+                            {f'<span class="badge-loc">📍 {location}</span>' if location else ''}
                         </div>
-                        <hr style="margin: 0.8rem 0; border: 0; border-top: 1px solid #eeeeee;">
-                        <p style="font-size: 1.1rem; margin-bottom: 0.4rem;"><b>الدلالة والترجمة:</b> {meaning}</p>
-                        {f'<p style="margin-bottom: 0.4rem;"><b>الترميز الصوتي الدولي (IPA):</b> <span class="ipa-badge">[{ipa}]</span></p>' if ipa else ''}
-                        {f'<p style="color: #444; margin-bottom: 0.4rem;"><b>الوصف اللساني والميداني:</b> {description}</p>' if description else ''}
-                        {f'<p style="color: #1b365d; font-style: italic; margin-bottom: 0.4rem;"><b>الشاهد النصي / المثل:</b> "{proverb}"</p>' if proverb else ''}
-                        
-                        <div class="citation-box">
-                            📖 <b>كيفية الاستشهاد الأكاديمي بفي هذا المدخل:</b><br>
-                            الباحث. (2026). المادة المعجمية "{tifinagh}" ({latin}). <i>الأطلس اللغوي وقاموس الفلاحة بإقليم بولمان</i>. المعرف: {entry_id}.
-                        </div>
+                        <p style="font-size: 1.15rem; margin-bottom: 0.4rem; color: #1e293b;"><b>المعنى بالعربية:</b> {meaning}</p>
+                        {f'<p style="margin-bottom: 0.4rem;"><b>الترميز الصوتي (IPA):</b> <span class="ipa-box">[{ipa}]</span></p>' if ipa else ''}
+                        {f'<p style="color: #475569; margin-bottom: 0.4rem;"><b>الوصف الميداني:</b> {description}</p>' if description else ''}
+                        {f'<div class="proverb-container"><b>الشاهد النصي / المثل:</b> "{proverb}"</div>' if proverb else ''}
                     </div>
                     """, unsafe_allow_html=True)
 
                 if col_media:
                     with col_media:
                         try:
-                            st.image(image_url, caption=f"المعطى البصري الميداني: {meaning}", use_column_width=True)
+                            st.image(image_url, caption=meaning, use_column_width=True)
                         except Exception:
                             pass
 
-    # --- التبويب 2: الأطلس الجغرافي اللغوي ---
+    # --- التبويب 2: الخريطة ---
     with tab2:
-        st.subheader("الترسيم الجغرافي للمواد المعجمية المفلترة")
-        st.caption("يعرض الأطلس توزيع الظواهر اللغوية والمعجمية عبر نقاط الجمع الميداني بإقليم بولمان.")
-
+        st.subheader("📍 الترسيم الجغرافي اللغوي")
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
         m = folium.Map(location=[33.25, -4.50], zoom_start=9, tiles="OpenStreetMap")
 
         for _, row in map_df.iterrows():
             try:
                 popup_html = f"""
-                <div style="font-family: sans-serif; text-align: right; width: 200px;">
+                <div style="font-family: sans-serif; text-align: right; width: 180px;">
                     <h4 style="color: #1b365d; margin: 0;">{str(row['word_tifinagh'])} ({str(row['word_latin'])})</h4>
                     <b>المعنى:</b> {str(row['arabic_meaning'])}<br>
-                    <b>النقطة الجغرافية:</b> {str(row['location'])}
+                    <b>الموقع:</b> {str(row['location'])}
                 </div>
                 """
                 folium.Marker(
                     location=[float(row['lat']), float(row['lon'])],
                     popup=folium.Popup(popup_html, max_width=250),
                     tooltip=f"{str(row['word_tifinagh'])} - {str(row['arabic_meaning'])}",
-                    icon=folium.Icon(color="navy", icon="info-sign")
+                    icon=folium.Icon(color="blue", icon="info-sign")
                 ).add_to(m)
             except Exception:
                 continue
 
-        st_folium(m, width="100%", height=550)
+        st_folium(m, width="100%", height=500)
 
-    # --- التبويب 3: الإحصاء والتحليل المعجمي ---
+    # --- التبويب 3: الإحصائيات ---
     with tab3:
-        st.subheader("📊 التحليل الإحصائي والتوزيع اللغوي")
-        
-        col_c1, col_c2 = st.columns(2)
-        
-        with col_c1:
-            st.markdown("#### التوزيع حسب الحقول المعجمية")
-            cat_counts = filtered_df['category'].value_counts()
-            st.bar_chart(cat_counts)
-            
-        with col_c2:
-            st.markdown("#### التوزيع حسب النقاط الجغرافية/القبائل")
-            loc_counts = filtered_df['location'].value_counts()
-            st.bar_chart(loc_counts)
+        st.subheader("📊 الرسوم البيانية للتوزيع اللغوي")
+        col_chart1, col_chart2 = st.columns(2)
+        with col_chart1:
+            st.markdown("#### المواد حسب الحقول المعجمية")
+            st.bar_chart(filtered_df['category'].value_counts())
+        with col_chart2:
+            st.markdown("#### المواد حسب النقاط الجغرافية")
+            st.bar_chart(filtered_df['location'].value_counts())
 
 # ---------------------------------------------------------
-# 7. التذييل الأكاديمي الرسمي
+# 7. التذييل
 # ---------------------------------------------------------
 st.markdown("---")
-st.markdown("""
-    <div style="text-align: center; color: #666; font-size: 0.9rem;">
-        <b>منصة الأطلس اللغوي وقاموس الفلاحة والرعي بالأطلس المتوسط الشرق (إقليم بولمان)</b><br>
-        جميع الحقوق محفوظة للباحث © 2026 | مختبر اللسان والمجتمع والتنشئة الثقافية
-    </div>
-""", unsafe_allow_html=True)
+st.caption("مركز التوثيق الرقمي والأطلس اللغوي | أطروحة الدكتوراه - إقليم بولمان © 2026")
