@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
@@ -110,87 +109,43 @@ st.sidebar.markdown("### 🌐 Language / اللغة")
 lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)", "English (EN)"], index=0)
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
+
 is_rtl = (lang_code == "AR")
+direction = "rtl" if is_rtl else "ltr"
+text_align = "right" if is_rtl else "left"
 
 # ---------------------------------------------------------
-# 3. حقن جافاسكربت وتنسيق المباشر لجذر DOM (حل جذر المشكلة)
+# 3. CSS المنسق والمستقر 100% بدون كسر الجافاسكربت
 # ---------------------------------------------------------
-def inject_rtl_script(rtl_active):
-    if rtl_active:
-        components.html(
-            """
-            <script>
-            const parentDoc = window.parent.document;
-            let rtlStyle = parentDoc.getElementById("streamlit-rtl-override");
-            if (!rtlStyle) {
-                rtlStyle = parentDoc.createElement("style");
-                rtlStyle.id = "streamlit-rtl-override";
-                parentDoc.head.appendChild(rtlStyle);
-            }
-            rtlStyle.innerHTML = `
-                /* اتجاه الصفحة العام */
-                [data-testid="stAppViewContainer"] {
-                    direction: rtl !important;
-                    text-align: right !important;
-                }
-                
-                /* تحريك القائمة الجانبية لليمين بشكل مباشر قاطع */
-                [data-testid="stSidebar"] {
-                    left: auto !important;
-                    right: 0 !important;
-                    border-left: 1px solid #cbd5e1 !important;
-                    border-right: none !important;
-                }
+rtl_css = """
+    /* تحويل محاذاة كافة نصوص الصفحة الرئيسية والشرائح */
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+        direction: rtl !important;
+        text-align: right !important;
+    }
 
-                /* إعادة ضبط موضع زر الفتح/الطي في الأعلى */
-                [data-testid="stSidebarCollapsedControl"],
-                [data-testid="stSidebarHeader"] {
-                    left: auto !important;
-                    right: 0.5rem !important;
-                    direction: rtl !important;
-                }
+    /* محاذاة كل العناصر داخل الشريط الجانبي إلى اليمين */
+    [data-testid="stSidebar"] {
+        direction: rtl !important;
+        text-align: right !important;
+    }
 
-                /* محاذاة كل النصوص والمدخلات إلى اليمين */
-                [data-testid="stSidebar"] *, 
-                [data-testid="stMain"] * {
-                    text-align: right !important;
-                }
+    [data-testid="stSidebar"] * {
+        text-align: right !important;
+        direction: rtl !important;
+    }
 
-                /* ضبط اتجاه حقول الإدخال والقوائم المنسدلة */
-                input, select, textarea, .stSelectbox, .stTextInput {
-                    direction: rtl !important;
-                    text-align: right !important;
-                }
+    /* ضبط الحقول المدخلة والأعمدة */
+    input, select, textarea, .stSelectbox, .stTextInput {
+        direction: rtl !important;
+        text-align: right !important;
+    }
 
-                /* عكس اتجاه الأيقونات داخل الأزرار */
-                [data-testid="stSidebarCollapseButton"] button svg {
-                    transform: scaleX(-1) !important;
-                }
-            `;
-            </script>
-            """,
-            height=0,
-            width=0
-        )
-    else:
-        components.html(
-            """
-            <script>
-            const parentDoc = window.parent.document;
-            const rtlStyle = parentDoc.getElementById("streamlit-rtl-override");
-            if (rtlStyle) {
-                rtlStyle.remove();
-            }
-            </script>
-            """,
-            height=0,
-            width=0
-        )
+    [data-testid="stHorizontalBlock"] {
+        direction: rtl !important;
+    }
+""" if is_rtl else ""
 
-# تطبيق الحقن
-inject_rtl_script(is_rtl)
-
-# CSS جمالي داعم لتصميم الواجهة
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
@@ -199,6 +154,8 @@ st.markdown(f"""
         font-family: 'Cairo', 'Inter', sans-serif;
         background-color: #f8fafc;
     }}
+
+    {rtl_css}
 
     /* الترويسة الرئيسية */
     .hero-header {{
@@ -251,7 +208,7 @@ st.markdown(f"""
     .stat-number {{ font-size: 1.8rem; font-weight: 700; color: #0f172a; }}
     .stat-label {{ font-size: 0.8rem; color: #64748b; font-weight: 600; }}
 
-    /* بطاقات المدونة المعجمية */
+    /* بطاقة المدونة المعجمية */
     .lexical-card {{
         background: #ffffff;
         border-radius: 14px;
