@@ -95,7 +95,7 @@ LANG_DICT = {
         'meaning': "Meaning",
         'ipa': "Phonetics (IPA)",
         'desc': "Description",
-        'proverb': "Proverb",
+        'proverb': "Proverbe",
         'audio': "🎧 Audio Recording:",
         'cite': "📖 Academic Citation (APA 7th):",
         'rights': "All Rights Reserved © 2026 | Ph.D. Dissertation in Digital Dialectology"
@@ -113,7 +113,7 @@ direction = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
 
 # ---------------------------------------------------------
-# CSS المعالج لحل مشكلة تداخل القائمة مع محتوى الصفحة
+# 2. CSS المحسّن لنقل القائمة والأيقونة لأقصى اليمين المطلق
 # ---------------------------------------------------------
 st.markdown(f"""
     <style>
@@ -126,26 +126,17 @@ st.markdown(f"""
         background-color: #f8fafc;
     }}
 
-    /* 📌 إزاحة محتوى الصفحة عند فتح الشريط الجانبي في جهة اليمين */
-    {"@media (min-width: 992px) {" if is_rtl else ""}
-    {"section[data-testid='stSidebar'][aria-expanded='true'] ~ div[data-testid='stMain'] { margin-right: 21rem !important; margin-left: 0rem !important; }" if is_rtl else ""}
-    {"section[data-testid='stSidebar'][aria-expanded='false'] ~ div[data-testid='stMain'] { margin-right: 0rem !important; margin-left: 0rem !important; }" if is_rtl else ""}
-    {"}" if is_rtl else ""}
+    /* 📌 تثبيت القائمة الجانبية تماماً على الشاطئ الأيمن للشاشة */
+    {"section[data-testid='stSidebar'] { right: 0 !important; left: auto !important; border-left: 1px solid #e2e8f0 !important; border-right: none !important; position: fixed !important; z-index: 999990 !important; }" if is_rtl else ""}
 
-    /* 📌 تثبيت الشريط الجانبي في اليمين */
-    section[data-testid="stSidebar"] {{
-        {"right: 0 !important; left: auto !important; border-left: 1px solid #e2e8f0 !important; border-right: none !important;" if is_rtl else ""}
-    }}
+    /* 📌 نقل زر فتح/إغلاق القائمة إلى أقصى اليمين عند حافة الشاشة (موقع السهم الأصفر) */
+    {"[data-testid='stSidebarCollapseButton'], [data-testid='stSidebarToggle'], button[aria-label*='sidebar'] { position: fixed !important; right: 15px !important; top: 15px !important; left: auto !important; z-index: 999999 !important; background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; }" if is_rtl else ""}
 
-    /* 📌 أزرار التحكم والأسهم */
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarToggle"] {{
-        {"right: 0.5rem !important; left: auto !important;" if is_rtl else ""}
-    }}
+    /* 📌 تدوير سهم الأيقونة بيتجه لليمين */
+    {"[data-testid='stSidebarCollapseButton'] svg, [data-testid='stSidebarToggle'] svg { transform: rotate(180deg) !important; }" if is_rtl else ""}
 
-    div[data-baseweb="select"] {{
-        direction: {direction} !important;
-    }}
+    /* 📌 تحريك المحتوى الرئيسي وتجنب تداخله */
+    {"div[data-testid='stMain'] { max-width: 100% !important; padding-right: 1.5rem !important; padding-left: 1.5rem !important; }" if is_rtl else ""}
 
     /* الترويسة الرئيسية */
     .hero-header {{
@@ -161,6 +152,7 @@ st.markdown(f"""
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        width: 100%;
     }}
     .hero-header h1 {{
         color: #ffffff !important;
@@ -225,7 +217,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. قراءة قاعدة البيانات
+# 3. قراءة قاعدة البيانات
 # ---------------------------------------------------------
 @st.cache_data
 def load_data():
@@ -242,7 +234,7 @@ def load_data():
 df = load_data()
 
 # ---------------------------------------------------------
-# 3. الترويسة الرئيسية
+# 4. الترويسة الرئيسية
 # ---------------------------------------------------------
 st.markdown(f"""
     <div class="hero-header">
@@ -253,7 +245,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. أدوات التصفية والتحكم
+# 5. أدوات التصفية والتحكم في الشريط الجانبي
 # ---------------------------------------------------------
 st.sidebar.markdown(f"### {L['filter_title']}")
 st.sidebar.markdown("---")
@@ -284,7 +276,7 @@ if not df.empty:
     )
 
 # ---------------------------------------------------------
-# 5. محرك البحث والمؤشرات
+# 6. محرك البحث والمؤشرات
 # ---------------------------------------------------------
 if not df.empty:
     col_s, col_r = st.columns([4, 1])
@@ -319,7 +311,7 @@ if not df.empty:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 6. التبويبات الرئيسية
+    # 7. التبويبات الرئيسية
     # ---------------------------------------------------------
     tab1, tab2, tab3, tab4 = st.tabs([L['tab1'], L['tab2'], L['tab3'], L['tab4']])
 
@@ -432,7 +424,7 @@ if not df.empty:
                 st.success("✅ تم استلام المادة المعجمية بنجاح!")
 
 # ---------------------------------------------------------
-# 7. التذييل
+# 8. التذييل
 # ---------------------------------------------------------
 st.markdown("---")
 st.markdown(f"""
