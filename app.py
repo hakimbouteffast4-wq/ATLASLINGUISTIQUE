@@ -2,32 +2,28 @@ import streamlit as st
 import pandas as pd
 
 # --------------------------------------------------
-# 1. إعدادات الصفحة
+# 1. إعدادات الصفحة الأساسية
 # --------------------------------------------------
 st.set_page_config(
-    page_title="الأطلس اللغوي وقاموس الفلاحة الأمازيغي",
+    page_title="الأطلس اللغوي وقاموس الفلاحة والأدب الأمازيغي",
     page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # --------------------------------------------------
-# 2. حقن الخطوط والتنسيقات المتقدمة (Advanced CSS)
+# 2. حقن التنسيقات المتقدمة والخطوط (CSS)
 # --------------------------------------------------
 st.markdown("""
     <style>
-    /* -------------------------------------------------- */
-    /* أ) استدعاء خط Cairo الاحترافي                       */
-    /* -------------------------------------------------- */
+    /* استدعاء خط Cairo الاحترافي */
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
 
     html, body, [class*="css"], .stMarkdown, p, h1, h2, h3, h4, h5, h6 {
         font-family: 'Cairo', sans-serif !important;
     }
 
-    /* -------------------------------------------------- */
-    /* ب) الخلفية العامة وهامش الأمان للهاتف               */
-    /* -------------------------------------------------- */
+    /* الخلفية العامة وهامش الأمان لهواتف أندرويد */
     .stApp {
         background-color: #F8F9FA;
     }
@@ -36,13 +32,11 @@ st.markdown("""
         direction: rtl !important;
         text-align: right !important;
         padding-top: 1.5rem !important;
-        padding-bottom: 90px !important; /* هامش حماية لأزرار شاشة الهاتف */
+        padding-bottom: 95px !important; /* هامش لحماية الأزرار من شريط الأندرويد */
         max-width: 1100px;
     }
 
-    /* -------------------------------------------------- */
-    /* ج) تصميم البطاقات الرئيسية (Card Containers)         */
-    /* -------------------------------------------------- */
+    /* تصميم البطاقات والخانات */
     div[data-testid="stForm"], .element-container div.stDataFrame {
         background-color: #FFFFFF !important;
         border-radius: 16px !important;
@@ -51,9 +45,7 @@ st.markdown("""
         border: 1px solid #EAEAEA !important;
     }
 
-    /* -------------------------------------------------- */
-    /* د) تصميم أزرار الإرسال والتفاعل                     */
-    /* -------------------------------------------------- */
+    /* تصميم أزرار الإرسال والتفاعل */
     .stButton>button, div[data-testid="stForm"] button {
         width: 100% !important;
         background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%) !important;
@@ -72,13 +64,11 @@ st.markdown("""
         box-shadow: 0 6px 15px rgba(46, 125, 50, 0.35) !important;
     }
 
-    /* -------------------------------------------------- */
-    /* هـ) القائمة الجانبية (Sidebar - جهة اليسار)         */
-    /* -------------------------------------------------- */
+    /* القائمة الجانبية (Sidebar - مثبتة على اليسار) */
     [data-testid="stSidebar"] {
         left: 0 !important;
         right: auto !important;
-        background-color: #1E2922 !important; /* لون داكن أنيق */
+        background-color: #1E2922 !important;
         border-right: 1px solid #2D3E33 !important;
         border-left: none !important;
         direction: ltr !important;
@@ -93,9 +83,7 @@ st.markdown("""
         right: auto !important;
     }
 
-    /* -------------------------------------------------- */
-    /* و) خانات الإدخال والتراكيب                         */
-    /* -------------------------------------------------- */
+    /* مدخلات النصوص والقوائم */
     .stTextInput input, .stSelectbox select, .stTextArea textarea {
         border-radius: 10px !important;
         border: 1.5px solid #D1D5DB !important;
@@ -105,12 +93,7 @@ st.markdown("""
         background-color: #FAFAFA !important;
     }
 
-    .stTextInput input:focus, .stSelectbox select:focus, .stTextArea textarea:focus {
-        border-color: #2E7D32 !important;
-        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
-    }
-
-    /* رأس الصفحة الجميل */
+    /* رأس الصفحات الملون */
     .header-box {
         background: linear-gradient(135deg, #1E4D2B 0%, #2E7D32 100%);
         color: white;
@@ -121,13 +104,13 @@ st.markdown("""
     }
     .header-box h1 {
         color: #FFFFFF !important;
-        font-size: 24px !important;
+        font-size: 22px !important;
         font-weight: 800 !important;
         margin: 0 !important;
     }
     .header-box p {
         color: #E8F5E9 !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         margin-top: 6px !important;
     }
     </style>
@@ -143,6 +126,7 @@ with st.sidebar:
         "اختر القسم / Select Section:",
         [
             "✍️ Fieldwork (الجمع الميداني)",
+            "📜 Literature (الأدب الشفهي)",
             "📊 Dialectométrie (القياس اللساني)",
             "🗺️ Atlas & Cartes (الأطلس والخرائط)",
             "📚 Corpus & Fiches (المدونة والمعاجم)"
@@ -151,18 +135,18 @@ with st.sidebar:
     
     st.divider()
     st.markdown("""
-        <div style='background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; font-size: 13px;'>
+        <div style='background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; font-size: 12px;'>
             <b>🌿 Atlas Linguistique & Amazigh Dictionary</b><br>
-            منصة التوثيق المعجمي والقياس اللساني الجغرافي.
+            منصة التوثيق المعجمي والأدبي والقياس اللساني الجغرافي.
         </div>
     """, unsafe_allow_html=True)
 
 # --------------------------------------------------
-# 4. محتوى الأقسام الكاملة
+# 4. محتوى أجزاء المنصة الكاملة
 # --------------------------------------------------
 
 # ==================================================
-# القسم الأول: الجمع الميداني (Fieldwork)
+# القسم الأول: الجمع الميداني الفلاحي (Fieldwork)
 # ==================================================
 if "✍️ Fieldwork" in selected_page:
     st.markdown("""
@@ -206,7 +190,86 @@ if "✍️ Fieldwork" in selected_page:
                 st.warning("⚠️ يرجى إدخال الكلمة بتيفيناغ أو اللاتينية على الأقل.")
 
 # ==================================================
-# القسم الثاني: القياس اللساني (Dialectométrie)
+# القسم الثاني: جمع الأدب الشفهي (Literature)
+# ==================================================
+elif "📜 Literature" in selected_page:
+    st.markdown("""
+        <div class="header-box">
+            <h1>📜 توثيق التراث الشفهي والأدب الأمازيغي</h1>
+            <p>جمع وتصنيف الأشعار، الألغاز، والحكايات الشعبية الميدانية</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    genre = st.radio(
+        "اختر نوع المادة الشفهية المراد توثيقها:",
+        ["📜 شعر (ⵜⴰⵎⴷⵢⴰⵣⵜ / Izlan)", "🧩 لغز (ⵜⴰⵏⴼⵓⵔⵜ / Timssardacin)", "📖 حكاية (ⵜⴰⵏⴼⵓⵙⵜ / Timaggarin)"],
+        horizontal=True
+    )
+
+    st.divider()
+
+    # 1. استمارة الشعر
+    if "شعر" in genre:
+        st.subheader("📝 توثيق قصيدة / إزلي")
+        with st.form("poetry_form", clear_on_submit=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                poem_title = st.text_input("عنوان القصيدة / البيت:")
+                poet_name = st.text_input("اسم الشاعر / الراوي:")
+            with col2:
+                poem_type = st.selectbox("نوع الشعر / الغرض:", ["إزلي (Izli)", "تامديازت (Tamdyazt)", "شعر الحصاد والعمل", "أخرى"])
+                region = st.text_input("المنطقة / القبيلة:")
+
+            text_tifinagh = st.text_area("نص القصيدة بتيفيناغ:", height=100)
+            text_latin = st.text_area("نص القصيدة باللاتينية:", height=90)
+            text_arabic = st.text_area("ترجمة الأبيات والشرح بالعربية:", height=90)
+
+            audio_file = st.file_uploader("🎙️ رفع تسجيل صوتي (MP3, WAV):", type=["mp3", "wav", "m4a"])
+
+            submit_poem = st.form_submit_button("📤 حفظ وثيقة الشعر")
+            if submit_poem:
+                st.success("✅ تم توثيق القصيدة بنجاح!")
+
+    # 2. استمارة اللغز
+    elif "لغز" in genre:
+        st.subheader("🧩 توثيق لغز شعبي (Tanfurt)")
+        with st.form("riddle_form", clear_on_submit=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                riddle_tifinagh = st.text_input("نص اللغز بتيفيناغ:")
+                riddle_arabic = st.text_input("نص اللغز بالعربية:")
+            with col2:
+                answer = st.text_input("💡 حل اللغز (الجواب):")
+                domain = st.selectbox("المجال:", ["أدوات الفلاحة", "الحيوانات والرعي", "الطبيعة والكون", "عناصر البيت"])
+
+            region = st.text_input("منطقة الجمع:")
+            notes = st.text_area("شرح ثقافي أو سياق اللغز:")
+
+            submit_riddle = st.form_submit_button("📤 حفظ اللغز")
+            if submit_riddle:
+                st.success("✅ تم تسجيل اللغز وحله بنجاح!")
+
+    # 3. استمارة الحكاية
+    else:
+        st.subheader("📖 توثيق حكاية شعبية (Tanfust)")
+        with st.form("story_form", clear_on_submit=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                story_title = st.text_input("عنوان الحكاية:")
+                narrator = st.text_input("اسم الإخباري / الراوي:")
+            with col2:
+                story_category = st.selectbox("تصنيف الحكاية:", ["حكايات الحيوان", "حكايات عجائبية", "حكايات واقعية", "أسطورة فلاحية"])
+                region = st.text_input("منطقة الجمع:")
+
+            story_body = st.text_area("نص الحكاية أو ملخصها:", height=180)
+            audio_story = st.file_uploader("🎙️ تسجيل صوتي للحكاية:", type=["mp3", "wav", "m4a"])
+
+            submit_story = st.form_submit_button("📤 حفظ الحكاية الشعبية")
+            if submit_story:
+                st.success("✅ تم توثيق الحكاية بنجاح!")
+
+# ==================================================
+# القسم الثالث: القياس اللساني (Dialectométrie)
 # ==================================================
 elif "📊 Dialectométrie" in selected_page:
     st.markdown("""
@@ -238,7 +301,7 @@ elif "📊 Dialectométrie" in selected_page:
         st.dataframe(pd.DataFrame(demo_data), use_container_width=True)
 
 # ==================================================
-# القسم الثالث: الخرائط والأطلس (Atlas & Cartes)
+# القسم الرابع: الخرائط والأطلس (Atlas & Cartes)
 # ==================================================
 elif "🗺️ Atlas & Cartes" in selected_page:
     st.markdown("""
@@ -259,7 +322,7 @@ elif "🗺️ Atlas & Cartes" in selected_page:
     st.map(map_data)
 
 # ==================================================
-# القسم الرابع: المدونة والمعاجم (Corpus & Fiches)
+# القسم الخامس: المدونة والمعاجم (Corpus & Fiches)
 # ==================================================
 else:
     st.markdown("""
