@@ -108,42 +108,43 @@ lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)",
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
 
-# CSS المصلح بدقة لحل مشكلة تداخل الأيقونات والانكسار
 is_rtl = (lang_code == "AR")
 direction = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
 
+# ---------------------------------------------------------
+# CSS المعالج لحل مشكلة تداخل القائمة مع محتوى الصفحة
+# ---------------------------------------------------------
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
     
-    html, body, [class*="css"] {{
+    html, body, [data-testid="stAppViewContainer"] {{
         direction: {direction} !important;
         text-align: {text_align} !important;
         font-family: 'Cairo', 'Inter', sans-serif;
         background-color: #f8fafc;
     }}
 
-    /* 📌 إجبار القائمة الجانبية على التموضع الصحيح ومنع الانكسار */
+    /* 📌 إزاحة محتوى الصفحة عند فتح الشريط الجانبي في جهة اليمين */
+    {"@media (min-width: 992px) {" if is_rtl else ""}
+    {"section[data-testid='stSidebar'][aria-expanded='true'] ~ div[data-testid='stMain'] { margin-right: 21rem !important; margin-left: 0rem !important; }" if is_rtl else ""}
+    {"section[data-testid='stSidebar'][aria-expanded='false'] ~ div[data-testid='stMain'] { margin-right: 0rem !important; margin-left: 0rem !important; }" if is_rtl else ""}
+    {"}" if is_rtl else ""}
+
+    /* 📌 تثبيت الشريط الجانبي في اليمين */
     section[data-testid="stSidebar"] {{
-        {"right: 0 !important; left: auto !important; border-left: 1px solid #e2e8f0 !important; border-right: none !important;" if is_rtl else "left: 0 !important; right: auto !important;"}
-        min-width: 300px !important;
-        max-width: 320px !important;
+        {"right: 0 !important; left: auto !important; border-left: 1px solid #e2e8f0 !important; border-right: none !important;" if is_rtl else ""}
     }}
 
-    /* 📌 تحريك زر التكبير/التصغير الخاص بالسيدبار بعيداً عن الهيدر */
-    button[data-testid="stSidebarCollapseButton"],
+    /* 📌 أزرار التحكم والأسهم */
+    [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarToggle"] {{
-        {"right: 0.5rem !important; left: auto !important;" if is_rtl else "left: 0.5rem !important; right: auto !important;"}
-        z-index: 999999 !important;
-        background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 50% !important;
+        {"right: 0.5rem !important; left: auto !important;" if is_rtl else ""}
     }}
 
-    button[data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarToggle"] svg {{
-        {"transform: rotate(180deg) !important;" if is_rtl else ""}
+    div[data-baseweb="select"] {{
+        direction: {direction} !important;
     }}
 
     /* الترويسة الرئيسية */
