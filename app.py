@@ -5,7 +5,7 @@ from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة والتصميم
+# 1. إعدادات الصفحة
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Linguistic Atlas & Amazigh Dictionary | الأطلس اللغوي",
@@ -54,7 +54,7 @@ LANG_DICT = {
         'all_cats': "Tous les champs lexicaux",
         'all_locs': "Toutes les localités",
         'search_ph': "🔍 Rechercher en Tifinagh, Latin, sens...",
-        'reset': "🔄 Réinitialiser",
+        'reset': "Réinitialiser",
         'stat_items': "Entrées affichées",
         'stat_cats': "Champs lexicaux",
         'stat_locs': "Sites de collecte",
@@ -82,7 +82,7 @@ LANG_DICT = {
         'all_cats': "All Lexical Fields",
         'all_locs': "All Locations",
         'search_ph': "🔍 Search by Tifinagh, Latin, Meaning...",
-        'reset': "🔄 Reset",
+        'reset': "Reset",
         'stat_items': "Entries Shown",
         'stat_cats': "Lexical Fields",
         'stat_locs': "Field Sites",
@@ -108,44 +108,42 @@ lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)",
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
 
-# CSS موجه بالكامل لضبط الأسهم جهة اليمين
+# CSS المصلح بدقة لحل مشكلة تداخل الأيقونات والانكسار
+is_rtl = (lang_code == "AR")
+direction = "rtl" if is_rtl else "ltr"
+text_align = "right" if is_rtl else "left"
+
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
     
     html, body, [class*="css"] {{
-        direction: {"rtl" if lang_code == "AR" else "ltr"};
-        text-align: {"right" if lang_code == "AR" else "left"};
+        direction: {direction} !important;
+        text-align: {text_align} !important;
         font-family: 'Cairo', 'Inter', sans-serif;
         background-color: #f8fafc;
     }}
-    
-    /* 📌 تثبيت القائمة الجانبية في اليمين */
-    {"'''" if lang_code != "AR" else ""}
+
+    /* 📌 إجبار القائمة الجانبية على التموضع الصحيح ومنع الانكسار */
     section[data-testid="stSidebar"] {{
-        right: 0 !important;
-        left: auto !important;
-        border-left: 1px solid #e2e8f0 !important;
-        border-right: none !important;
+        {"right: 0 !important; left: auto !important; border-left: 1px solid #e2e8f0 !important; border-right: none !important;" if is_rtl else "left: 0 !important; right: auto !important;"}
+        min-width: 300px !important;
+        max-width: 320px !important;
     }}
-    div[data-testid="stSidebarCollapseButton"],
+
+    /* 📌 تحريك زر التكبير/التصغير الخاص بالسيدبار بعيداً عن الهيدر */
+    button[data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarToggle"] {{
-        right: 0.5rem !important;
-        left: auto !important;
-    }}
-    {"'''" if lang_code != "AR" else ""}
-
-    div[data-testid="stSidebar"] {{
-        background-color: #ffffff;
+        {"right: 0.5rem !important; left: auto !important;" if is_rtl else "left: 0.5rem !important; right: auto !important;"}
+        z-index: 999999 !important;
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 50% !important;
     }}
 
-    /* ➡️ توجيه جميع الأسهم بالتطبيق إلى الجانب الأيمن */
     button[data-testid="stSidebarCollapseButton"] svg,
-    button[aria-label*="sidebar"] svg,
-    [data-testid="stSidebarToggle"] svg,
-    div[data-baseweb="select"] svg,
-    .stSelectbox svg {{
-        transform: rotate(180deg) !important;
+    [data-testid="stSidebarToggle"] svg {{
+        {"transform: rotate(180deg) !important;" if is_rtl else ""}
     }}
 
     /* الترويسة الرئيسية */
@@ -164,14 +162,14 @@ st.markdown(f"""
         justify-content: center;
     }}
     .hero-header h1 {{
-        color: #ffffff;
+        color: #ffffff !important;
         font-size: 2rem;
         font-weight: 700;
         margin: 0.8rem 0;
         line-height: 1.3;
     }}
     .hero-header p {{
-        color: #cbd5e1;
+        color: #cbd5e1 !important;
         font-size: 1rem;
         margin: 0;
     }}
@@ -214,17 +212,13 @@ st.markdown(f"""
     .badge-loc {{ background-color: #fef3c7; color: #b45309; padding: 3px 10px; border-radius: 15px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-bottom: 4px; }}
     .ipa-box {{ font-family: monospace; background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 2px 6px; border-radius: 6px; }}
 
-    .proverb-container {{ background-color: #f8fafc; border-{"right" if lang_code == "AR" else "left"}: 4px solid #0f172a; padding: 0.7rem; margin-top: 0.6rem; font-style: italic; font-size: 0.95rem; }}
+    .proverb-container {{ background-color: #f8fafc; border-{"right" if is_rtl else "left"}: 4px solid #0f172a; padding: 0.7rem; margin-top: 0.6rem; font-style: italic; font-size: 0.95rem; }}
     .citation-box {{ background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px 10px; font-size: 0.8rem; color: #475569; margin-top: 10px; border-radius: 6px; word-break: break-word; }}
 
     @media only screen and (max-width: 768px) {{
         .hero-header {{ padding: 1.8rem 0.8rem; }}
         .hero-header h1 {{ font-size: 1.4rem; }}
         .hero-header p {{ font-size: 0.9rem; }}
-        .academic-badge {{ font-size: 0.75rem; }}
-        .word-tifinagh {{ font-size: 1.5rem; }}
-        .word-latin {{ font-size: 0.95rem; }}
-        .stat-number {{ font-size: 1.4rem; }}
     }}
     </style>
 """, unsafe_allow_html=True)
