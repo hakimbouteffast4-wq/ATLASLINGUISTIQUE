@@ -5,7 +5,7 @@ from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة
+# 1. إعدادات الصفحة والتصميم
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Linguistic Atlas & Amazigh Dictionary | الأطلس اللغوي",
@@ -95,7 +95,7 @@ LANG_DICT = {
         'meaning': "Meaning",
         'ipa': "Phonetics (IPA)",
         'desc': "Description",
-        'proverb': "Proverbe",
+        'proverb': "Proverb",
         'audio': "🎧 Audio Recording:",
         'cite': "📖 Academic Citation (APA 7th):",
         'rights': "All Rights Reserved © 2026 | Ph.D. Dissertation in Digital Dialectology"
@@ -108,7 +108,7 @@ lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)",
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
 
-# CSS متطور لنقل وتثبيت القائمة الجانبية في أقصى اليمين ومنع ظهورها في المنتصف
+# CSS موجه بالكامل لضبط الأسهم جهة اليمين
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
@@ -120,7 +120,7 @@ st.markdown(f"""
         background-color: #f8fafc;
     }}
     
-    /* 📌 تثبيت القائمة الجانبية في جهة اليمين تماماً للغة العربية */
+    /* 📌 تثبيت القائمة الجانبية في اليمين */
     {"'''" if lang_code != "AR" else ""}
     section[data-testid="stSidebar"] {{
         right: 0 !important;
@@ -139,10 +139,12 @@ st.markdown(f"""
         background-color: #ffffff;
     }}
 
-    /* 🔄 عكس اتجاه سهم فتح وإغلاق القائمة الجانبية */
+    /* ➡️ توجيه جميع الأسهم بالتطبيق إلى الجانب الأيمن */
     button[data-testid="stSidebarCollapseButton"] svg,
     button[aria-label*="sidebar"] svg,
-    [data-testid="stSidebarToggle"] svg {{
+    [data-testid="stSidebarToggle"] svg,
+    div[data-baseweb="select"] svg,
+    .stSelectbox svg {{
         transform: rotate(180deg) !important;
     }}
 
@@ -215,7 +217,6 @@ st.markdown(f"""
     .proverb-container {{ background-color: #f8fafc; border-{"right" if lang_code == "AR" else "left"}: 4px solid #0f172a; padding: 0.7rem; margin-top: 0.6rem; font-style: italic; font-size: 0.95rem; }}
     .citation-box {{ background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px 10px; font-size: 0.8rem; color: #475569; margin-top: 10px; border-radius: 6px; word-break: break-word; }}
 
-    /* تعديلات التجاوب للهواتف */
     @media only screen and (max-width: 768px) {{
         .hero-header {{ padding: 1.8rem 0.8rem; }}
         .hero-header h1 {{ font-size: 1.4rem; }}
