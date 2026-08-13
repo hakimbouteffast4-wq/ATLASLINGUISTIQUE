@@ -5,12 +5,13 @@ from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة والتصميم المتجاوب مع الهاتف والكمبيوتر
+# 1. إعدادات الصفحة
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Linguistic Atlas & Amazigh Dictionary | الأطلس اللغوي",
     page_icon="🌍",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # قاموس اللغات للواجهة العالمية
@@ -94,7 +95,7 @@ LANG_DICT = {
         'meaning': "Meaning",
         'ipa': "Phonetics (IPA)",
         'desc': "Description",
-        'proverb': "Proverb",
+        'proverb': "Proverbe",
         'audio': "🎧 Audio Recording:",
         'cite': "📖 Academic Citation (APA 7th):",
         'rights': "All Rights Reserved © 2026 | Ph.D. Dissertation in Digital Dialectology"
@@ -107,7 +108,7 @@ lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)",
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
 
-# CSS متجاوب شامل + تعديل اتجاه سهم القائمة الجانبية
+# CSS متطور لنقل وتثبيت القائمة الجانبية في أقصى اليمين ومنع ظهورها في المنتصف
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
@@ -119,9 +120,23 @@ st.markdown(f"""
         background-color: #f8fafc;
     }}
     
+    /* 📌 تثبيت القائمة الجانبية في جهة اليمين تماماً للغة العربية */
+    {"'''" if lang_code != "AR" else ""}
+    section[data-testid="stSidebar"] {{
+        right: 0 !important;
+        left: auto !important;
+        border-left: 1px solid #e2e8f0 !important;
+        border-right: none !important;
+    }}
+    div[data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarToggle"] {{
+        right: 0.5rem !important;
+        left: auto !important;
+    }}
+    {"'''" if lang_code != "AR" else ""}
+
     div[data-testid="stSidebar"] {{
         background-color: #ffffff;
-        border-{"left" if lang_code == "AR" else "right"}: 1px solid #e2e8f0;
     }}
 
     /* 🔄 عكس اتجاه سهم فتح وإغلاق القائمة الجانبية */
@@ -200,7 +215,7 @@ st.markdown(f"""
     .proverb-container {{ background-color: #f8fafc; border-{"right" if lang_code == "AR" else "left"}: 4px solid #0f172a; padding: 0.7rem; margin-top: 0.6rem; font-style: italic; font-size: 0.95rem; }}
     .citation-box {{ background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px 10px; font-size: 0.8rem; color: #475569; margin-top: 10px; border-radius: 6px; word-break: break-word; }}
 
-    /* تعديلات استجابة الشاشة للهواتف */
+    /* تعديلات التجاوب للهواتف */
     @media only screen and (max-width: 768px) {{
         .hero-header {{ padding: 1.8rem 0.8rem; }}
         .hero-header h1 {{ font-size: 1.4rem; }}
