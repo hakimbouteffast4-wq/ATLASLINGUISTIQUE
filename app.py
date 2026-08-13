@@ -5,13 +5,13 @@ from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة (تم ضبط القائمة لتختفي افتراضياً)
+# 1. إعدادات الصفحة (إخفاء القائمة افتراضياً)
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Linguistic Atlas & Amazigh Dictionary | الأطلس اللغوي",
     page_icon="🌍",
     layout="wide",
-    initial_sidebar_state="collapsed"  # 👈 تختفي القائمة إلى اليمين فور تحميل الصفحة
+    initial_sidebar_state="collapsed"  # تختفي القائمة تلقائياً عند الفتح
 )
 
 # قاموس اللغات للواجهة العالمية
@@ -113,7 +113,7 @@ direction = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
 
 # ---------------------------------------------------------
-# CSS تنظيف الحواف وإخفاء الخطوط المتداخلة
+# 2. CSS المخصص لضبط الاتجاه وعكس السهم وإخفاء الحدود
 # ---------------------------------------------------------
 st.markdown(f"""
     <style>
@@ -126,10 +126,17 @@ st.markdown(f"""
         background-color: #f8fafc;
     }}
 
-    /* إخفاء حدود القائمة الجانبية المتداخلة لمنع ظهور أي خط رأسي */
+    /* إخفاء حدود القائمة الجانبية لمنع ظهور أي خطوط عمودية */
     section[data-testid="stSidebar"] {{
         border: none !important;
         box-shadow: -2px 0 10px rgba(0,0,0,0.05) !important;
+    }}
+
+    /* 📌 عكس اتجاه سهم القائمة الجانبية ليشير لليمين */
+    [data-testid="stSidebarCollapseButton"] button svg,
+    [data-testid="stSidebarToggle"] button svg,
+    [data-testid="stSidebarHeader"] button svg {{
+        transform: scaleX(-1) !important;
     }}
 
     /* الترويسة الرئيسية */
@@ -210,7 +217,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. قراءة قاعدة البيانات
+# 3. قراءة البيانات
 # ---------------------------------------------------------
 @st.cache_data
 def load_data():
@@ -227,7 +234,7 @@ def load_data():
 df = load_data()
 
 # ---------------------------------------------------------
-# 3. الترويسة الرئيسية
+# 4. الهيدر والترويسة
 # ---------------------------------------------------------
 st.markdown(f"""
     <div class="hero-header">
@@ -238,7 +245,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. أدوات التصفية والتحكم في الشريط الجانبي
+# 5. محتويات القائمة الجانبية (Sidebar)
 # ---------------------------------------------------------
 st.sidebar.markdown(f"### {L['filter_title']}")
 st.sidebar.markdown("---")
@@ -269,7 +276,7 @@ if not df.empty:
     )
 
 # ---------------------------------------------------------
-# 5. محرك البحث والمؤشرات
+# 6. البحث والإحصائيات
 # ---------------------------------------------------------
 if not df.empty:
     col_s, col_r = st.columns([4, 1])
@@ -304,14 +311,14 @@ if not df.empty:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 6. التبويبات الرئيسية
+    # 7. التبويبات الرئيسية
     # ---------------------------------------------------------
     tab1, tab2, tab3, tab4 = st.tabs([L['tab1'], L['tab2'], L['tab3'], L['tab4']])
 
-    # --- التبويب 1: البطاقات المعجمية ---
+    # --- التبويب 1: المدونة المعجمية ---
     with tab1:
         if filtered_df.empty:
-            st.info("⚠️ No results found.")
+            st.info("⚠️ لا توجد نتائج مطابقة.")
         else:
             for idx, row in filtered_df.iterrows():
                 entry_id = f"REF-{str(idx+1).zfill(3)}"
@@ -356,7 +363,7 @@ if not df.empty:
                 </div>
                 """, unsafe_allow_html=True)
 
-    # --- التبويب 2: الخريطة ---
+    # --- التبويب 2: الخرائط ---
     with tab2:
         st.subheader(L['tab2'])
         map_df = filtered_df.dropna(subset=['lat', 'lon'])
@@ -393,7 +400,7 @@ if not df.empty:
         folium.LayerControl().add_to(m)
         st_folium(m, width="100%", height=450)
 
-    # --- التبويب 3: الإحصائيات ---
+    # --- التبويب 3: التحليل اللساني ---
     with tab3:
         st.subheader("📊 التحليل اللساني")
         st.markdown("#### كثافة المفردات حسب الحقول المعجمية")
@@ -417,7 +424,7 @@ if not df.empty:
                 st.success("✅ تم استلام المادة المعجمية بنجاح!")
 
 # ---------------------------------------------------------
-# 7. التذييل
+# 8. التذييل
 # ---------------------------------------------------------
 st.markdown("---")
 st.markdown(f"""
