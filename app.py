@@ -111,40 +111,12 @@ lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "
 L = LANG_DICT[lang_code]
 
 is_rtl = (lang_code == "AR")
-direction = "rtl" if is_rtl else "ltr"
+
+# ---------------------------------------------------------
+# 3. CSS آمن ومضمون بدون كسر القائمة عند التحويل
+# ---------------------------------------------------------
+align_dir = "rtl" if is_rtl else "ltr"
 text_align = "right" if is_rtl else "left"
-
-# ---------------------------------------------------------
-# 3. CSS المنسق والمستقر 100% بدون كسر الجافاسكربت
-# ---------------------------------------------------------
-rtl_css = """
-    /* تحويل محاذاة كافة نصوص الصفحة الرئيسية والشرائح */
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        direction: rtl !important;
-        text-align: right !important;
-    }
-
-    /* محاذاة كل العناصر داخل الشريط الجانبي إلى اليمين */
-    [data-testid="stSidebar"] {
-        direction: rtl !important;
-        text-align: right !important;
-    }
-
-    [data-testid="stSidebar"] * {
-        text-align: right !important;
-        direction: rtl !important;
-    }
-
-    /* ضبط الحقول المدخلة والأعمدة */
-    input, select, textarea, .stSelectbox, .stTextInput {
-        direction: rtl !important;
-        text-align: right !important;
-    }
-
-    [data-testid="stHorizontalBlock"] {
-        direction: rtl !important;
-    }
-""" if is_rtl else ""
 
 st.markdown(f"""
     <style>
@@ -155,7 +127,25 @@ st.markdown(f"""
         background-color: #f8fafc;
     }}
 
-    {rtl_css}
+    /* محاذاة للنصوص حسب اللغة المختارة دون تغيير موضع الشريط الجانبي الهيكلي */
+    [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+        direction: {align_dir};
+        text-align: {text_align};
+    }}
+
+    [data-testid="stSidebar"] {{
+        direction: {align_dir};
+        text-align: {text_align};
+    }}
+
+    [data-testid="stSidebar"] * {{
+        text-align: {text_align} !important;
+    }}
+
+    input, select, textarea, .stSelectbox, .stTextInput {{
+        direction: {align_dir} !important;
+        text-align: {text_align} !important;
+    }}
 
     /* الترويسة الرئيسية */
     .hero-header {{
@@ -208,7 +198,7 @@ st.markdown(f"""
     .stat-number {{ font-size: 1.8rem; font-weight: 700; color: #0f172a; }}
     .stat-label {{ font-size: 0.8rem; color: #64748b; font-weight: 600; }}
 
-    /* بطاقة المدونة المعجمية */
+    /* بطاقات المدونة المعجمية */
     .lexical-card {{
         background: #ffffff;
         border-radius: 14px;
