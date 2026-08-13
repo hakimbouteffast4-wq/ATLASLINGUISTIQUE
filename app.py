@@ -5,7 +5,7 @@ from streamlit_folium import st_folium
 from folium.plugins import MarkerCluster, HeatMap
 
 # ---------------------------------------------------------
-# 1. إعدادات الصفحة والتصميم المتجاوب مع الهاتف (Mobile-First CSS)
+# 1. إعدادات الصفحة والتصميم المتجاوب مع الهاتف والكمبيوتر
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Linguistic Atlas & Amazigh Dictionary | الأطلس اللغوي",
@@ -107,7 +107,7 @@ lang_choice = st.sidebar.selectbox("", ["العربية (AR)", "Français (FR)",
 lang_code = "AR" if "AR" in lang_choice else ("FR" if "FR" in lang_choice else "EN")
 L = LANG_DICT[lang_code]
 
-# CSS متجاوب مع الهواتف الذكية (Media Queries)
+# CSS متجاوب شامل + تعديل اتجاه سهم القائمة الجانبية
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600&display=swap');
@@ -124,7 +124,14 @@ st.markdown(f"""
         border-{"left" if lang_code == "AR" else "right"}: 1px solid #e2e8f0;
     }}
 
-    /* الترويسة متجاوبة للهاتف */
+    /* 🔄 عكس اتجاه سهم فتح وإغلاق القائمة الجانبية */
+    button[data-testid="stSidebarCollapseButton"] svg,
+    button[aria-label*="sidebar"] svg,
+    [data-testid="stSidebarToggle"] svg {{
+        transform: rotate(180deg) !important;
+    }}
+
+    /* الترويسة الرئيسية */
     .hero-header {{
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: #ffffff;
@@ -193,29 +200,15 @@ st.markdown(f"""
     .proverb-container {{ background-color: #f8fafc; border-{"right" if lang_code == "AR" else "left"}: 4px solid #0f172a; padding: 0.7rem; margin-top: 0.6rem; font-style: italic; font-size: 0.95rem; }}
     .citation-box {{ background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px 10px; font-size: 0.8rem; color: #475569; margin-top: 10px; border-radius: 6px; word-break: break-word; }}
 
-    /* تعديلات استجابة الشاشة للهواتف (Responsive CSS) */
+    /* تعديلات استجابة الشاشة للهواتف */
     @media only screen and (max-width: 768px) {{
-        .hero-header {{
-            padding: 1.8rem 0.8rem;
-        }}
-        .hero-header h1 {{
-            font-size: 1.4rem;
-        }}
-        .hero-header p {{
-            font-size: 0.9rem;
-        }}
-        .academic-badge {{
-            font-size: 0.75rem;
-        }}
-        .word-tifinagh {{
-            font-size: 1.5rem;
-        }}
-        .word-latin {{
-            font-size: 0.95rem;
-        }}
-        .stat-number {{
-            font-size: 1.4rem;
-        }}
+        .hero-header {{ padding: 1.8rem 0.8rem; }}
+        .hero-header h1 {{ font-size: 1.4rem; }}
+        .hero-header p {{ font-size: 0.9rem; }}
+        .academic-badge {{ font-size: 0.75rem; }}
+        .word-tifinagh {{ font-size: 1.5rem; }}
+        .word-latin {{ font-size: 0.95rem; }}
+        .stat-number {{ font-size: 1.4rem; }}
     }}
     </style>
 """, unsafe_allow_html=True)
